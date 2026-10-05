@@ -1,0 +1,83 @@
+/* Learned commands live beside the pet. Gesture parts explain each trick. */
+.pet-play-zone-copy { min-width: 0; width: 100%; }
+.pet-commands { width: 100%; min-width: 0; display: grid; gap: 12px; }
+.pet-commands h4 { margin: 10px 0 0; color: #654d5f; font-size: 1rem; }
+.pet-command-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+#screen[data-screen="pets"] .pet-command-button {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr); grid-template-rows: auto auto;
+  align-items: center; column-gap: 8px; row-gap: 4px;
+  min-height: 108px; min-width: 96px; padding: 16px 10px;
+  border: 2px solid #ddc1d1; border-radius: 20px;
+  color: #654d5f; background: #fffafc; box-shadow: 0 4px 0 #ecdbe5;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.pet-command-button strong { font-size: .85rem; line-height: 1.5; overflow-wrap: anywhere; }
+.pet-command-button small { font-size: .72rem; line-height: 1.5; overflow-wrap: anywhere; }
+.pet-command-portrait { position: relative; display: grid; grid-row: span 2; place-items: center; min-width: 0; }
+.pet-command-portrait > .pet-companion { width: 64px !important; min-width: 0; }
+.pet-command-portrait > i { position: absolute; bottom: -8px; right: 0; display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: #f0e4f7; font-size: 1rem; color: #845d80; font-style: normal; }
+#screen[data-screen="pets"] .pet-command-button.is-playing { border-color: #9c6487; background: #fff0f6; box-shadow: 0 4px 0 #d6b4c8; }
+#screen[data-screen="pets"] .pet-command-button:hover { border-color: #9c6487; }
+#screen[data-screen="pets"] .pet-command-button:focus-visible { outline: 3px solid #965c87; outline-offset: 3px; }
+.pet-commands .pet-command-status { min-height: 1.6em; margin: 0; color: #74536a; font-size: .9rem; line-height: 1.6; }
+.pet-companion { --gesture-fur: #fff4e8; --gesture-edge: #cda58f; }
+.pet-species-bunny { --gesture-fur: #fff9fa; --gesture-edge: #d4b5c8; }
+.pet-species-puppy { --gesture-fur: #fff1d9; --gesture-edge: #c4a584; }
+.pet-species-fox { --gesture-fur: #eee5ff; --gesture-edge: #b5a1d2; }
+.pet-gesture { position: absolute; inset: 0; z-index: 3; pointer-events: none; }
+.pet-gesture-sign { position: absolute; right: -13%; bottom: 16%; width: 26%; height: 28%; border: 2px solid #ead3df; border-radius: 50%; background: #fffafc; box-shadow: 0 2px 0 #d9bfd133; }
+.pet-gesture-sign--tail { bottom: 16%; }
+.pet-gesture-paw { position: absolute; width: 24%; height: 27%; top: 42%; transform-origin: 45% 95%; }
+.pet-gesture-paw--left { left: 24%; }
+.pet-gesture-paw--right { right: 20%; }
+.pet-gesture--wave .pet-gesture-paw { top: 34%; right: 13%; transform: rotate(20deg); animation: command-paw-wave 1.05s ease-in-out both; }
+.pet-gesture--clap .pet-gesture-paw--left { left: 23%; animation: command-clap-left 1.05s ease-in-out both; }
+.pet-gesture--clap .pet-gesture-paw--right { right: 23%; animation: command-clap-right 1.05s ease-in-out both; }
+.pet-gesture--stretch .pet-gesture-paw { top: 20%; animation: command-paw-stretch 1.1s ease-in-out both; }
+.pet-gesture-tail { position: absolute; right: 2%; bottom: 16%; width: 35%; height: 44%; transform-origin: 15% 90%; animation: command-tail-wag 1.05s ease-in-out both; }
+.pet-gesture-tail--heart { right: 0; bottom: 16%; width: 42%; height: 48%; animation: command-tail-heart 1.1s ease-out both; }
+.pet-gesture-floor { position: absolute; left: 28%; bottom: 14%; width: 44%; height: 5%; border-radius: 50%; background: #bba3b933; animation: command-floor-hop 1.05s ease-in-out both; z-index: -1; }
+.pet-gesture-sparks { position: absolute; inset: 0; }
+.pet-gesture-sparks > i { position: absolute; color: #c19540; font-size: 1.6rem; line-height: 1; font-style: normal; animation: command-star-bloom 1.1s ease-out both; }
+.pet-gesture-sparks > i:nth-child(1) { left: 10%; top: 26%; }
+.pet-gesture-sparks > i:nth-child(2) { right: 10%; top: 18%; animation-delay: .08s; }
+.pet-gesture-sparks > i:nth-child(3) { right: 12%; bottom: 20%; animation-delay: .16s; }
+.pet-gesture--cuddle .pet-gesture-sparks > i { color: #bf759c; font-size: 1.3rem; }
+.pet-gesture--clap .pet-gesture-sparks > i { top: 55%; left: 48%; color: #bf759c; font-size: .9rem; }
+.pet-gesture-sign .pet-gesture-paw { width: 44%; height: 65%; top: 20%; }
+.pet-gesture--wave .pet-gesture-sign .pet-gesture-paw { right: 27%; top: 16%; }
+.pet-gesture--clap .pet-gesture-sign .pet-gesture-paw--left { left: 8%; }
+.pet-gesture--clap .pet-gesture-sign .pet-gesture-paw--right { right: 8%; }
+.pet-gesture--stretch .pet-gesture-sign .pet-gesture-paw--left { left: 7%; top: 23%; }
+.pet-gesture--stretch .pet-gesture-sign .pet-gesture-paw--right { right: 7%; top: 23%; }
+.pet-gesture-sign .pet-gesture-tail { width: 76%; height: 85%; right: 8%; bottom: 6%; }
+.pet-gesture-sign .pet-gesture-tail--heart { width: 88%; right: 6%; }
+.pet-companion.pet-motion-tail-wag .pet-art { animation: command-body-sway 1.05s ease-in-out both; }
+.pet-companion.pet-motion-cuddle .pet-art { animation: command-body-cuddle 1.1s ease-in-out both; }
+/* A stretch grows taller; a twirl is one visible turn with a small jump. */
+@keyframes pet-stretch { 0%,100% { transform: scale(1); } 45% { transform: translateY(-8px) scale(.95,1.1); } }
+@keyframes pet-bow { 0%,100% { transform: scale(1); transform-origin: 50% 82%; } 42% { transform: translateY(5px) scale(1.02,.86); transform-origin: 50% 82%; } }
+@keyframes pet-twirl { 0% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-12px) rotate(-12deg); } 80% { transform: translateY(-8px) rotate(350deg); } 100% { transform: translateY(0) rotate(360deg); } }
+@keyframes command-paw-wave { 0%,100% { transform: rotate(20deg); } 20%,60% { transform: rotate(-20deg); } 40%,80% { transform: rotate(32deg); } }
+@keyframes command-clap-left { 0%,100% { transform: rotate(-12deg); } 20%,55%,85% { transform: translateX(20%) rotate(12deg); } 35%,70% { transform: translateX(-12%) rotate(-12deg); } }
+@keyframes command-clap-right { 0%,100% { transform: rotate(12deg); } 20%,55%,85% { transform: translateX(-20%) rotate(-12deg); } 35%,70% { transform: translateX(12%) rotate(12deg); } }
+@keyframes command-paw-stretch { 0%,100% { transform: translateY(0); } 45% { transform: translateY(-18%) rotate(-8deg); } }
+@keyframes command-tail-wag { 0%,100% { transform: rotate(0); } 20%,60% { transform: rotate(-16deg); } 40%,80% { transform: rotate(13deg); } }
+@keyframes command-tail-heart { 0% { transform: scale(.8); opacity: 0; } 30%,100% { transform: scale(1); opacity: 1; } }
+@keyframes command-floor-hop { 0%,100% { transform: scaleX(1); } 40% { transform: scaleX(.7); } }
+@keyframes command-star-bloom { 0% { opacity: 0; transform: scale(.6); } 25%,65% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: translateY(-10px) scale(.9); } }
+@keyframes command-body-sway { 0%,100% { transform: rotate(0); } 30% { transform: rotate(-4deg); } 70% { transform: rotate(4deg); } }
+@keyframes command-body-cuddle { 0%,100% { transform: scale(1); } 30% { transform: scale(1.03,.98) rotate(-3deg); } 65% { transform: scale(1.03,.98) rotate(3deg); } }
+@media (max-width: 900px) {
+  .pet-command-list { width: min(100%, 480px); }
+}
+@media (max-width: 600px) {
+  .pet-command-list { grid-template-columns: minmax(0, 1fr); }
+  .pet-commands { justify-items: center; }
+  #screen[data-screen="pets"] .pet-command-button { width: 100%; grid-template-columns: 72px minmax(0, 1fr); }
+  .pet-commands .pet-command-status { width: 100%; text-align: center; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pet-gesture *, .pet-motion-cuddle .pet-art, .pet-motion-tail-wag .pet-art { animation: none !important; transition: none !important; }
+  .pet-gesture-sparks > i { opacity: 1; }
+}

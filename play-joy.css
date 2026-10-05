@@ -1,0 +1,66 @@
+/* A bouquet grows from completed requests. The play board keeps its position. */
+#screen[data-view="play"] .roleplay-dot-row { display:none; }
+.joy-bloom-track { display:grid; grid-template-columns:minmax(165px,.7fr) minmax(0,1fr); align-items:center; gap:12px; padding:8px 18px; border:1px solid #e4cbd6; border-radius:18px; background:#fff8f5; min-width:0; }
+.joy-bloom-copy { display:grid; gap:3px; color:#74495f; }
+.joy-bloom-copy strong { font-size:.96rem; }
+.joy-bloom-copy span { font-size:.76rem; color:#725966; }
+.joy-flower-trail { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:2px; min-width:0; }
+.joy-flower-trail > span { width:28px; height:34px; display:block; }
+.joy-flower { display:block; width:100%; height:auto; overflow:visible; }
+.joy-bloom-track[data-joy-tier="2"] { background:linear-gradient(110deg,#fff5f7,#faf5ff); }
+.joy-bloom-track[data-joy-tier="3"],.joy-bloom-track[data-joy-tier="4"] { border-color:#c5a9d4; background:linear-gradient(110deg,#fff2f4,#f2edfc,#eff8f3); }
+#screen[data-view="play"] .roleplay-stage[data-joy-tier="2"] { border-color:#d4bfdc; }
+#screen[data-view="play"] .roleplay-stage[data-joy-tier="3"],#screen[data-view="play"] .roleplay-stage[data-joy-tier="4"] { border-color:#ceadc3; box-shadow:0 8px 24px #b990ac24,inset 0 0 0 3px #fff8fb; }
+.joy-reward .reward-celebration__card { align-items:center; grid-template-columns:minmax(140px,.65fr) minmax(0,1fr); grid-template-areas:"avatar copy"; gap:24px; width:min(94vw,680px); max-height:calc(100dvh - 36px); overflow:auto; background:linear-gradient(135deg,#fff8ef,#fff4f8); }
+.joy-reward[data-joy-tier="2"] .reward-celebration__card { background:linear-gradient(130deg,#fff5ed,#fbf2ff); border-color:#dcc7e7; }
+.joy-reward[data-joy-tier="3"] .reward-celebration__card { background:linear-gradient(130deg,#fff2f5,#f5edff,#eff9f2); border-color:#d2b5cf; }
+.joy-reward[data-joy-tier="4"] .reward-celebration__card { background:linear-gradient(130deg,#fff0f3,#fff8df,#eee9fc,#e7f5ec); border:3px solid #c69fba; }
+.joy-reward .reward-celebration__card::before,.joy-reward .reward-celebration__card::after { color:#ba8d38; font-size:24px; animation-iteration-count:2; }
+.joy-reward .joy-reward-cast { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:0; min-width:0; align-self:center; }
+.joy-reward-cast > .pet-companion { width:180px; max-width:100%; animation:joy-pet-bounce 650ms ease-out both; }
+.joy-reward[data-joy-tier="2"] .joy-reward-cast > .pet-companion { animation:joy-pet-wiggle 850ms ease-in-out both; }
+.joy-reward[data-joy-tier="3"] .joy-reward-cast > .pet-companion,.joy-reward[data-joy-tier="4"] .joy-reward-cast > .pet-companion { animation:joy-pet-bounce 650ms ease-out 2; }
+.joy-reward .reward-celebration__copy { text-shadow:none; color:#654654; }
+.joy-reward .reward-celebration__copy strong { font-size:1.35rem; line-height:1.45; overflow-wrap:anywhere; }
+.joy-reward .reward-celebration__copy p { font-weight:600; max-width:none; font-size:.85rem; line-height:1.5; margin-top:10px; }
+.joy-reward .reward-celebration__copy .joy-reward-line { color:#785967; }
+.joy-reward .reward-celebration__copy .action-row { margin-top:16px; }
+.joy-reward .reward-celebration__copy .action-row button { min-height:96px; white-space:normal; }
+.joy-combo-label { display:inline-block; padding:6px 14px; margin-bottom:10px; border:1px solid #c899b0; border-radius:20px; color:#7a375b; background:#fff; font-size:.85rem; font-weight:800; }
+.joy-reward[data-joy-tier="4"] .joy-combo-label { color:#644781; border-color:#b79dcc; background:#fffdf0; }
+.joy-bouquet { display:flex; flex-direction:column; align-items:center; min-width:0; width:100%; max-width:210px; }
+.joy-bouquet-flowers { display:flex; flex-wrap:wrap; justify-content:center; width:100%; gap:0; padding:4px 2px 0; }
+.joy-bouquet-flowers > .joy-flower { width:32px; height:38px; }
+.joy-bouquet-ribbon { display:block; width:52px; height:28px; margin-top:-1px; }
+.joy-bouquet.is-complete .joy-bouquet-flowers { border-bottom:2px solid #d4b2c4; border-radius:0 0 45% 45%; background:linear-gradient(0deg,#fbe5ee55,transparent); }
+.joy-finale-keepsake { display:flex; justify-content:center; align-items:center; gap:20px; padding:14px; margin-bottom:20px; border:1px solid #dbc1d1; border-radius:22px; background:linear-gradient(115deg,#fff6f6,#f6f0ff,#f4f8ed); }
+.joy-finale-keepsake > div { max-width:180px; }
+.joy-finale-keepsake p { display:grid; gap:5px; color:#70455e; margin:0; }
+.joy-finale-keepsake p span { font-size:.85rem; }
+.fx-burst .fx-flower { display:block; color:#d17b9f; line-height:1; font-size:24px; width:26px; height:26px; background:transparent; text-shadow:0 1px 0 #fff; }
+.fx-burst .fx-flower:nth-child(3n) { color:#a687c9; }
+@keyframes joy-pet-bounce { 0%,100% { transform:translateY(0) scale(1); } 30% { transform:translateY(-14px) scale(1.04); } 68% { transform:translateY(0) scale(1.05,.96); } }
+@keyframes joy-pet-wiggle { 0%,100% { transform:rotate(0); } 25% { transform:rotate(-5deg) translateY(-6px); } 65% { transform:rotate(5deg) translateY(-6px); } }
+@media(max-width:600px) {
+ .joy-bloom-track { grid-template-columns:minmax(0,1fr); gap:3px; padding:8px 12px; }
+ .joy-bloom-copy { display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:3px 8px; }
+ .joy-bloom-copy strong { font-size:.82rem; }
+ .joy-bloom-copy span { font-size:.72rem; }
+ .joy-flower-trail { justify-content:center; }
+ .joy-flower-trail > span { width:22px; height:27px; }
+ .joy-reward .reward-celebration__card { grid-template-columns:minmax(0,1fr); grid-template-areas:"avatar" "copy"; padding:18px 16px; gap:12px; width:min(94vw,430px); }
+ .joy-reward .joy-reward-cast { flex-direction:row; gap:8px; }
+ .joy-reward .joy-reward-cast > .pet-companion { width:128px; flex:0 1 128px; }
+ .joy-reward .joy-reward-cast > .joy-bouquet { flex:0 1 128px; max-width:128px; }
+ .joy-reward .joy-reward-cast--outfit > .atelier-avatar { width:88px; }
+ .joy-bouquet-flowers > .joy-flower { width:25px; height:30px; }
+ .joy-reward .reward-celebration__copy strong { font-size:1.13rem; }
+ .joy-reward .reward-celebration__copy .action-row button { font-size:.9rem; }
+ .joy-finale-keepsake { gap:10px; flex-wrap:wrap; }
+}
+@media(prefers-reduced-motion:reduce) {
+ .joy-reward *, .joy-reward *::before, .joy-reward *::after { animation:none!important; transition:none!important; }
+}
+
+#effectLayer:has(.fx-burst--joy) { z-index:1100; }
+.fx-burst .fx-flower { position:absolute; left:0; top:0; transform-origin:center; animation:fx-particle-burst var(--duration,820ms) var(--motion-soft) var(--delay,0ms) both; }

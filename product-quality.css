@@ -1,0 +1,252 @@
+/* Product UI: shared sizing and natural layouts, after the legacy themes. */
+:root {
+  --radius: 20px;
+  --muted: #675c70;
+}
+
+.app-shell, #screen, .panel, .wide-panel,
+.section-heading > div, .progress-stack > *, .world-adventure-card > * {
+  min-width: 0;
+}
+
+button:focus-visible, [role="button"]:focus-visible, input:focus-visible,
+select:focus-visible, summary:focus-visible {
+  outline: 3px solid #6a3986;
+  outline-offset: 3px;
+}
+
+.primary-button, .soft-button, .dangerless-button, .dress-tab {
+  min-height: 44px;
+}
+
+.tag {
+  min-height: 28px;
+  padding: 5px 10px;
+  border: 1px solid #e4c781;
+  color: #684914;
+  background: #fff3ce;
+  text-shadow: none;
+  line-height: 1.35;
+}
+.tag.mint { color: #285b47; background: #e4f6e9; border-color: #b1d7bd; }
+.tag.peach { color: #83354e; background: #ffedf3; border-color: #ebbbcd; }
+.tag.sky { color: #315d78; background: #e7f4ff; border-color: #bdd9eb; }
+
+.meter-track {
+  height: 14px;
+  border: 1px solid #c9d8d3;
+  background: #edf2ef;
+  overflow: hidden;
+}
+.meter-fill {
+  min-width: 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #499a7c, #75bd91);
+}
+
+.stats-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.stat-pill { min-height: 40px; gap: 6px; padding: 5px 10px; font-size: .875rem; }
+.stat-pill .stat-sprite { width: 28px; height: 28px; flex: 0 0 28px; }
+.sound-toggle { min-height: 44px; }
+.tab-button .tab-sprite { width: 36px; height: 36px; flex: 0 0 36px; }
+.tabbar { flex-shrink: 0; }
+
+.section-heading { flex-wrap: wrap; align-items: flex-start; }
+.section-heading > div:first-child { flex: 1 1 200px; }
+.section-heading .action-row { flex: 0 1 auto; }
+.section-heading .action-row button { overflow-wrap: anywhere; }
+.section-heading p { max-width: 70ch; line-height: 1.6; }
+.roleplay-instruction { margin: 0 0 10px; color: #594662; font-size: 1rem; line-height: 1.65; overflow-wrap: anywhere; }
+
+.island-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: visible;
+}
+.island-panel .section-heading, .first-quest-card { flex: 0 0 auto; margin: 0; }
+.first-quest-card { padding: 14px; border-radius: 18px; }
+.iso-scene {
+  flex: 1 0 auto;
+  align-items: center;
+  min-width: 0;
+  padding: 56px 4px 12px;
+  overflow: visible;
+}
+.iso-board { flex-shrink: 0; }
+.island-wrap > aside.progress-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: none;
+  align-content: start;
+  align-items: stretch;
+  gap: 12px;
+}
+.island-wrap > aside.progress-stack > * { grid-column: 1; grid-row: auto; }
+.island-wrap > aside.progress-stack .avatar-home-card {
+  grid-template-columns: 140px minmax(0, 1fr);
+}
+.island-wrap > aside.progress-stack .avatar-home-preview { width: 72px; }
+.daily-growth { --daily-muted: #735c70; }
+.daily-growth__quest b { white-space: normal; overflow-wrap: anywhere; }
+.daily-growth__visitor small, .daily-growth__complete small,
+.daily-growth__body { font-size: .875rem; }
+.daily-growth__button { min-height: 44px; font-size: .875rem; }
+.pet-xp-meter { width: min(100%, 300px); }
+.pet-xp-meter > div { gap: 12px; }
+.pet-stage-row { gap: 12px; padding-bottom: 24px; }
+.pet-stage-row > span { width: 36px; height: 36px; flex: 0 0 36px; font-size: .875rem; }
+.pet-stage-row small { top: 38px; font-size: .75rem; line-height: 1.5; color: #71556a; }
+
+/* A full-canvas avatar must keep the source's 1024:2006 proportions. */
+.starter-look-card .avatar-doll, .wardrobe-look-card .avatar-doll {
+  width: auto;
+  height: 154px;
+  max-width: 100%;
+  aspect-ratio: 1024 / 2006;
+  justify-self: center;
+}
+.shop-tryon-preview .avatar-doll {
+  width: auto;
+  height: 161px;
+  max-width: 100%;
+  aspect-ratio: 1024 / 2006;
+  justify-self: center;
+}
+.shop-tryon-preview .item-swatch > * { width: 100%; height: 100%; }
+.shop-tryon-preview .item-swatch-slot-mouth {
+  background-size: 260% auto !important;
+  background-position: center 29% !important;
+}
+.shop-tryon-preview .item-swatch-slot-blush {
+  background-size: 260% auto !important;
+  background-position: center 24% !important;
+}
+.avatar-doll.is-loading { background: #f3eaf2; border-radius: 24px; }
+.avatar-doll.is-loading > * { visibility: hidden; }
+.avatar-doll.is-loading::after {
+  content: "よみこみ中";
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #6b5370;
+  font-size: 12px;
+  font-weight: 700;
+}
+.avatar-doll.has-load-error::after { content: "よみこめませんでした"; padding: 8px; text-align: center; }
+
+/* Rewards stay readable above the scenery, including a short phone in landscape. */
+.reward-celebration {
+  overflow-y: auto;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+}
+.reward-celebration__card {
+  width: min(100%, 640px);
+  min-width: 0;
+  min-height: 0;
+  max-height: calc(100svh - 32px);
+  grid-template-columns: minmax(0, .7fr) minmax(0, 1.3fr) minmax(0, .6fr);
+  grid-template-areas: "chip chip chip" "avatar copy pet";
+  align-items: center;
+  gap: 8px 12px;
+  padding: 18px;
+  overflow-y: auto;
+  border-radius: 30px;
+}
+.reward-celebration__card::before, .reward-celebration__card::after { pointer-events: none; }
+.reward-celebration .reward-chip {
+  position: relative;
+  inset: auto;
+  grid-area: chip;
+  justify-self: center;
+  min-width: 72px;
+  min-height: 36px;
+  padding: 6px 14px;
+  border-radius: 18px;
+}
+.reward-celebration__avatar { grid-area: avatar; }
+.reward-celebration__pet { grid-area: pet; }
+.reward-celebration__copy { grid-area: copy; min-width: 0; color: #57324f; text-shadow: none; }
+.reward-celebration__copy strong { font-size: clamp(1.35rem, 3vw, 1.8rem); line-height: 1.4; }
+.reward-celebration__copy p { max-width: none; color: #593c55; line-height: 1.6; }
+.reward-celebration__copy .action-row { justify-content: center; margin-top: 14px; }
+.reward-celebration__copy .action-row button { min-height: 44px; }
+.reward-celebration__avatar .avatar-doll { width: auto; height: min(30svh, 230px); aspect-ratio: 1024 / 2006; }
+.reward-celebration__pet .pet-companion { width: min(100%, 110px); }
+
+@media (max-width: 600px) {
+  .reward-celebration__card {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-areas: "chip chip" "copy copy" "avatar pet";
+    padding: 14px;
+    gap: 12px;
+  }
+  .reward-celebration__avatar, .reward-celebration__pet { justify-self: center; }
+  .reward-celebration__avatar .avatar-doll { height: 110px; }
+  .reward-celebration__pet .pet-companion { width: 84px; }
+  .reward-celebration__copy .action-row { gap: 8px; }
+}
+.avatar-stage.sticky-stage {
+  min-height: 0;
+  align-content: start;
+  gap: 12px;
+  overflow: visible;
+}
+.avatar-stage.sticky-stage .avatar-doll { width: min(100%, 180px); }
+
+@media (min-width: 900px) and (orientation: landscape) {
+  .island-wrap { grid-template-columns: minmax(0, 1fr) 320px; height: auto; min-height: 100%; align-items: start; }
+  .island-panel { min-height: calc(100svh - 156px); }
+  .island-wrap > aside.progress-stack { overflow: visible; }
+  .tab-button { min-height: 56px; }
+}
+
+/* Portrait tablets use the same contained screen as laptops and phones. */
+@media (min-width: 641px) and (max-width: 899px), (min-width: 900px) and (orientation: portrait) {
+  body { height: 100svh; overflow: hidden; }
+  .app-shell { height: 100svh; min-height: 0; grid-template-rows: auto auto minmax(0, 1fr); }
+  #screen { min-height: 0; overflow-y: auto; overflow-x: hidden; }
+  .tabbar { grid-template-columns: repeat(9, minmax(0, 1fr)); gap: 5px; padding-bottom: 12px; }
+  .tab-button { display: grid; justify-items: center; gap: 4px; font-size: .8rem; padding: 7px 2px; }
+  .island-wrap { grid-template-columns: minmax(0, 1fr); height: auto; }
+  .island-wrap > aside.progress-stack { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .island-wrap > aside.progress-stack > * { grid-column: auto; }
+  .stage-map { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 640px) {
+  .topbar { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 10px; padding-top: max(8px, env(safe-area-inset-top)); }
+  .brand { flex: 1 0 auto; }
+  .stats-bar { gap: 4px; }
+  .stat-pill { min-height: 34px; padding: 4px 8px; font-size: .8rem; }
+  .stat-pill .stat-sprite { width: 24px; height: 24px; flex-basis: 24px; }
+  .sound-toggle { min-height: 44px; }
+  .tabbar { padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+  .tab-button { flex-basis: 66px; min-height: 64px; font-size: .75rem; }
+  .tab-button .tab-sprite { width: 32px; height: 32px; }
+  .panel, .wide-panel { padding: 12px; border-radius: 20px; }
+  .section-heading { gap: 10px; }
+  .section-heading > div:first-child { flex-basis: 100%; }
+  .section-heading p, .question-sub { font-size: .875rem; line-height: 1.6; }
+  .section-heading .action-row { width: 100%; }
+  .section-heading .action-row .primary-button { flex: 1; }
+  .first-quest-card { grid-template-columns: 42px minmax(0, 1fr); padding: 10px; gap: 8px; font-size: .875rem; }
+  .first-quest-fairy { width: 42px; height: 42px; }
+  .island-wrap { grid-template-rows: auto auto; gap: 12px; }
+  .iso-scene { padding-top: 40px; }
+  .iso-label { font-size: 10px; padding-inline: 3px; }
+  .island-wrap > aside.progress-stack .action-row { display: flex; }
+  .starter-wardrobe { padding: 10px 6px; }
+  .starter-look-card .avatar-doll { height: auto; width: min(100%, 66px); max-height: none; }
+  .starter-look-card strong { font-size: .75rem; overflow-wrap: anywhere; }
+  .adventure-arc-card { grid-template-columns: 40px minmax(0, 1fr); }
+  .adventure-arc-card > small { grid-column: 1 / -1; }
+  .avatar-stage.sticky-stage { padding: 12px; }
+  .avatar-stage.sticky-stage .avatar-doll { width: min(100%, 130px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}

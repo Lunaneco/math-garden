@@ -1,0 +1,1343 @@
+/*
+ * Experience refresh — the learning screen is a play space first.
+ * This file is intentionally loaded after styles.css.  It only uses concrete
+ * colours so it remains readable in older in-app web views.
+ */
+
+/* --------------------------------------------------------------------------
+   Role-play learning scene
+   -------------------------------------------------------------------------- */
+
+.roleplay-play-screen {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  gap: 12px;
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.roleplay-play-screen .roleplay-hud,
+.roleplay-play-screen .roleplay-progress-line {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: 44px;
+  padding: 7px 12px;
+  border: 2px solid #f1c5d7;
+  border-radius: 999px;
+  color: #76536b;
+  background: rgba(255, 255, 255, .94);
+  box-shadow: 0 4px 0 rgba(220, 137, 172, .16);
+  font-weight: 900;
+}
+
+.roleplay-play-screen .roleplay-hud > span,
+.roleplay-play-screen .roleplay-progress-line > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+}
+
+.roleplay-stage,
+.roleplay-scene {
+  position: relative;
+  isolation: isolate;
+  min-height: 560px;
+  overflow: hidden;
+  border: 4px solid #fff;
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, .95) 0 4%, transparent 4.5%),
+    radial-gradient(circle at 78% 12%, rgba(255, 255, 255, .82) 0 3.5%, transparent 4%),
+    linear-gradient(180deg, #bfeaff 0%, #eaf9ff 43%, #ffecc4 43.4%, #ffdca0 100%);
+  box-shadow: 0 15px 35px rgba(111, 82, 111, .16), inset 0 -10px 0 rgba(225, 169, 104, .12);
+}
+
+.roleplay-stage::before,
+.roleplay-scene::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  top: 48px;
+  left: -8%;
+  width: 50%;
+  height: 90px;
+  border-radius: 55% 45% 52% 48%;
+  background: rgba(255, 255, 255, .72);
+  filter: blur(1px);
+}
+
+.roleplay-stage::after,
+.roleplay-scene::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  right: -8%;
+  bottom: -64px;
+  width: 49%;
+  height: 180px;
+  border-radius: 54% 46% 0 0;
+  background: #bde2a0;
+  box-shadow: -290px 20px 0 #d3efb1, -590px -15px 0 #a8d992;
+}
+
+.roleplay-stage--shop,
+.roleplay-scene--shop {
+  background:
+    radial-gradient(circle at 18% 14%, rgba(255, 255, 255, .95) 0 4%, transparent 4.5%),
+    linear-gradient(180deg, #ffe1ee 0%, #fff5ea 48%, #ffcfa4 48.5%, #ffdca8 100%);
+}
+
+.roleplay-stage--bakery,
+.roleplay-scene--bakery {
+  background:
+    radial-gradient(circle at 82% 14%, rgba(255, 255, 255, .85) 0 4%, transparent 4.5%),
+    linear-gradient(180deg, #d9edff 0%, #fdf8e8 47%, #f5c38c 47.5%, #f9daaa 100%);
+}
+
+.roleplay-stage--garden,
+.roleplay-scene--garden {
+  background:
+    radial-gradient(circle at 20% 14%, rgba(255, 255, 255, .92) 0 4%, transparent 4.5%),
+    linear-gradient(180deg, #c8eeff 0%, #efffdc 45%, #aade92 45.5%, #d8efae 100%);
+}
+
+.roleplay-stage--night,
+.roleplay-scene--night {
+  background:
+    radial-gradient(circle at 16% 15%, #fff5bb 0 4%, transparent 4.5%),
+    radial-gradient(circle at 79% 21%, rgba(255, 255, 255, .8) 0 1.4%, transparent 1.7%),
+    linear-gradient(180deg, #6671bb 0%, #9da9e5 51%, #b8d79f 51.5%, #d8efb0 100%);
+}
+
+.roleplay-scenery {
+  position: absolute;
+  z-index: 1;
+  inset: auto 0 0;
+  width: 100%;
+  pointer-events: none;
+}
+
+.roleplay-actor,
+.roleplay-character {
+  position: absolute;
+  z-index: 4;
+  display: grid;
+  place-items: end center;
+  width: min(26vw, 210px);
+  min-width: 108px;
+  aspect-ratio: 1 / 1.16;
+  transform-origin: center bottom;
+  animation: roleplay-idle 3.8s ease-in-out infinite;
+}
+
+.roleplay-actor--customer,
+.roleplay-character--customer { left: 4%; bottom: 8%; }
+.roleplay-actor--hero,
+.roleplay-character--hero { right: 5%; bottom: 5%; animation-delay: -.9s; }
+.roleplay-actor--pet,
+.roleplay-character--pet { right: 24%; bottom: 4%; width: min(17vw, 126px); min-width: 78px; animation-delay: -1.8s; }
+
+.roleplay-actor img,
+.roleplay-character img,
+.roleplay-actor .avatar-doll,
+.roleplay-character .avatar-doll,
+.roleplay-actor .avatar-svg,
+.roleplay-character .avatar-svg,
+.roleplay-actor .pet-art,
+.roleplay-character .pet-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 10px 6px rgba(95, 70, 83, .22));
+}
+
+.roleplay-actor .avatar-doll,
+.roleplay-character .avatar-doll {
+  /* レイヤー式アバターは 1024:2006 の縦長キャンバス。actor 枠へ
+     width/height を両方100%で渡すと、顔と髪まで横に潰れてしまう。 */
+  width: auto;
+  height: 100%;
+  max-width: 100%;
+  aspect-ratio: 1024 / 2006;
+  margin: 0;
+  justify-self: center;
+  align-self: end;
+}
+
+.roleplay-speech,
+.character-speech-bubble {
+  position: absolute;
+  z-index: 8;
+  display: block;
+  max-width: min(58%, 370px);
+  margin: 0;
+  padding: 13px 17px;
+  border: 3px solid #e98fb0;
+  border-radius: 24px 24px 24px 8px;
+  color: #714f64;
+  background: #fff;
+  box-shadow: 0 7px 0 rgba(222, 124, 163, .18);
+  font-size: clamp(1rem, 2.2vw, 1.28rem);
+  font-weight: 900;
+  line-height: 1.35;
+  letter-spacing: .02em;
+}
+
+.roleplay-speech::after,
+.character-speech-bubble::after {
+  content: "";
+  position: absolute;
+  bottom: -13px;
+  left: 25px;
+  width: 19px;
+  height: 19px;
+  border-right: 3px solid #e98fb0;
+  border-bottom: 3px solid #e98fb0;
+  background: #fff;
+  transform: rotate(45deg);
+}
+
+.roleplay-speech--customer,
+.character-speech-bubble--customer { top: 7%; left: 6%; }
+.roleplay-speech--guide,
+.character-speech-bubble--guide { top: 5%; right: 6%; border-color: #86cbbb; border-radius: 24px 24px 8px; color: #4d716c; }
+.roleplay-speech--guide::after,
+.character-speech-bubble--guide::after { right: 25px; left: auto; border-color: #86cbbb; }
+.roleplay-speech--pet,
+.character-speech-bubble--pet { right: 19%; bottom: 32%; max-width: 190px; padding: 9px 12px; border-color: #a99ee6; color: #645a94; font-size: .92rem; }
+
+.roleplay-task,
+.roleplay-playfield {
+  position: absolute;
+  z-index: 5;
+  top: 21%;
+  right: 17%;
+  bottom: 19%;
+  left: 17%;
+  display: grid;
+  align-content: center;
+  gap: 12px;
+  min-width: 0;
+  padding: 18px;
+  border: 3px solid rgba(255, 255, 255, .95);
+  border-radius: 28px;
+  background: rgba(255, 253, 247, .83);
+  box-shadow: 0 11px 0 rgba(174, 107, 130, .14), 0 11px 28px rgba(105, 81, 101, .14);
+  backdrop-filter: blur(2px);
+}
+
+.roleplay-task-title {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  color: #80546c;
+  font-size: clamp(1rem, 2.3vw, 1.35rem);
+  font-weight: 900;
+  text-align: center;
+}
+
+.roleplay-shelf,
+.roleplay-item-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  justify-items: center;
+  gap: clamp(9px, 1.6vw, 17px);
+}
+
+.roleplay-item,
+.roleplay-draggable,
+.roleplay-tap-item {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: min(100%, 126px);
+  min-width: 96px;
+  min-height: 96px;
+  padding: 7px;
+  border: 3px solid #fff;
+  border-radius: 25px;
+  color: #6d5261;
+  background: linear-gradient(145deg, #fff 0%, #fff7fb 55%, #fde2ec 100%);
+  box-shadow: 0 8px 0 #eab3c8, 0 12px 18px rgba(99, 73, 94, .16);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: transform 130ms ease, box-shadow 130ms ease, filter 130ms ease;
+}
+
+.roleplay-item::after,
+.roleplay-draggable::after,
+.roleplay-tap-item::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 2px dashed rgba(235, 147, 181, .26);
+  border-radius: 20px;
+  pointer-events: none;
+}
+
+.roleplay-item img,
+.roleplay-draggable img,
+.roleplay-tap-item img,
+.roleplay-item .asset-sprite,
+.roleplay-draggable .asset-sprite,
+.roleplay-tap-item .asset-sprite {
+  position: relative;
+  z-index: 1;
+  width: 74px;
+  height: 74px;
+  object-fit: contain;
+  filter: drop-shadow(0 5px 3px rgba(112, 74, 91, .18));
+}
+
+.roleplay-item:hover,
+.roleplay-draggable:hover,
+.roleplay-tap-item:hover,
+.roleplay-item:focus-visible,
+.roleplay-draggable:focus-visible,
+.roleplay-tap-item:focus-visible {
+  outline: none;
+  transform: translateY(-5px) rotate(-2deg) scale(1.035);
+  box-shadow: 0 11px 0 #e49ab9, 0 15px 24px rgba(99, 73, 94, .2);
+}
+
+.roleplay-item:active,
+.roleplay-draggable:active,
+.roleplay-tap-item:active,
+.roleplay-item.is-dragging,
+.roleplay-draggable.is-dragging,
+.roleplay-tap-item.is-dragging {
+  cursor: grabbing;
+  transform: translateY(5px) scale(.94) rotate(2deg);
+  box-shadow: 0 3px 0 #df8eaf, 0 6px 11px rgba(99, 73, 94, .14);
+}
+
+.roleplay-item.is-picked,
+.roleplay-draggable.is-picked,
+.roleplay-tap-item.is-picked {
+  border-color: #80cdb8;
+  background: linear-gradient(145deg, #fff, #e9fff4);
+  box-shadow: 0 8px 0 #98d8bf, 0 12px 18px rgba(84, 147, 119, .18);
+  animation: roleplay-picked 750ms ease-in-out infinite alternate;
+}
+
+.roleplay-basket,
+.roleplay-target {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 132px;
+  padding: 13px;
+  border: 4px dashed #dc9d60;
+  border-radius: 31px;
+  color: #815c3e;
+  background:
+    repeating-linear-gradient(45deg, rgba(255, 235, 190, .45) 0 12px, rgba(255, 247, 226, .7) 12px 24px),
+    #fff6dc;
+  box-shadow: inset 0 -8px 0 rgba(205, 140, 76, .16);
+  transition: transform 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.roleplay-basket::before,
+.roleplay-target::before {
+  content: "ここへ ぽんっ";
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  color: #ac7c52;
+  font-size: .76rem;
+  font-weight: 900;
+  transform: translateX(-50%);
+  white-space: nowrap;
+}
+
+.roleplay-basket.is-over,
+.roleplay-target.is-over {
+  border-color: #62c29a;
+  background: #eafff2;
+  transform: scale(1.04);
+  animation: target-wiggle 430ms ease-in-out infinite alternate;
+}
+
+.roleplay-basket .roleplay-item,
+.roleplay-target .roleplay-item {
+  width: 82px;
+  min-width: 72px;
+  min-height: 72px;
+  margin-top: 18px;
+  box-shadow: 0 5px 0 #eab3c8;
+}
+
+.roleplay-submit,
+.roleplay-done-button {
+  justify-self: center;
+  min-width: min(100%, 240px);
+  min-height: 68px;
+  padding: 12px 25px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: linear-gradient(180deg, #ff9fbd, #e96d98);
+  box-shadow: 0 7px 0 #bd5176, 0 11px 17px rgba(146, 65, 96, .22);
+  font: inherit;
+  font-size: 1.1rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+
+.roleplay-submit:hover,
+.roleplay-submit:focus-visible,
+.roleplay-done-button:hover,
+.roleplay-done-button:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+  transform: translateY(-2px) scale(1.025);
+}
+
+.roleplay-submit:active,
+.roleplay-done-button:active {
+  transform: translateY(6px);
+  box-shadow: 0 2px 0 #bd5176, 0 4px 9px rgba(146, 65, 96, .2);
+}
+
+.roleplay-play-screen .stage-game-card,
+.roleplay-play-screen .curriculum-mission-frame,
+.roleplay-play-screen .question-title,
+.roleplay-play-screen .question-sub:not(.roleplay-speech) {
+  /* Kept in the DOM for screen readers or a fallback, not the play scene. */
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Correct-answer moment: character first, ledger second
+   -------------------------------------------------------------------------- */
+
+.reward-celebration,
+.reward-celebration-overlay {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  overflow: hidden;
+  background: rgba(83, 56, 105, .36);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 180ms ease;
+}
+
+.reward-celebration.is-visible,
+.reward-celebration-overlay.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.reward-celebration__card,
+.reward-celebration-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(112px, .75fr) minmax(170px, 1fr) minmax(96px, .6fr);
+  align-items: end;
+  gap: 4px;
+  width: min(94vw, 640px);
+  min-height: 315px;
+  padding: 28px 24px 22px;
+  overflow: hidden;
+  border: 5px solid #fff;
+  border-radius: 40px;
+  background:
+    radial-gradient(circle at 15% 15%, #fff 0 4px, transparent 5px),
+    radial-gradient(circle at 82% 20%, #fff 0 5px, transparent 6px),
+    radial-gradient(circle at 31% 72%, #ffe78e 0 6px, transparent 7px),
+    linear-gradient(145deg, #ffb7d0, #d8b8ff 51%, #8ee0c7);
+  box-shadow: 0 21px 54px rgba(57, 36, 70, .32), inset 0 -12px 0 rgba(255, 255, 255, .16);
+  animation: reward-pop 520ms cubic-bezier(.18, 1.35, .38, 1) both;
+}
+
+.reward-celebration__card::before,
+.reward-celebration-card::before,
+.reward-celebration__card::after,
+.reward-celebration-card::after {
+  content: "✦";
+  position: absolute;
+  color: #fffde0;
+  font-size: clamp(1.6rem, 5vw, 3.7rem);
+  text-shadow: 0 3px 0 rgba(164, 96, 158, .24);
+  animation: reward-star 1.1s ease-in-out infinite alternate;
+}
+
+.reward-celebration__card::before,
+.reward-celebration-card::before { top: 17px; left: 10%; }
+.reward-celebration__card::after,
+.reward-celebration-card::after { top: 29px; right: 11%; animation-delay: -.5s; }
+
+.reward-celebration__avatar,
+.reward-celebration-avatar,
+.reward-celebration__pet,
+.reward-celebration-pet {
+  position: relative;
+  z-index: 2;
+  align-self: end;
+}
+
+.reward-celebration__avatar .avatar-svg,
+.reward-celebration-avatar .avatar-svg,
+.reward-celebration__avatar .avatar-doll,
+.reward-celebration-avatar .avatar-doll,
+.reward-celebration__avatar img,
+.reward-celebration-avatar img {
+  display: block;
+  width: min(100%, 195px);
+  height: auto;
+  filter: drop-shadow(0 10px 5px rgba(91, 44, 77, .23));
+  animation: reward-avatar-hop 850ms cubic-bezier(.22, .9, .25, 1.2) both;
+}
+
+.reward-magic-gift {
+  position: absolute;
+  z-index: 1;
+  width: min(45%, 265px);
+  right: -5%;
+  bottom: -9%;
+  pointer-events: none;
+  filter: drop-shadow(0 12px 7px rgba(111, 57, 96, .2));
+  animation: reward-pop 620ms cubic-bezier(.18, 1.35, .38, 1) both;
+}
+
+.reward-celebration__pet .pet-companion,
+.reward-celebration-pet .pet-companion,
+.reward-celebration__pet img,
+.reward-celebration-pet img {
+  width: min(100%, 136px);
+  animation: reward-pet-hop 900ms cubic-bezier(.22, .9, .25, 1.2) 80ms both;
+}
+
+.reward-celebration__copy,
+.reward-celebration-copy {
+  position: relative;
+  z-index: 3;
+  align-self: center;
+  color: #fff;
+  text-align: center;
+  text-shadow: 0 3px 0 rgba(118, 62, 106, .23);
+}
+
+.reward-celebration__copy strong,
+.reward-celebration-copy strong {
+  display: block;
+  font-size: clamp(1.55rem, 5vw, 2.35rem);
+  line-height: 1.16;
+}
+
+.reward-celebration__copy p,
+.reward-celebration-copy p {
+  margin: 8px auto 0;
+  max-width: 230px;
+  font-size: .98rem;
+  font-weight: 900;
+}
+
+.reward-drop-chip,
+.reward-celebration .reward-chip {
+  position: absolute;
+  z-index: 6;
+  top: 17%;
+  right: 13%;
+  display: grid;
+  place-items: center;
+  min-width: 72px;
+  min-height: 72px;
+  padding: 8px;
+  border: 3px solid #fff;
+  border-radius: 22px;
+  color: #8d5271;
+  background: #fff9d7;
+  box-shadow: 0 6px 0 #e6b663;
+  font-size: .8rem;
+  font-weight: 900;
+  animation: reward-drop 900ms cubic-bezier(.2, .9, .25, 1.15) 150ms both;
+}
+
+/* --------------------------------------------------------------------------
+   Day-one wardrobe and shop desire
+   -------------------------------------------------------------------------- */
+
+.starter-wardrobe,
+.wardrobe-showcase {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px;
+  border: 3px solid #f2c9db;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at 9% 11%, #fff 0 3px, transparent 4px),
+    linear-gradient(145deg, #fff5fa, #f4f5ff 55%, #edfff7);
+}
+
+.starter-wardrobe__title,
+.wardrobe-showcase__title { grid-column: 1 / -1; margin: 0; color: #86576e; font-size: 1.05rem; text-align: center; }
+
+.starter-look-card,
+.wardrobe-look-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  min-height: 208px;
+  padding: 11px 8px 10px;
+  overflow: hidden;
+  border: 3px solid #fff;
+  border-radius: 24px;
+  color: #755267;
+  background: linear-gradient(180deg, #fff, #fff5fa 70%, #ffe1ee);
+  box-shadow: 0 7px 0 rgba(225, 148, 182, .22), 0 9px 17px rgba(107, 77, 100, .1);
+  cursor: pointer;
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.starter-look-card::before,
+.wardrobe-look-card::before {
+  content: "";
+  position: absolute;
+  top: 9px;
+  left: 50%;
+  width: 66px;
+  height: 21px;
+  border-radius: 50%;
+  background: rgba(255, 218, 237, .7);
+  transform: translateX(-50%);
+}
+
+.starter-look-card:hover,
+.starter-look-card:focus-visible,
+.starter-look-card.is-selected,
+.wardrobe-look-card:hover,
+.wardrobe-look-card:focus-visible,
+.wardrobe-look-card.is-selected {
+  outline: none;
+  border-color: #ef8fb5;
+  background: linear-gradient(180deg, #fff, #fff0f6 70%, #ffcde1);
+  transform: translateY(-5px) rotate(-1.5deg);
+  box-shadow: 0 11px 0 rgba(223, 119, 165, .35), 0 16px 22px rgba(107, 77, 100, .15);
+}
+
+.starter-look-card .avatar-svg,
+.wardrobe-look-card .avatar-svg,
+.starter-look-card .avatar-doll,
+.wardrobe-look-card .avatar-doll,
+.starter-look-card img,
+.wardrobe-look-card img {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 137px);
+  max-height: 154px;
+  object-fit: contain;
+  filter: drop-shadow(0 6px 4px rgba(108, 75, 97, .14));
+}
+
+.starter-look-card .avatar-doll,
+.wardrobe-look-card .avatar-doll {
+  height: auto;
+  aspect-ratio: 1024 / 2006;
+}
+
+.starter-look-card strong,
+.wardrobe-look-card strong { position: relative; z-index: 2; margin-top: 3px; font-size: .82rem; }
+
+.starter-wardrobe .item-pick,
+.starter-wardrobe .dress-item-card .item-pick {
+  min-height: 96px;
+  padding: 7px;
+  border-radius: 20px;
+}
+
+.shop-tryon-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+  gap: 14px;
+}
+
+.shop-tryon-card {
+  position: relative;
+  display: grid;
+  grid-template-rows: 170px auto auto minmax(54px, auto);
+  gap: 9px;
+  min-height: 332px;
+  padding: 12px;
+  overflow: hidden;
+  border: 3px solid #f0c5d7;
+  border-radius: 27px;
+  color: #76556a;
+  background: linear-gradient(145deg, #fff, #fff6fb 48%, #f4f0ff);
+  box-shadow: 0 8px 0 rgba(220, 147, 178, .18), 0 12px 21px rgba(100, 74, 95, .1);
+}
+
+.shop-tryon-card::after {
+  content: "試着してみる";
+  position: absolute;
+  top: 10px;
+  right: -29px;
+  min-width: 118px;
+  padding: 5px 8px;
+  color: #fff;
+  background: #e98aac;
+  font-size: .65rem;
+  font-weight: 900;
+  text-align: center;
+  transform: rotate(38deg);
+}
+
+.shop-tryon-card.is-previewing {
+  border-color: #e878a6;
+  background: linear-gradient(145deg, #fff9fc, #ffe6f1 48%, #e6f9f0);
+  box-shadow: 0 9px 0 rgba(224, 113, 161, .32), 0 15px 25px rgba(100, 74, 95, .17);
+}
+
+.shop-tryon-card.is-previewing::after {
+  content: "いま 試着中！";
+  background: #cf6ba4;
+}
+
+.shop-tryon-preview {
+  position: relative;
+  display: grid;
+  place-items: end center;
+  overflow: hidden;
+  border: 2px solid #fff;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 26% 23%, #fff 0 4px, transparent 5px),
+    linear-gradient(180deg, #ffe8f2, #e8ecff 70%, #d6f1df);
+}
+
+.shop-tryon-card.is-previewing .shop-tryon-preview {
+  outline: 4px solid rgba(255, 255, 255, .92);
+  box-shadow: inset 0 0 0 3px #e781ad, 0 0 0 5px rgba(255, 180, 210, .34);
+  animation: tryon-glow 650ms ease both;
+}
+
+.shop-tryon-preview .avatar-svg,
+.shop-tryon-preview .avatar-doll,
+.shop-tryon-preview img { width: 138px; max-height: 161px; object-fit: contain; filter: drop-shadow(0 7px 3px rgba(115, 78, 105, .17)); }
+.shop-tryon-preview .avatar-doll { height: auto; aspect-ratio: 1024 / 2006; }
+.shop-tryon-preview .item-swatch { position: absolute; z-index: 2; right: 7px; bottom: 5px; width: 54px; height: 54px; padding: 3px; border-radius: 17px; background: rgba(255,255,255,.88); box-shadow: 0 3px 0 rgba(221,147,178,.24); }
+.shop-tryon-card > strong { font-size: 1rem; }.shop-tryon-card .primary-button, .shop-tryon-card .soft-button { width: 100%; min-height: 52px; }
+
+/* --------------------------------------------------------------------------
+   Sticker book as a canvas, not a collection shelf
+   -------------------------------------------------------------------------- */
+
+.deco-workbench {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(210px, .36fr);
+  gap: 15px;
+}
+
+.deco-canvas {
+  position: relative;
+  min-height: 470px;
+  overflow: hidden;
+  border: 6px solid #fff;
+  border-radius: 30px;
+  background:
+    linear-gradient(90deg, transparent 49.4%, rgba(242, 169, 191, .32) 49.7%, rgba(242, 169, 191, .32) 50.3%, transparent 50.6%),
+    repeating-linear-gradient(0deg, #fffdf8 0 29px, #eadffc 30px, #fffdf8 31px);
+  box-shadow: 0 9px 0 #eec5d5, 0 15px 25px rgba(101, 75, 96, .13);
+}
+
+.deco-canvas::before {
+  content: "きょうの きらきらページ";
+  position: absolute;
+  top: 13px;
+  left: 50%;
+  z-index: 1;
+  padding: 4px 12px;
+  border: 2px solid #eeb7cd;
+  border-radius: 999px;
+  color: #a35f7e;
+  background: #fff;
+  font-size: .73rem;
+  font-weight: 900;
+  transform: translateX(-50%) rotate(-2deg);
+}
+
+.deco-canvas.is-empty::after {
+  content: "すきな シールを ぺたっ";
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  color: #b78aa1;
+  font-size: 1.03rem;
+  font-weight: 900;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  white-space: nowrap;
+}
+
+.deco-sticker {
+  position: absolute;
+  z-index: 2;
+  display: grid;
+  place-items: center;
+  width: 96px;
+  height: 96px;
+  padding: 6px;
+  border: 0;
+  border-radius: 24px;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: filter 130ms ease, transform 130ms ease;
+}
+
+.deco-sticker:hover, .deco-sticker:focus-visible { outline: 3px solid #ec91b3; outline-offset: 3px; filter: drop-shadow(0 5px 4px rgba(128, 73, 103, .24)); }
+.deco-sticker.is-selected { outline: 3px solid #ec91b3; outline-offset: 3px; background: rgba(255, 222, 236, .35); filter: drop-shadow(0 5px 4px rgba(128, 73, 103, .24)); }
+.deco-sticker.is-dragging { z-index: 10; cursor: grabbing; filter: drop-shadow(0 9px 7px rgba(128, 73, 103, .28)); }
+.deco-sticker img, .deco-sticker .asset-sprite { width: 82px; height: 82px; object-fit: contain; }
+
+.deco-tool-tray {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  padding: 12px;
+  border: 3px solid #d9e8e7;
+  border-radius: 25px;
+  background: linear-gradient(160deg, #f8ffff, #fff8fb);
+}
+
+.deco-tool-tray > h3 { margin: 0; color: #667e83; text-align: center; }
+.deco-sticker-choice { min-height: 96px; border: 2px solid #ead7e3; border-radius: 20px; color: #735469; background: #fff; font: inherit; font-weight: 900; cursor: pointer; }
+.deco-sticker-choice:hover, .deco-sticker-choice:focus-visible { border-color: #e88dae; outline: none; transform: translateY(-3px) rotate(-1deg); }
+
+/* --------------------------------------------------------------------------
+   Pet play and visits
+   -------------------------------------------------------------------------- */
+
+.pet-play-zone {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(135px, .8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 15px;
+  min-height: 310px;
+  padding: 18px;
+  overflow: hidden;
+  border: 4px solid #fff;
+  border-radius: 32px;
+  background:
+    radial-gradient(circle at 77% 15%, rgba(255,255,255,.86) 0 5px, transparent 6px),
+    linear-gradient(180deg, #d9f5ff, #f7fff4 57%, #c7eaa5 57.5%, #dff5bd);
+  box-shadow: 0 10px 0 rgba(143, 205, 170, .24), 0 15px 25px rgba(84, 116, 98, .12);
+}
+
+.pet-play-zone::after { content: "♥"; position: absolute; right: 12%; top: 16%; color: #ff9aba; font-size: 2rem; animation: pet-heart-float 1.8s ease-in-out infinite; }
+.pet-play-zone .pet-companion { width: min(100%, 230px); justify-self: center; }.pet-play-zone-copy { position: relative; z-index: 2; display: grid; justify-items: start; gap: 9px; color: #526f68; }.pet-play-zone-copy h3 { margin: 0; font-size: 1.35rem; }.pet-play-zone-copy p { margin: 0; font-weight: 800; line-height: 1.45; }
+
+.pet-pat-button,
+.pet-play-button {
+  min-width: 154px;
+  min-height: 62px;
+  padding: 9px 17px;
+  border: 3px solid #fff;
+  border-radius: 999px;
+  color: #4f7869;
+  background: #c8f2d9;
+  box-shadow: 0 6px 0 #8bc9a8;
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.pet-pat-button:hover,
+.pet-pat-button:focus-visible,
+.pet-play-button:hover,
+.pet-play-button:focus-visible { outline: 3px solid #fff; outline-offset: 3px; transform: translateY(-3px) scale(1.03); }
+.pet-pat-button:active,
+.pet-play-button:active { transform: translateY(4px) scale(.97); box-shadow: 0 2px 0 #8bc9a8; }
+/* Pet tricks use their species-specific pet-motion animation. */
+
+.outing-postcard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+.outing-postcard { position: relative; display: grid; grid-template-rows: 164px auto auto; gap: 9px; min-height: 320px; padding: 11px; overflow: hidden; border: 5px solid #fff; border-radius: 17px; color: #76546a; background: #fffaf4; box-shadow: 0 8px 0 #edc6b0, 0 14px 23px rgba(108, 78, 93, .12); transform: rotate(-1deg); }
+.outing-postcard:nth-child(even) { transform: rotate(1.2deg); background: #f8fbff; }.outing-postcard:hover { transform: translateY(-5px) rotate(0deg); }
+.outing-postcard::before { content: "✦ おでかけ便"; position: absolute; z-index: 3; top: 11px; left: 11px; padding: 4px 8px; border-radius: 999px; color: #9c5e7b; background: rgba(255,255,255,.92); font-size: .64rem; font-weight: 900; }.outing-postcard::after { content: ""; position: absolute; right: 11px; bottom: 11px; width: 32px; height: 32px; border: 2px dashed #efa3bb; border-radius: 50%; }
+.outing-postcard-art { position: relative; display: grid; place-items: end center; overflow: hidden; border-radius: 10px; background: linear-gradient(180deg, #cbeeff, #f7e7c8 61%, #addc8f 61.5%, #d9efab); }
+.outing-postcard-art > .avatar-doll,
+.outing-postcard-art > .asset-sprite,
+.outing-postcard-art > .avatar-svg,
+.outing-postcard-art > img { grid-area: 1 / 1; }
+.outing-postcard-art > .avatar-doll { position: relative; z-index: 2; width: auto; height: 151px; max-width: 100%; aspect-ratio: 1024 / 2006; margin: 0; align-self: end; justify-self: center; filter: drop-shadow(0 6px 3px rgba(85, 70, 84, .16)); }
+.outing-postcard-art > .avatar-svg,
+.outing-postcard-art > img { position: relative; z-index: 2; width: min(100%, 180px); height: 151px; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 6px 3px rgba(85, 70, 84, .16)); }
+.outing-postcard-art > .asset-sprite { position: absolute; z-index: 1; top: 16px; right: 14px; width: 92px; height: 92px; filter: drop-shadow(0 5px 3px rgba(85, 70, 84, .13)); }
+.outing-postcard h3 { margin: 0; font-size: 1.14rem; }.outing-postcard p { margin: 0; font-size: .88rem; font-weight: 800; line-height: 1.45; }.outing-postcard .primary-button, .outing-postcard .soft-button { min-height: 52px; }
+
+@keyframes tryon-glow {
+  0% { filter: brightness(1); transform: scale(.96); }
+  58% { filter: brightness(1.11); transform: scale(1.025); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+
+/* --------------------------------------------------------------------------
+   Safe upgrades for legacy cards when they appear in a refreshed screen
+   -------------------------------------------------------------------------- */
+
+.experience-refresh .stage-game-card,
+.roleplay-play-screen + .stage-game-card { display: none; }
+
+.experience-refresh .play-panel,
+.roleplay-play-screen .play-panel { min-height: 0; padding: 0; border: 0; background: transparent; box-shadow: none; }
+
+.experience-refresh .pick-object,
+.experience-refresh .choice-card,
+.experience-refresh .number-card,
+.roleplay-play-screen .pick-object,
+.roleplay-play-screen .choice-card,
+.roleplay-play-screen .number-card {
+  min-width: 96px;
+  min-height: 96px;
+  border-width: 3px;
+  border-radius: 24px;
+}
+
+.experience-refresh .fruit,
+.roleplay-play-screen .fruit { width: 72px; height: 72px; }
+
+.experience-refresh .choice-grid,
+.roleplay-play-screen .choice-grid { gap: 15px; }
+
+.experience-refresh .speak-button,
+.roleplay-play-screen .speak-button { min-width: 96px; min-height: 52px; border-radius: 999px; }
+
+/* Stage selection reads as a winding garden route, not a spreadsheet list. */
+.stage-map {
+  position: relative;
+  isolation: isolate;
+  padding: 22px 12px;
+  border: 3px solid #e7d6f1;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 10% 15%, #fff 0 4px, transparent 5px),
+    radial-gradient(circle at 83% 25%, #fff 0 3px, transparent 4px),
+    linear-gradient(145deg, #d9f5ff, #f4ffdf 54%, #ffe9ca);
+}
+
+.stage-map::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 11% 7%;
+  border: 12px dotted rgba(244, 181, 130, .55);
+  border-radius: 44% 56% 48% 52% / 53% 45% 55% 47%;
+  transform: rotate(-2deg);
+}
+
+.stage-map .stage-card {
+  min-height: 226px;
+  border: 3px solid #fff;
+  border-radius: 26px;
+  background: rgba(255,255,255,.94);
+  box-shadow: 0 7px 0 rgba(183, 133, 158, .18), 0 12px 20px rgba(94, 76, 97, .1);
+}
+
+.stage-map .stage-card:nth-child(3n + 2) { transform: translateY(15px) rotate(1deg); }
+.stage-map .stage-card:nth-child(3n) { transform: translateY(-5px) rotate(-1deg); }
+.stage-map .stage-card .tag-row:first-child .tag:first-child { background: #ffe5a9; }
+.stage-map .stage-visual { min-height: 74px; }
+
+.roleplay-task .legacy-sound-layer { min-height: 42px; padding: 5px 9px; border-radius: 18px; }
+.roleplay-task .legacy-sound-layer > div,
+.roleplay-task .legacy-sound-layer__status { display: none; }
+.roleplay-task .legacy-sound-layer .legacy-sound-layer__prop { width: 34px; height: 34px; }
+
+.roleplay-dot-row { display: inline-flex; gap: 3px; color: #d5a5bc; }
+.roleplay-dot-row i { font-style: normal; }
+.roleplay-dot-row .done { color: #ec8eb0; }
+.roleplay-dot-row .current { color: #8ecfb7; transform: scale(1.18); }
+
+/* Keep math evidence in the accessible markup without printing the target
+   answer on a visual board that asks the player to discover it. */
+.lab-answer-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* --------------------------------------------------------------------------
+   Viewport safety — one scene when it fits, a contained scroll when it does
+   not.  A short laptop or a small phone must never cut off the answer or the
+   next button just because the play space has a carefully composed height.
+   -------------------------------------------------------------------------- */
+
+#screen[data-view="play"] {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+
+.roleplay-task {
+  grid-template-rows: auto minmax(0, 1fr);
+  align-content: stretch;
+}
+
+.roleplay-task .play-space {
+  min-height: 0;
+  max-height: 100%;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+/* All question renderers can return a board plus its controls.  Keeping them
+   in one content column prevents a button row from drifting away from its
+   board when the PC scene has spare horizontal room. */
+.roleplay-play-content {
+  display: grid;
+  gap: 12px;
+  width: min(100%, 720px);
+  min-width: 0;
+  margin-inline: auto;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  /* Earlier fixed-height layouts are ideal when content fits, but the
+     refreshed wardrobe, pet home and sticker canvas intentionally have more
+     to explore.  Let the screen own the fallback scroll instead of clipping
+     their lower controls. */
+  #screen {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+
+  #screen > .dress-panel,
+  #screen > .boutique-panel,
+  #screen > .sticker-deco-panel,
+  #screen > .notebook-panel,
+  #screen > .outing-panel,
+  #screen > .pet-home {
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
+  }
+
+  .dress-panel .avatar-layout,
+  .dress-panel .dress-stack {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  /* ----------------------------------------------------------------------
+     PC learning scene
+
+     The old scene reserved only 60% of a 560px stage for the question.
+     That left around 260px after the title and padding, which made a normal
+     board and its answer choices begin inside a tiny nested scroll area.
+     On a PC the task is the hero: give it a stable, generous centre lane and
+     keep the decorative cast entirely outside that lane.
+     ---------------------------------------------------------------------- */
+  #screen[data-view="play"] .roleplay-stage {
+    /* 200px accounts for the compact PC header, tabs, screen inset, HUD and
+       its gap.  At 1180×820 this makes the whole play scene land on one
+       screen; shorter laptops deliberately use the screen's safe scroll. */
+    min-height: clamp(600px, calc(100svh - 200px), 660px);
+  }
+
+  #screen[data-view="play"] .roleplay-task {
+    top: 18%;
+    right: 20%;
+    bottom: 8%;
+    left: 20%;
+    min-height: 0;
+    gap: 8px;
+    overflow: hidden;
+    border-radius: 30px;
+  }
+
+  /* The customer already says the task out loud.  Do not repeat it above
+     every board on desktop; reclaim that space for the actual interaction. */
+  #screen[data-view="play"] .roleplay-task-title {
+    display: none;
+  }
+
+  #screen[data-view="play"] .roleplay-task .play-space {
+    width: 100%;
+    min-width: 0;
+    align-content: start;
+    justify-items: stretch;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 12px 14px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content {
+    gap: 10px;
+  }
+
+  #screen[data-view="play"] .roleplay-actor--customer,
+  #screen[data-view="play"] .roleplay-actor--hero {
+    width: min(18vw, 200px);
+  }
+
+  #screen[data-view="play"] .roleplay-actor--customer { left: 1%; }
+  #screen[data-view="play"] .roleplay-actor--hero { right: 1%; }
+  #screen[data-view="play"] .roleplay-actor--pet {
+    right: 2%;
+    bottom: 28%;
+    width: min(10vw, 112px);
+    min-width: 70px;
+  }
+
+  #screen[data-view="play"] .roleplay-speech,
+  #screen[data-view="play"] .character-speech-bubble {
+    max-width: min(27%, 250px);
+    padding: 9px 12px;
+    font-size: clamp(.92rem, 1.45vw, 1.05rem);
+  }
+
+  #screen[data-view="play"] .roleplay-speech--customer,
+  #screen[data-view="play"] .character-speech-bubble--customer {
+    top: 4%;
+    left: 3%;
+  }
+
+  #screen[data-view="play"] .roleplay-speech--guide,
+  #screen[data-view="play"] .character-speech-bubble--guide {
+    top: 4%;
+    right: 3%;
+  }
+
+  /* A hint is useful, but it must live in the right-hand scenery rail rather
+     than cover a number card or a keypad. */
+  #screen[data-view="play"] .roleplay-speech--pet,
+  #screen[data-view="play"] .character-speech-bubble--pet {
+    right: 2%;
+    bottom: 46%;
+    max-width: min(18%, 190px);
+  }
+
+  /* Curriculum boards are the tallest problem type.  At normal desktop
+     widths, the evidence and answer cards share one clear workbench; at a
+     smaller laptop they fall back to the same readable vertical column. */
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-lab {
+    min-height: 0;
+    gap: 8px;
+    padding: 11px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-bank-meta,
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-lab .mission-instruction {
+    display: none;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-answer-option {
+    min-height: 64px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-answer-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1100px) and (orientation: landscape) {
+  #screen[data-view="play"] .roleplay-play-content--lab {
+    grid-template-columns: minmax(0, 1.1fr) minmax(230px, .9fr);
+    align-items: start;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-lab,
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-answer-board {
+    min-width: 0;
+    margin-top: 0;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-answer-board {
+    align-content: start;
+  }
+}
+
+@media (max-width: 640px) {
+  /* styles.css keeps legacy play panels fixed on phones.  The new role-play
+     scene is deliberately taller, so it needs the same safe vertical scroll
+     as every other child-facing page. */
+  #screen[data-view="play"] {
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .roleplay-play-screen { padding-bottom: 12px; }
+}
+
+@media (pointer: coarse) {
+  .roleplay-play-screen button,
+  .roleplay-play-screen [role="button"],
+  .starter-wardrobe button,
+  .shop-tryon-card button,
+  .deco-tool-tray button,
+  .pet-play-zone button,
+  .outing-postcard button { min-height: 56px; }
+
+  .roleplay-item,
+  .roleplay-draggable,
+  .roleplay-tap-item,
+  .deco-sticker { -webkit-tap-highlight-color: transparent; }
+}
+
+@media (max-width: 720px) {
+  .roleplay-stage,
+  .roleplay-scene { min-height: 600px; border-radius: 26px; }
+  .roleplay-task,
+  .roleplay-playfield { top: 25%; right: 6%; bottom: 17%; left: 6%; padding: 13px; }
+  .roleplay-actor--customer,
+  .roleplay-character--customer { left: -1%; bottom: 6%; }
+  .roleplay-actor--hero,
+  .roleplay-character--hero { right: -2%; bottom: 5%; }
+  .roleplay-actor--pet,
+  .roleplay-character--pet { right: 24%; bottom: 1%; }
+  .roleplay-speech,
+  .character-speech-bubble { max-width: 74%; padding: 10px 12px; }
+  .roleplay-speech--customer,
+  .character-speech-bubble--customer { left: 8%; }
+  .roleplay-speech--guide,
+  .character-speech-bubble--guide { right: 8%; }
+  .roleplay-shelf,
+  .roleplay-item-grid { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 9px; }
+  .reward-celebration__card,
+  .reward-celebration-card { grid-template-columns: 1fr 1.25fr .75fr; min-height: 270px; padding: 22px 12px 16px; border-radius: 29px; }
+  .starter-wardrobe,
+  .wardrobe-showcase { gap: 7px; padding: 9px; }.starter-look-card, .wardrobe-look-card { min-height: 174px; padding: 7px 3px; }.starter-look-card .avatar-svg, .wardrobe-look-card .avatar-svg, .starter-look-card img, .wardrobe-look-card img { max-height: 126px; }
+  .deco-workbench { grid-template-columns: 1fr; }.deco-canvas { min-height: 410px; }.deco-tool-tray { grid-template-columns: repeat(3, minmax(0,1fr)); }.deco-tool-tray > h3 { grid-column: 1 / -1; }.deco-sticker-choice { min-height: 82px; }
+  .pet-play-zone { grid-template-columns: 1fr; min-height: 430px; text-align: center; }.pet-play-zone-copy { justify-items: center; }.pet-play-zone .pet-companion { width: 185px; }.outing-postcard-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 430px) {
+  .roleplay-stage,
+  .roleplay-scene { min-height: 630px; }
+  .roleplay-task,
+  .roleplay-playfield { top: 23%; bottom: 20%; }
+  .roleplay-speech--pet,
+  .character-speech-bubble--pet { display: none; }
+  .roleplay-actor,
+  .roleplay-character { min-width: 88px; }
+  .roleplay-item,
+  .roleplay-draggable,
+  .roleplay-tap-item { min-width: 86px; min-height: 86px; }
+  .roleplay-item img,
+  .roleplay-draggable img,
+  .roleplay-tap-item img,
+  .roleplay-item .asset-sprite,
+  .roleplay-draggable .asset-sprite,
+  .roleplay-tap-item .asset-sprite { width: 65px; height: 65px; }
+  .reward-celebration__card,
+  .reward-celebration-card { grid-template-columns: .75fr 1.2fr .5fr; }.reward-celebration__pet .pet-companion, .reward-celebration-pet .pet-companion { width: 82px; }
+  .starter-look-card,
+  .wardrobe-look-card { min-height: 153px; }.starter-look-card strong, .wardrobe-look-card strong { font-size: .67rem; }
+  .deco-tool-tray { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roleplay-actor,
+  .roleplay-character,
+  .roleplay-item.is-picked,
+  .roleplay-basket.is-over,
+  .roleplay-target.is-over,
+  .reward-celebration__card,
+  .reward-celebration-card,
+  .reward-celebration__avatar .avatar-svg,
+  .reward-celebration-avatar .avatar-svg,
+  .reward-celebration__pet .pet-companion,
+  .reward-celebration-pet .pet-companion,
+  .pet-play-zone::after,
+  .pet-play-zone.is-patted .pet-art { animation: none !important; }
+  .roleplay-item,
+  .roleplay-draggable,
+  .roleplay-tap-item,
+  .starter-look-card,
+  .wardrobe-look-card,
+  .outing-postcard { transition: none; }
+}
+
+@keyframes roleplay-idle {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50% { transform: translateY(-7px) rotate(-1deg); }
+}
+
+@keyframes roleplay-picked {
+  from { transform: translateY(-3px) rotate(-2deg) scale(1); }
+  to { transform: translateY(-8px) rotate(2deg) scale(1.04); }
+}
+
+@keyframes target-wiggle {
+  from { transform: rotate(-1deg) scale(1.02); }
+  to { transform: rotate(1deg) scale(1.05); }
+}
+
+@keyframes reward-pop {
+  0% { opacity: 0; transform: scale(.58) rotate(-8deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+@keyframes reward-star {
+  from { transform: scale(.74) rotate(-12deg); opacity: .55; }
+  to { transform: scale(1.12) rotate(13deg); opacity: 1; }
+}
+
+@keyframes reward-avatar-hop {
+  0% { transform: translateY(80px) scale(.8); opacity: 0; }
+  56% { transform: translateY(-13px) scale(1.06); opacity: 1; }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes reward-pet-hop {
+  0% { transform: translateY(55px) rotate(12deg); opacity: 0; }
+  55% { transform: translateY(-20px) rotate(-7deg); opacity: 1; }
+  100% { transform: translateY(0) rotate(0); }
+}
+
+@keyframes reward-drop {
+  0% { transform: translate(70px, -110px) rotate(25deg) scale(.4); opacity: 0; }
+  65% { transform: translate(-6px, 7px) rotate(-6deg) scale(1.14); opacity: 1; }
+  100% { transform: translate(0, 0) rotate(0) scale(1); }
+}
+
+@keyframes pet-heart-float {
+  0%, 100% { transform: translateY(0) scale(.85); opacity: .55; }
+  50% { transform: translateY(-20px) scale(1.16) rotate(13deg); opacity: 1; }
+}
+
+@keyframes pet-pat-hop {
+  0% { transform: translateY(0) scale(1); }
+  42% { transform: translateY(-23px) scale(1.1, .91); }
+  74% { transform: translateY(3px) scale(.95, 1.08); }
+  100% { transform: translateY(0) scale(1); }
+}

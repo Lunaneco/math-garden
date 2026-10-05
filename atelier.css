@@ -1,0 +1,339 @@
+/* Atelier edition: one quiet material palette and visible, usable play. */
+:root { --ink:#513f48; --muted:#75606c; --berry:#8d4c65; --line:#e6d9d5; --radius:22px; --shadow:0 10px 30px #644d6610; }
+body { background:#f6f2ec; }
+.app-shell { max-width:1440px; margin:auto; }
+.topbar { padding:18px 30px 12px; background:#fbf8f3; }
+.brand-mark { background:#9d6b7c; color:#fff6ed; width:44px; height:44px; box-shadow:none; font-size:24px; font-weight:400; }
+.brand h1 { font-size:19px; font-weight:800; letter-spacing:.06em; }
+.brand p { font-size:12px; color:#76636b; }
+.brand { min-width:0; }
+.stat-pill { border:1px solid #e1d7d2; box-shadow:none; background:#fff; color:#63505c; }
+.tabbar { position:relative; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:4px; padding:8px 30px 14px; background:#fbf8f3; border-bottom:1px solid #e8dcd4; overflow:visible; }
+.tab-button { display:flex; flex-direction:row; justify-content:center; gap:8px; min-width:0; min-height:54px; border:1px solid transparent; border-radius:14px; color:#76606b; background:transparent; box-shadow:none; font-size:14px; }
+.tab-button.active { background:#f0e2e7; color:#6e354e; border-color:#d9b7c5; box-shadow:none; transform:none; }
+.tab-button.active { outline:none; }
+.tab-button.active:focus-visible { outline:3px solid #5f4b83; }
+.tab-button .tab-sprite { width:28px; height:28px; flex:0 0 28px; filter:none; }
+.atelier-utility-menu { position:absolute; z-index:50; right:24px; top:70px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); width:min(380px,calc(100vw - 30px)); padding:12px; gap:6px; border:1px solid #d5b7c7; border-radius:18px; box-shadow:0 12px 32px #66506426; background:#fffcf8; }
+.atelier-utility-menu .tab-button { min-height:64px; background:#f5eee9; }
+#screen { padding:24px 30px 40px; }
+.wide-panel,.panel { border:1px solid #e3d6d0; border-radius:22px; background:#fffdf9; box-shadow:var(--shadow); }
+.wide-panel { padding:24px; }
+.section-heading h2 { font-size:clamp(22px,3vw,30px); line-height:1.5; }
+.primary-button,.soft-button { min-height:48px; border-radius:14px; padding:12px 18px; box-shadow:none; line-height:1.5; overflow-wrap:anywhere; font-weight:750; }
+.primary-button { color:white; background:#95566f; border:1px solid #95566f; text-shadow:none; }
+.primary-button:hover { background:#81445d; box-shadow:0 4px 10px #81445d20; }
+.primary-button:disabled { background:#eee5e8; color:#795e6d; border-color:#d9c7d0; opacity:1; cursor:default; }
+.soft-button { background:#fffaf4; color:#754e61; border:1px solid #cfb6bd; }
+.text-button { min-height:44px; padding:8px 4px; background:transparent; color:#805269; text-decoration:underline; text-underline-offset:4px; font-weight:700; line-height:1.5; }
+button:hover { transform:none; }
+/* The map button is centered by its own transform. Keep that anchor when
+   touching it; only its illustration should react. */
+button.iso-object.is-tappable,
+button.iso-object.is-tappable:hover,
+button.iso-object.is-tappable:active,
+button.iso-object.is-tappable:focus-visible { transform:translateX(-50%); touch-action:manipulation; -webkit-tap-highlight-color:transparent; user-select:none; }
+@media (hover:none) {
+  button.iso-object.is-tappable:hover .iso-object-img { transform:scale(var(--object-scale,1)); }
+}
+button.iso-object.is-tappable:active .iso-object-img { animation:none; transform:scale(calc(var(--object-scale,1) * .97)); }
+button:focus-visible,summary:focus-visible { outline:3px solid #5f4b83; outline-offset:3px; }
+.toast-area,.toast { pointer-events:none; }
+.atelier-kicker { display:block; color:#78604f; font-size:11px; font-weight:800; letter-spacing:.13em; line-height:1.7; }
+.atelier-note,.atelier-empty-copy { color:#77616e; font-size:13px; line-height:1.8; }
+.avatar-doll.atelier-avatar { position:relative; display:block; aspect-ratio:2/3; height:auto; width:100%; max-width:none; flex-shrink:0; overflow:visible; background:transparent; filter:none; border-radius:0; }
+.atelier-character,.atelier-part-layer { display:block; position:absolute; inset:0; width:100%; height:100%; background:var(--src) center/contain no-repeat; pointer-events:none; }
+.atelier-character { z-index:1; }
+.atelier-part-layer { z-index:2; }
+.atelier-avatar::before { display:none; }
+.atelier-avatar.is-loading { background:#eee6eb; border-radius:15px; }
+.atelier-avatar.is-loading::after { font-size:12px; }
+.atelier-frame-garden { background:radial-gradient(ellipse at 18% 90%,#cfdecb 0 12%,transparent 12.5%),radial-gradient(ellipse at 90% 96%,#dbe4c9 0 18%,transparent 18.5%),linear-gradient(135deg,#f4f1e1,#e6f0e5); }
+.atelier-frame-rose { background:repeating-linear-gradient(90deg,transparent 0 34px,#f0dfe6 35px 36px),linear-gradient(#fff7f2,#f8e7e6); }
+.atelier-frame-sky { background:radial-gradient(ellipse at 18% 28%,#fffdf5 0 12%,transparent 12.5%),radial-gradient(ellipse at 85% 42%,#fffdf5 0 14%,transparent 14.5%),linear-gradient(#e1edf4,#eef2ed); }
+.atelier-home { display:grid; gap:22px; max-width:1200px; margin:auto; }
+.atelier-home-hero { display:grid; grid-template-columns:1.2fr 1fr; min-height:390px; border:1px solid #e2d3cb; border-radius:28px; background:#fffaf2; overflow:hidden; }
+.atelier-home-copy { padding:42px clamp(20px,4vw,52px); align-self:center; }
+.atelier-home-copy h2 { margin:12px 0 16px; color:#684651; font-size:clamp(32px,4.2vw,50px); letter-spacing:.025em; font-weight:800; line-height:1.35; }
+.atelier-home-copy p { font-size:15px; line-height:1.9; color:#776372; }
+.atelier-home-tip { display:block; margin-top:16px; font-size:12px; color:#7b626c; }
+.atelier-home-portrait { position:relative; display:grid; place-items:center; min-height:390px; padding:18px; }
+.atelier-home-portrait .atelier-avatar { width:240px; }
+.atelier-home-portrait > .avatar-doll:not(.atelier-avatar) { width:190px; }
+.atelier-home-pet { position:absolute; right:18px; bottom:36px; width:110px; }
+.atelier-home-pet .pet-companion { width:100%; min-width:0; }
+.atelier-outfit-label { position:absolute; bottom:12px; padding:8px 14px; font-size:12px; border-radius:12px; color:#624c53; background:#ffffffe8; }
+.atelier-home-grid { display:grid; grid-template-columns:1.2fr 1fr; gap:18px; }
+.atelier-wish { display:grid; grid-template-columns:100px minmax(0,1fr); gap:16px; align-items:center; padding:18px 20px; background:#fffdfa; border:1px solid #e2d6ce; border-radius:20px; }
+.atelier-wish-image { background:#f8eff0; border-radius:14px; padding:8px; }
+.atelier-wish strong { display:block; font-size:18px; margin-top:4px; line-height:1.5; }
+.atelier-wish p { font-size:14px; line-height:1.6; margin:8px 0; }
+.atelier-wish small { color:#7b626c; font-size:12px; line-height:1.6; }
+.atelier-wish .text-button { display:block; }
+.atelier-wish--idle { display:block; padding:22px; }
+.atelier-thread-track { display:flex; flex-wrap:wrap; gap:5px; margin:8px 0; }
+.atelier-thread-track i { display:grid; place-items:center; width:22px; height:22px; font-style:normal; color:#c8b8bc; border:1px solid #d9cacc; border-radius:50%; font-size:16px; }
+.atelier-thread-track i.is-filled { background:#ecd2dc; color:#87495e; border-color:#c490a4; }
+.atelier-first-orders { padding:22px; border:1px solid #e2d6ce; border-radius:20px; background:#fffdfa; }
+.atelier-first-orders h3 { margin:4px 0; }
+.help-home-actions { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+.help-home-actions > button { min-height:96px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; }
+.help-home-actions > button > span { font-size:28px; }
+.help-mode-picker { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin:8px 0 22px; }
+.help-mode-choice { display:grid; grid-template-columns:38px minmax(0,1fr); gap:4px 10px; align-content:center; padding:16px; min-height:108px; border:1px solid #d9c5cd; border-radius:18px; background:#fffaf4; color:#754e61; text-align:left; }
+.help-mode-choice > span { grid-row:span 2; align-self:center; font-size:28px; }
+.help-mode-choice strong { font-size:16px; line-height:1.6; }
+.help-mode-choice small { font-size:12px; line-height:1.6; }
+.help-mode-choice.is-selected { border:2px solid #95566f; background:#f8eaf0; padding:15px; }
+.help-domain-picker { display:flex; flex-wrap:wrap; gap:8px; margin:18px 0; }
+.help-domain-picker button { display:flex; gap:6px; align-items:center; }
+.help-domain-picker .is-selected { background:#e5f1eb; border:2px solid #639276; }
+.help-auto-card { display:grid; grid-template-columns:minmax(130px,.65fr) minmax(0,1fr); gap:24px; align-items:center; padding:24px; background:#f3f2e8; border:1px solid #dadcca; border-radius:20px; margin-bottom:22px; }
+.help-auto-art { display:grid; place-items:center; min-height:168px; }
+.help-auto-art .asset-sprite,.help-auto-art .stage-material-token { width:144px; height:144px; min-width:0; }
+.help-auto-card h3 { color:#754e61; font-size:22px; line-height:1.5; margin:4px 0 10px; }
+.help-auto-card p { line-height:1.8; }
+.help-auto-card .primary-button { display:block; min-height:64px; width:100%; margin-top:14px; }
+.help-auto-card .text-button { display:block; margin-top:8px; }
+.help-auto-note { font-size:13px; line-height:1.8; color:#715f6b; }
+.help-resume-list { margin:12px 0 22px; padding:16px; border:1px solid #d8d9cd; background:#f4f5ed; border-radius:16px; }
+.help-resume-list h3 { margin:0 0 10px; font-size:16px; }
+.help-resume-list > div { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:8px; }
+.help-resume-list > div > span { overflow-wrap:anywhere; line-height:1.6; }
+.help-resume-list button { flex:0 0 auto; }
+@media(max-width:560px) {
+  .help-mode-picker { gap:8px; }
+  .help-mode-choice { grid-template-columns:minmax(0,1fr); justify-items:center; text-align:center; padding:12px 8px; }
+  .help-mode-choice.is-selected { padding:11px 7px; }
+  .help-mode-choice > span { grid-row:auto; font-size:25px; }
+  .help-mode-choice strong { font-size:14px; }
+  .help-mode-choice small { font-size:11px; }
+  .help-auto-card { grid-template-columns:minmax(0,1fr); gap:8px; padding:18px; }
+  .help-auto-art { min-height:116px; }
+  .help-auto-art .asset-sprite,.help-auto-art .stage-material-token { width:112px; height:112px; }
+  .help-auto-card h3 { font-size:20px; }
+  .help-home-actions { gap:8px; }
+  .help-home-actions > button { padding:10px 8px; }
+  .help-resume-list > div { flex-direction:column; align-items:flex-start; }
+  .help-resume-list > div > span,.help-resume-list button { width:100%; }
+}
+.atelier-order-preview { display:flex; align-items:center; gap:14px; }
+.atelier-order-preview .asset-sprite { width:74px; height:74px; flex-shrink:0; }
+.atelier-order-preview p { color:#725c66; line-height:1.6; }
+.atelier-garden-home { padding:24px; overflow:visible; }
+.atelier-garden-home .iso-scene { padding-top:55px; }
+.atelier-garden-home .garden-decor-shop { margin-top:18px; }
+.atelier-dress-workbench,.atelier-project-workbench { display:grid; grid-template-columns:300px minmax(0,1fr); gap:26px; align-items:start; }
+.atelier-fitting,.atelier-project-preview { position:sticky; top:0; display:flex; flex-direction:column; align-items:center; gap:10px; padding:22px; border:1px solid #dacdc4; border-radius:22px; min-width:0; }
+.atelier-fitting .atelier-avatar,.atelier-project-preview .atelier-avatar { width:210px; }
+.atelier-fitting > strong,.atelier-project-preview h3 { text-align:center; margin:0; line-height:1.5; font-size:16px; }
+.atelier-fitting > p,.atelier-project-preview p { margin:0; font-size:13px; line-height:1.5; text-align:center; }
+.atelier-fitting button,.atelier-project-preview > button { width:100%; }
+.atelier-closet { display:grid; gap:22px; min-width:0; }
+.atelier-closet h3 { font-size:17px; margin:0 0 12px; }
+.atelier-look-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.atelier-look-card { min-width:0; display:grid; gap:6px; padding:10px; border-radius:16px; background:#fbf7f2; border:1px solid #e0d1ca; color:#644b59; justify-items:center; }
+.atelier-look-card .atelier-avatar { width:auto; height:165px; aspect-ratio:2/3; max-width:100%; }
+.atelier-look-card strong { font-size:12px; line-height:1.5; font-weight:750; }
+.atelier-look-card > span { font-size:12px; line-height:1.5; }
+.atelier-look-card.is-selected,.atelier-part-picker .is-selected,.atelier-frame-picker .is-selected,.atelier-project-card.is-selected { border-color:#9b5974; background:#f7e8ed; box-shadow:inset 0 0 0 1px #9b5974; }
+.atelier-part-picker { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px; }
+.atelier-part-picker button { min-height:96px; padding:10px 4px; display:grid; place-items:center; gap:5px; border:1px solid #dfd0c9; background:#fffbf6; border-radius:14px; color:#665060; font-size:13px; }
+.atelier-part-icon { display:block; width:52px; height:52px; }
+.atelier-empty-part { display:grid; place-items:center; font-size:30px; color:#967e89; height:52px; }
+.atelier-frame-picker { display:grid; width:100%; gap:5px; }
+.atelier-frame-picker button { font-size:12px; min-height:44px; border:1px solid #d7c4ce; background:#ffffffb8; border-radius:9px; color:#715366; padding:6px; }
+.atelier-photos { margin-top:28px; border-top:1px solid #e2d3cc; padding-top:22px; }
+.atelier-photo-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:14px; }
+.atelier-photo { padding:12px; display:grid; justify-items:center; gap:8px; border:6px solid #fff; border-bottom-width:18px; box-shadow:0 3px 14px #71546816; border-radius:4px; color:#72596a; }
+.atelier-photo .atelier-avatar { height:170px; width:auto; aspect-ratio:2/3; max-width:100%; }
+.atelier-photo strong,.atelier-photo > span { font-size:12px; line-height:1.5; }
+.atelier-legacy,.atelier-more-orders,.atelier-volume-details { margin-top:24px; border-top:1px solid #e4d7d0; padding-top:14px; color:#785e6c; }
+summary { cursor:pointer; min-height:44px; padding:10px 0; line-height:1.5; }
+.atelier-legacy .wide-panel { margin-top:16px; }
+.atelier-projects { display:grid; gap:12px; }
+.atelier-project-card { display:grid; grid-template-columns:104px minmax(0,1fr); align-items:center; gap:20px; border:1px solid #dfd0c9; border-radius:18px; background:#fffaf4; padding:12px 18px; text-align:left; color:#624856; }
+.atelier-project-card strong { font-size:17px; line-height:1.5; }
+.atelier-project-card p,.atelier-project-card div > span { font-size:13px; line-height:1.6; }
+.atelier-project-card div > span { text-decoration:underline; }
+.atelier-story-note { border-radius:15px; padding:18px; background:#f3f0e8; font-size:13px; line-height:1.8; color:#78606a; }
+.atelier-thread-bank { border:1px solid #dac6cd; border-radius:12px; background:#f6e8ec; padding:12px; font-size:13px; }
+.atelier-garden-projects { margin-top:28px; border-top:1px solid #e3d5cf; padding-top:24px; }
+.atelier-garden-projects p { color:#78616a; line-height:1.8; font-size:14px; }
+.atelier-keepsakes { border-top:1px solid #e3d5cf; padding-top:20px; margin-top:24px; }
+.atelier-keepsakes p { font-size:13px; color:#725a66; line-height:1.8; }
+.atelier-keepsake-grid { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); gap:10px; }
+.atelier-keepsake-grid button { display:grid; justify-items:center; gap:8px; padding:12px; min-height:125px; border:1px solid #dccbc7; border-radius:15px; background:#fff9f1; color:#695060; }
+.atelier-keepsake-grid .asset-sprite { width:66px; height:66px; }
+.atelier-keepsake-grid strong,.atelier-keepsake-grid span { font-size:12px; line-height:1.5; }
+.atelier-keepsake-grid button:disabled { opacity:1; background:#f2eeea; color:#715d66; }
+.atelier-place-picker { display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:8px; margin:20px 0; }
+.atelier-place-picker button { min-height:106px; display:grid; justify-items:center; gap:8px; padding:12px 6px; border:1px solid #ddd0cc; border-radius:14px; background:#fbf8f3; color:#725565; }
+.atelier-place-picker button > span { font-size:28px; }
+.atelier-place-picker strong { font-size:12px; line-height:1.65; }
+.atelier-place-picker .is-selected { background:#ecf1e5; border:2px solid #719c88; padding:11px 5px; color:#365f4c; }
+.atelier-order-heading { display:flex; justify-content:space-between; gap:22px; align-items:center; margin:22px 0; }
+.atelier-order-heading p { color:#7c6670; line-height:1.8; font-size:14px; }
+.atelier-wish.is-compact { grid-template-columns:58px minmax(0,1fr); max-width:430px; padding:10px 14px; gap:10px; }
+.atelier-wish.is-compact strong { font-size:14px; }
+.atelier-wish.is-compact p { font-size:12px; margin:5px 0; }
+.atelier-wish.is-compact .atelier-thread-track,.atelier-wish.is-compact small,.atelier-wish.is-compact .text-button { display:none; }
+.atelier-order-grid { grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+.atelier-order-card { display:grid; grid-template-columns:64px minmax(0,1fr); gap:12px; padding:18px; background:#fbf7f1; border:1px solid #e0d3cb; border-radius:18px; box-shadow:none; }
+.atelier-order-card .stage-visual { grid-column:1; min-height:0; background:none; box-shadow:none; height:68px; }
+.atelier-order-card .stage-visual .asset-sprite { width:64px; height:64px; }
+.atelier-order-card > div:nth-child(2) { grid-column:2; }
+.atelier-order-card strong { font-size:15px; line-height:1.6; }
+.atelier-order-card p { font-size:12px; line-height:1.75; margin:8px 0; }
+.atelier-order-card small { font-size:11px; color:#775d6a; line-height:1.6; }
+.atelier-order-card > button { grid-column:1/-1; width:100%; }
+.atelier-reward .reward-celebration__card { background:#fffaf2; border:1px solid #d4b3c2; border-radius:24px; box-shadow:0 20px 80px #5a46582a; grid-template-areas:"avatar copy"; grid-template-columns:180px minmax(0,1fr); gap:20px; padding:26px; }
+.atelier-reward .reward-celebration__avatar { grid-area:avatar; }
+.atelier-reward .reward-celebration__copy { grid-area:copy; }
+.atelier-reward .reward-celebration__pet { display:none; }
+.atelier-reward .reward-celebration__avatar .atelier-avatar { width:180px; height:auto; aspect-ratio:2/3; }
+.atelier-reward .reward-celebration__copy strong { color:#75505f; font-size:22px; }
+.atelier-reward .reward-celebration__copy .action-row { flex-direction:column; align-items:stretch; }
+.atelier-result-grid { display:grid; grid-template-columns:320px minmax(0,1fr); gap:30px; }
+.atelier-result-portrait { border-radius:22px; padding:20px; display:flex; flex-direction:column; align-items:center; }
+.atelier-result-portrait .atelier-avatar { width:225px; }
+.atelier-result-portrait .pet-companion { width:90px; }
+.atelier-result-copy { display:grid; gap:14px; align-content:start; }
+.atelier-result-copy h3 { margin:0; line-height:1.7; }
+.atelier-result-sticker { display:flex; align-items:center; gap:12px; font-size:13px; flex-wrap:wrap; }
+.atelier-result-sticker .asset-sprite { width:60px; height:60px; }
+.atelier-result-copy details { font-size:13px; line-height:1.7; }
+#screen[data-screen="pets"] [data-action="pet-practice"] { min-height:44px; min-width:64px; }
+#screen[data-screen="pets"] .pet-xp-meter small,
+#screen[data-screen="pets"] .pet-xp-meter b,
+#screen[data-screen="pets"] .pet-nameplate small,
+#screen[data-screen="pets"] .pet-trick-card small,
+#screen[data-screen="pets"] .pet-xp-meter > div,
+#screen[data-screen="pets"] .pet-roster-card small,
+#screen[data-screen="pets"] .pet-stage-row small,
+#screen[data-screen="pets"] .pet-pat-button { color:#654d5f; }
+#screen[data-screen="pets"] .pet-stage-row > span.current,
+#screen[data-screen="pets"] .pet-stage-row > span.active,
+#screen[data-screen="pets"] .pet-stage-row > span.done,
+#screen[data-screen="pets"] .pet-stage-row > span.is-current { color:#fff; background:#995671; }
+#screen[data-screen="pets"] .pet-stage-row > span:not(.done) { color:#654d5f; background:#f6edf5; }
+.daily-growth__quest small,.daily-growth__time,.daily-growth__duration { color:#654d5f; }
+.atelier-play-look { display:block; width:30px; height:45px; flex:0 0 30px; }
+.atelier-play-look .atelier-avatar { width:30px; height:45px; aspect-ratio:2/3; }
+.atelier-play-look > .avatar-doll:not(.atelier-avatar) { width:24px; height:45px; }
+@media (max-width:900px) {
+  .atelier-dress-workbench,.atelier-project-workbench { grid-template-columns:230px minmax(0,1fr); gap:18px; }
+  .atelier-fitting .atelier-avatar,.atelier-project-preview .atelier-avatar { width:175px; }
+  .atelier-look-card .atelier-avatar { height:130px; }
+  .atelier-order-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .atelier-place-picker { grid-template-columns:repeat(4,minmax(0,1fr)); }
+  .atelier-order-heading { align-items:flex-start; }
+}
+@media (max-width:640px) {
+  .atelier-utility-menu { right:10px; top:auto; bottom:calc(100% + 8px); max-height:calc(100svh - 150px); overflow-y:auto; }
+}
+@media (max-width:600px) {
+  .topbar { padding:10px 14px; gap:8px; }
+  .brand-mark { width:34px; height:34px; font-size:20px; }
+  .brand { gap:7px; }
+  .brand h1 { font-size:14px; }
+  .brand p { font-size:10px; max-width:200px; }
+  .stat-pill { font-size:11px; padding:5px 7px; }
+  .stats-bar { flex-wrap:nowrap; gap:4px; }
+  .tabbar { display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); padding:2px 8px 8px; gap:2px; overflow:visible; }
+  .tab-button { min-height:58px; flex-direction:column; gap:3px; padding:5px 0; font-size:10px; flex-basis:0; border-radius:12px; }
+  .tab-button .tab-sprite { width:26px; height:26px; flex-basis:26px; }
+  .atelier-utility-menu { right:10px; top:auto; bottom:calc(100% + 8px); max-height:calc(100svh - 150px); overflow-y:auto; }
+  .atelier-utility-menu .tab-button { flex-direction:row; font-size:13px; }
+  #screen { padding:14px 12px 30px; }
+  .wide-panel { padding:16px 12px; border-radius:20px; }
+  .section-heading { gap:12px; }
+  .section-heading h2 { font-size:21px; }
+  .section-heading p { font-size:12px; }
+  .section-heading > div:first-child { flex-basis:160px; }
+  .section-heading > button { padding:10px; font-size:12px; }
+  .atelier-home { gap:14px; }
+  .atelier-home-hero { grid-template-columns:1fr 135px; min-height:280px; border-radius:22px; overflow:hidden; }
+  .atelier-home-copy { padding:20px 12px 20px 16px; }
+  .atelier-home-copy .atelier-kicker { font-size:8px; letter-spacing:.06em; }
+  .atelier-home-copy h2 { font-size:clamp(21px,6vw,25px); margin:8px 0 12px; }
+  .atelier-home-copy p { font-size:11px; line-height:1.8; margin:10px 0; }
+  .atelier-home-copy .action-row { gap:8px; }
+  .atelier-home-copy .action-row button { width:100%; font-size:12px; padding:10px 7px; }
+  .atelier-home-tip { font-size:10px; line-height:1.7; margin-top:10px; }
+  .atelier-home-portrait { min-height:280px; padding:12px 4px 30px; }
+  .atelier-home-portrait .atelier-avatar { width:122px; max-width:100%; min-width:0; }
+  .atelier-home-portrait > .avatar-doll:not(.atelier-avatar) { width:100px; }
+  .atelier-home-pet { width:64px; right:1px; bottom:47px; }
+  .atelier-outfit-label { font-size:10px; bottom:15px; padding:5px; max-width:95%; text-align:center; }
+  .atelier-home-grid { grid-template-columns:1fr; gap:14px; }
+  .atelier-wish { padding:14px; gap:12px; grid-template-columns:75px minmax(0,1fr); }
+  .atelier-wish strong { font-size:16px; }
+  .atelier-first-orders { padding:18px; }
+  .atelier-garden-home { padding:16px; }
+  .atelier-dress-workbench,.atelier-project-workbench { grid-template-columns:126px minmax(0,1fr); gap:10px; }
+  .atelier-fitting,.atelier-project-preview { padding:10px 7px; gap:8px; border-radius:15px; }
+  .atelier-fitting .atelier-avatar,.atelier-project-preview .atelier-avatar { width:110px; }
+  .atelier-fitting > .atelier-kicker { font-size:9px; }
+  .atelier-fitting > strong,.atelier-project-preview h3 { font-size:11px; }
+  .atelier-fitting > p,.atelier-project-preview p { font-size:10px; }
+  .atelier-fitting > button,.atelier-project-preview > button { font-size:11px; padding:8px 5px; }
+  .atelier-frame-picker button { font-size:11px; padding:5px 2px; }
+  .atelier-look-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .atelier-look-card { padding:6px 3px; gap:4px; border-radius:12px; }
+  .atelier-look-card .atelier-avatar { height:105px; }
+  .atelier-look-card strong,.atelier-look-card > span { font-size:11px; }
+  .atelier-closet { gap:16px; }
+  .atelier-closet h3 { font-size:13px; margin-bottom:8px; }
+  .atelier-part-picker { grid-template-columns:repeat(2,minmax(0,1fr)); gap:7px; }
+  .atelier-part-picker button { min-height:86px; font-size:11px; padding:8px 3px; }
+  .atelier-part-icon,.atelier-empty-part { width:42px; height:42px; }
+  .atelier-note { font-size:11px; }
+  .atelier-photo-grid { grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px; }
+  .atelier-photo .atelier-avatar { height:145px; }
+  .atelier-photo strong,.atelier-photo > span { font-size:10px; }
+  .atelier-project-card { display:grid; grid-template-columns:1fr; gap:8px; padding:10px; justify-items:center; text-align:center; }
+  .atelier-project-card .atelier-avatar { width:85px; }
+  .atelier-project-card strong { font-size:12px; }
+  .atelier-project-card p,.atelier-project-card div > span { font-size:11px; margin:5px 0; }
+  .atelier-keepsake-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+  .atelier-story-note { font-size:11px; padding:12px; }
+  .atelier-place-picker { grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; margin:12px 0; }
+  .atelier-place-picker button { min-height:95px; padding:10px 5px; }
+  .atelier-place-picker strong { font-size:10px; }
+  .atelier-place-picker button > span { font-size:23px; }
+  .atelier-order-heading { display:grid; gap:10px; margin:18px 0; }
+  .atelier-order-heading h3 { font-size:18px; margin:0; }
+  .atelier-order-heading p { font-size:12px; margin:5px 0; }
+  .atelier-wish.is-compact { width:100%; max-width:none; }
+  .atelier-order-grid { grid-template-columns:1fr; gap:12px; }
+  .atelier-order-card { grid-template-columns:62px minmax(0,1fr); padding:14px; }
+  .atelier-order-card strong { font-size:15px; }
+  .atelier-order-card p { font-size:12px; }
+  .atelier-reward .reward-celebration__card { grid-template-columns:100px minmax(0,1fr); gap:12px; padding:20px 14px; }
+  .atelier-reward .reward-celebration__avatar .atelier-avatar { width:100px; height:auto; aspect-ratio:2/3; }
+  .atelier-reward .reward-celebration__copy strong { font-size:17px; }
+  .atelier-reward .reward-celebration__copy p { font-size:12px; }
+  .atelier-reward .reward-celebration__copy .action-row button { font-size:12px; }
+  .atelier-result-grid { grid-template-columns:1fr; gap:16px; }
+  .atelier-result-portrait { flex-direction:row; justify-content:center; gap:10px; padding:12px; }
+  .atelier-result-portrait .atelier-avatar { width:130px; }
+  .atelier-result-portrait .pet-companion { width:80px; }
+  .atelier-result-copy h3 { font-size:16px; }
+}
+/* In play, the in-scene back button handles navigation and leaves room for play. */
+body:has(#screen[data-view="play"]) .tabbar { display:none; }
+body:has(#screen[data-view="play"]) .topbar { padding-top:7px; padding-bottom:7px; }
+body:has(#screen[data-view="play"]) .brand p { display:none; }
+@media(max-height:700px) {
+  .atelier-fitting,.atelier-project-preview { position:static; }
+}
+@media(max-height:450px) {
+  body:has(#screen[data-view="play"]) .topbar { display:none; }
+  #screen { padding:10px 14px 24px; }
+  .atelier-fitting .atelier-avatar,.atelier-project-preview .atelier-avatar { width:90px; }
+
+  .atelier-fitting,.atelier-project-preview { position:static; }
+  .atelier-home-copy h2 { font-size:26px; }
+}
+@media(prefers-reduced-motion:reduce) { .atelier-home *, .atelier-avatar, .atelier-reward * { animation:none !important; transition:none !important; } }

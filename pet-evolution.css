@@ -1,0 +1,42 @@
+/* Each generated atlas has four equally sized transparent portrait cells.
+   Animate the portrait, never the atlas coordinates. */
+.pet-companion { aspect-ratio:auto; gap:6px; }
+.pet-portrait { position:relative; width:100%; aspect-ratio:1; min-width:0; }
+.pet-art-opacity { position:relative; z-index:2; display:block; width:100%; height:100%; filter:url(#pet-solid-interior); }
+.pet-play-zone { padding-top:36px; }
+.pet-art-opacity > .pet-art { background-size:200% 200%; background-position:var(--pet-atlas-x,0%) var(--pet-atlas-y,0%); background-repeat:no-repeat; }
+.pet-companion > .pet-nameplate { position:relative; bottom:auto; left:auto; justify-self:center; max-width:100%; transform:none; }
+.pet-current-appearance { margin:0; font-weight:800; color:#654d5f; line-height:1.6; }
+.pet-appearance-album { min-width:0; margin:24px 0; padding:20px; border:1px solid #dfd4db; border-radius:24px; background:#fffaf6; }
+.pet-appearance-album .section-heading { margin-bottom:16px; }
+.pet-appearance-album h3 { margin:0; color:#5f4256; }
+.pet-appearance-album p { margin:8px 0 0; color:#654d5f; line-height:1.65; }
+.pet-appearance-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; min-width:0; }
+.pet-appearance-card { display:grid; align-content:start; justify-items:center; gap:8px; min-width:0; min-height:200px; padding:12px; border:2px solid #e1d7de; border-radius:20px; color:#5f4256; background:#fff; font:inherit; text-align:center; }
+button.pet-appearance-card { cursor:pointer; }
+.pet-appearance-card .pet-appearance-preview { width:min(100%,180px); min-width:0; }
+.pet-appearance-card .pet-aura { opacity:.55; }
+.pet-appearance-card .pet-art { animation:none; }
+.pet-appearance-card strong { font-size:.95rem; line-height:1.55; overflow-wrap:anywhere; }
+.pet-appearance-card small { font-size:.8rem; line-height:1.5; color:#654d5f; overflow-wrap:anywhere; }
+.pet-appearance-card.is-selected { border-color:#9a5673; background:#fff0f5; box-shadow:0 0 0 2px #f2dde7; }
+.pet-appearance-card.is-selected small { padding:4px 8px; border-radius:999px; color:#fff; background:#92506b; }
+.pet-appearance-card.is-locked { border-style:dashed; background:#fcfaf8; }
+.pet-appearance-card .is-silhouette .pet-art-opacity { filter:url(#pet-solid-interior) brightness(0) invert(.5); }
+.pet-appearance-card .is-silhouette .pet-aura { display:none; }
+button.pet-appearance-card:hover { border-color:#9a5673; background:#fff3f8; }
+button.pet-appearance-card:focus-visible { outline:3px solid #78587b; outline-offset:3px; }
+#screen[data-screen="pets"] .pet-evolve-button { min-height:96px; width:100%; white-space:normal; }
+#screen[data-screen="pets"] .pet-roster-card { min-height:96px; }
+#screen[data-screen="pets"] .pet-roster-card .pet-compact { width:72px; }
+#screen[data-screen="pets"] .pet-roster-card { grid-template-columns:72px minmax(0,1fr); gap:10px; }
+@media(max-width:900px) {
+  .pet-appearance-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+  .pet-appearance-album { padding:12px 8px; }
+  .pet-appearance-grid { gap:8px; }
+  .pet-appearance-card { padding:8px 4px; min-height:180px; }
+  .pet-appearance-card strong { font-size:.85rem; }
+  .pet-appearance-card small { font-size:.75rem; }
+}

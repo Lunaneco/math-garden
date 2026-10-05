@@ -1,0 +1,454 @@
+/* Fractions: the given numbers lead; optional working is revealed one step
+   at a time. Keep each fraction intact while allowing equations to wrap. */
+.fraction-problem-board { display:grid; gap:12px; margin:12px 0; min-width:0; }
+.fraction-work-math { color:#533e4b; font-size:1.25rem; line-height:1.5; min-width:0; }
+.fraction-math-layout { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:6px 10px; min-width:0; max-width:100%; }
+.fraction-math-text { min-width:0; max-width:100%; overflow-wrap:anywhere; white-space:pre-wrap; }
+.fraction-number { display:inline-flex; flex-direction:column; align-items:stretch; justify-content:center; text-align:center; min-width:30px; max-width:100%; line-height:1.4; }
+.fraction-number > span { padding:2px 6px; overflow-wrap:anywhere; }
+.fraction-number > span:first-child { border-bottom:2px solid currentColor; }
+.fraction-given-parts { display:grid; grid-template-columns:repeat(var(--parts),minmax(0,1fr)); gap:3px; width:100%; max-width:360px; margin:0 auto; padding:4px; border:2px solid #8a6074; border-radius:10px; background:#fff; }
+.fraction-given-parts > span { min-height:36px; border:1px solid #b7a6ad; border-radius:4px; background:#fff; }
+.fraction-given-parts > .is-shaded { background:#be7095; }
+.fraction-help { margin-top:14px; min-width:0; }
+.fraction-help .fraction-hint-toggle,.fraction-help .fraction-hint-next { width:100%; min-height:96px; white-space:normal; }
+.curriculum-lab--fraction + .curriculum-answer-board .curriculum-estimate-meter button { min-height:96px; min-width:96px; flex:1 1 96px; }
+.fraction-hint-work { display:grid; gap:12px; margin-top:12px; min-width:0; }
+.fraction-work-step { min-width:0; padding:14px; border:1px solid #d1d9ca; border-radius:16px; background:#fbfcf7; }
+.fraction-work-step h4 { display:flex; align-items:flex-start; gap:8px; margin:0 0 12px; color:#4e6154; font-size:1rem; line-height:1.6; overflow-wrap:anywhere; }
+.fraction-work-step h4 > span { display:grid; place-items:center; flex:0 0 26px; min-height:26px; border-radius:50%; background:#e3ecdf; font-size:.8rem; }
+.fraction-work-step .fraction-work-math + .fraction-work-math { margin-top:12px; }
+.fraction-problem-board .fraction-work-math { font-size:1.5rem; }
+@media(max-width:640px) {
+  .fraction-work-step { padding:12px 8px; }
+  .fraction-work-math { font-size:1.1rem; }
+  .fraction-problem-board .fraction-work-math { font-size:1.25rem; }
+  .fraction-math-layout { gap:6px; }
+  .fraction-number > span { padding:2px 4px; }
+}
+
+/* Atelier play scene: the customer's order and the hands-on board lead.
+   Loaded after the legacy play styles. Authored prompts and instructions stay
+   in normal flow; only scenery moves out of the way on compact screens. */
+#screen[data-view="play"] .roleplay-play-screen {
+  gap: 10px;
+}
+
+#screen[data-view="play"] .roleplay-stage {
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto auto;
+  gap: 12px;
+  min-height: 0;
+  overflow: visible;
+  padding: 20px clamp(14px, 2vw, 24px) 20px;
+  border: 1px solid #e5d9d3;
+  border-radius: 26px;
+  background: linear-gradient(135deg, #fffaf3, #f8f5fc 55%, #eef8f3);
+  box-shadow: 0 8px 24px rgba(95, 74, 88, .08);
+}
+
+#screen[data-view="play"] .roleplay-stage::before,
+#screen[data-view="play"] .roleplay-stage::after,
+#screen[data-view="play"] .roleplay-scenery {
+  display: none;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-speech--customer {
+  grid-area: 1 / 1;
+  justify-self: stretch;
+  width: 100%;
+  max-width: 100%;
+  padding: 14px 18px 14px 72px;
+  border: 1px solid #e2b9cc;
+  border-radius: 18px;
+  color: #583b4c;
+  background: #fff;
+  box-shadow: 0 3px 0 #f0e2e8;
+  font-size: 1.075rem;
+  line-height: 1.5;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-speech--customer::after,
+#screen[data-view="play"] .roleplay-stage .roleplay-speech--guide::after {
+  display: none;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-actor--customer {
+  top: 24px;
+  bottom: auto;
+  left: clamp(22px, 3vw, 34px);
+  width: 48px;
+  height: 48px;
+  min-width: 0;
+  aspect-ratio: 1;
+  z-index: 9;
+  animation: none;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-actor--customer .pet-companion {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-actor--customer .pet-art {
+  filter: none;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-actor--hero,
+#screen[data-view="play"] .roleplay-stage .roleplay-actor--pet {
+  display: none;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-task {
+  grid-area: 2 / 1;
+  width: min(100%, 920px);
+  padding: 0;
+  gap: 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+#screen[data-view="play"] .roleplay-stage .roleplay-speech--guide {
+  grid-area: 3 / 1;
+  justify-self: start;
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  color: #4d665d;
+  background: transparent;
+  box-shadow: none;
+  font-size: .9rem;
+  line-height: 1.5;
+}
+
+#screen[data-view="play"] .roleplay-instruction {
+  margin: 0;
+  color: #594653;
+  font-size: .95rem;
+  line-height: 1.5;
+}
+
+#screen[data-view="play"] .roleplay-task .play-space {
+  padding: 0;
+  gap: 10px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+#screen[data-view="play"] .roleplay-play-content {
+  gap: 12px;
+}
+
+/* The supplemental cue remains available but follows the actual play board.
+   The menu's voice button still reads the complete customer request. */
+#screen[data-view="play"] .roleplay-play-content > .legacy-sound-layer {
+  order: 10;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+#screen[data-view="play"] .legacy-sound-layer .sound-cue-button {
+  width: auto;
+  min-width: 130px;
+  min-height: 44px;
+  padding: 6px 12px;
+  color: #68516f;
+  background: #fff;
+  border: 1px solid #d6c5e0;
+  box-shadow: none;
+}
+
+#screen[data-view="play"] .legacy-sound-layer .legacy-sound-layer__prop {
+  width: 32px;
+  height: 32px;
+}
+
+#screen[data-view="play"] .mission-board {
+  justify-items: stretch;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #d0e1d5;
+  border-radius: 20px;
+  background: #fff;
+}
+
+#screen[data-view="play"] .slot-fill-layout {
+  grid-template-columns: minmax(0, 1fr) 24px minmax(130px, .65fr);
+  gap: 12px;
+}
+
+#screen[data-view="play"] .slot-source-group {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  justify-items: center;
+  gap: 10px;
+  min-height: 0;
+  padding: 10px;
+  border: 1px dashed #dcc0ca;
+  background: #fff9fb;
+}
+
+#screen[data-view="play"] .slot-source-token,
+#screen[data-view="play"] .pick-object {
+  width: 96px;
+  height: 96px;
+  min-width: 0;
+  min-height: 96px;
+  padding: 8px;
+  border: 2px solid #ead9df;
+  border-radius: 20px;
+  box-shadow: 0 3px 0 #ead9df;
+  background: #fff;
+}
+
+#screen[data-view="play"] .slot-source-token .question-token,
+#screen[data-view="play"] .pick-object .question-token {
+  width: 62px;
+  height: 62px;
+}
+
+#screen[data-view="play"] .slot-fill-target {
+  min-height: 96px;
+  padding: 26px 10px 10px;
+  border: 2px dashed #b88954;
+  background: #fff7e9;
+  box-shadow: none;
+}
+
+#screen[data-view="play"] .slot-fill-seat {
+  min-height: 40px;
+}
+
+#screen[data-view="play"] .slot-fill-token {
+  width: 34px;
+  height: 34px;
+}
+
+#screen[data-view="play"] .roleplay-play-content > .action-row {
+  gap: 10px;
+  justify-content: center;
+  padding: 4px 0;
+}
+
+#screen[data-view="play"] .roleplay-hud {
+  min-height: 56px;
+  padding: 4px 10px;
+  border: 1px solid #dbcbd4;
+  border-radius: 18px;
+  box-shadow: none;
+}
+
+#screen[data-view="play"] .roleplay-progress-line {
+  min-height: 44px;
+  padding: 3px 8px;
+  border: 0;
+  box-shadow: none;
+  background: #fff;
+}
+
+#screen[data-view="play"] .roleplay-dot-row {
+  max-width: none;
+}
+
+@media (max-width: 640px) {
+  #screen[data-view="play"] .roleplay-play-screen { gap: 8px; }
+  #screen[data-view="play"] .roleplay-stage {
+    gap: 8px;
+    padding: 12px 8px;
+    border-radius: 20px;
+  }
+  #screen[data-view="play"] .roleplay-stage .roleplay-speech--customer {
+    padding: 10px 12px 10px 56px;
+    font-size: 1rem;
+    line-height: 1.45;
+  }
+  #screen[data-view="play"] .roleplay-stage .roleplay-actor--customer {
+    top: 18px;
+    left: 16px;
+    width: 38px;
+    height: 38px;
+  }
+  #screen[data-view="play"] .roleplay-instruction {
+    font-size: .9rem;
+    line-height: 1.45;
+  }
+  #screen[data-view="play"] .roleplay-play-content { gap: 8px; }
+  #screen[data-view="play"] .mission-board { gap: 8px; padding: 8px; }
+  #screen[data-view="play"] .slot-fill-layout { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+  #screen[data-view="play"] .slot-fill-arrow { display: none; }
+  #screen[data-view="play"] .slot-source-group { padding: 7px; gap: 7px; }
+  #screen[data-view="play"] .slot-fill-heading { gap: 5px; font-size: .8rem; }
+  #screen[data-view="play"] .slot-fill-target { min-height: 68px; padding-top: 20px; }
+  #screen[data-view="play"] .slot-fill-seat { min-height: 34px; }
+  #screen[data-view="play"] .roleplay-hud { padding: 3px 6px; gap: 3px; }
+  #screen[data-view="play"] .roleplay-hud > .pill-sprite-button { width: 84px; height: 44px; }
+  #screen[data-view="play"] .roleplay-hud .speak-button { min-width: 64px; min-height: 44px; padding: 6px 10px; }
+  #screen[data-view="play"] .roleplay-progress-line { gap: 3px; font-size: .9rem; }
+  #screen[data-view="play"] .roleplay-dot-row { max-width: none; gap: 1px; font-size: .85rem; }
+}
+
+@media (max-width: 360px) {
+  /* A small phone cannot fit three 96px objects. Keep a generous 72px
+     fallback instead of shrinking the scene's typography or clipping it. */
+  #screen[data-view="play"] .slot-source-group { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); }
+  #screen[data-view="play"] .slot-source-token,
+  #screen[data-view="play"] .pick-object { width: 72px; height: 72px; min-height: 72px; }
+  #screen[data-view="play"] .slot-source-token .question-token,
+  #screen[data-view="play"] .pick-object .question-token { width: 48px; height: 48px; }
+  #screen[data-view="play"] .roleplay-hud > .pill-sprite-button { width: 72px; }
+  #screen[data-view="play"] .roleplay-hud > span:last-child > b { font-size: .75rem; }
+  #screen[data-view="play"] .roleplay-dot-row { max-width: 70px; }
+}
+
+@media (max-height: 640px) {
+  #screen[data-view="play"] .roleplay-stage { padding-block: 10px; }
+  #screen[data-view="play"] .roleplay-play-content > .action-row:has(.roleplay-submit) {
+    position: sticky;
+    bottom: 0;
+    z-index: 12;
+    margin-inline: -2px;
+    padding: 5px 8px;
+    border: 1px solid #e2d3dc;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, .96);
+    box-shadow: 0 -4px 12px rgba(103, 76, 91, .08);
+  }
+}
+/* Stage invitations show the same single material used by the question. */
+.stage-material-token { display: block; width: 82px; height: 82px; margin: auto; }
+.atelier-order-preview .stage-material-token { width: 62px; height: 62px; flex: 0 0 62px; }
+
+/* The tens/ones keypad uses separate, generous keys at every viewport size. */
+#screen[data-view="play"] .builder-pick {
+  min-width: 52px;
+  min-height: 52px;
+  padding: 8px;
+}
+
+/* Every ribbon in the sorting board uses the same unit width, including ones
+   already placed. A shared container measure preserves the length ratios;
+   independently clamping each ribbon would make long ribbons look equal. */
+#screen[data-view="play"] .roleplay-task {
+  container-type: inline-size;
+}
+#screen[data-view="play"] .sequence-slots,
+#screen[data-view="play"] .sequence-picker {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  width: min(100%, 520px);
+}
+#screen[data-view="play"] .sequence-ribbon {
+  width: calc(var(--units) * min(14px, (100cqw - 90px) / 30));
+  max-width: none;
+  min-width: 0;
+}
+#screen[data-view="play"] .sequence-choice:has(.sequence-ribbon),
+#screen[data-view="play"] .sequence-slot:has(.sequence-ribbon) {
+  min-width: 0;
+  padding: 8px;
+  justify-items: start;
+}
+#screen[data-view="play"] .sequence-slot:has(.sequence-ribbon) {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr);
+}
+#screen[data-view="play"] .sequence-slot:has(.sequence-ribbon) > b {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+}
+
+/* Mathematical ribbons use their declared color and an exact number of cells.
+   A rotated pink bitmap changes the stated color and gives arbitrary stripes. */
+#screen .ribbon-bar {
+  background-color: var(--color, #ff9fbe);
+  background-image: linear-gradient(90deg, transparent calc(100% - 1px), rgba(98, 66, 85, .5) 0);
+  background-size: calc(100% / var(--units, 1)) 100%;
+  background-repeat: repeat-x;
+  border: 1px solid rgba(98, 66, 85, .5);
+  border-radius: 4px;
+  filter: none;
+}
+
+/* Both the ruler's zero and the object's left edge belong to the same track.
+   Its target fraction N/M ends exactly at tick N on the M-cell grid. */
+#screen .unit-ruler-track {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+}
+#screen .unit-ruler-track .unit-ruler-object {
+  display: grid;
+  min-height: 42px;
+  padding: 0 0 8px;
+  border: 0;
+  align-items: end;
+}
+#screen .unit-ruler-track .unit-ruler-object .ribbon-bar {
+  width: calc(100% * var(--ruler-target) / var(--ruler-max));
+  max-width: none;
+}
+#screen .unit-ruler-track .unit-ruler-scale {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--ruler-max), minmax(0, 1fr));
+  min-height: 42px;
+  padding: 0;
+}
+#screen .unit-ruler-track .unit-ruler-scale::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 2px;
+  background: #9b6078;
+}
+#screen .unit-ruler-track .unit-ruler-zero {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  display: block;
+  width: auto;
+  padding: 0;
+  border: 0;
+  transform: translateX(-50%);
+  color: #775468;
+  line-height: 1.4;
+}
+#screen .unit-ruler-track .unit-ruler-cell {
+  min-width: 0;
+  padding: 0;
+  justify-items: end;
+  border-right: 1px solid #af7b92;
+  border-top: 2px solid #af7b92;
+  color: #775468;
+  background: #fff5f8;
+}
+#screen .unit-ruler-track .unit-ruler-cell > b {
+  line-height: 1.4;
+}
+
+/* Two-digit labels still fit when the phone's text is enlarged. Alternate
+   their rows without changing the unit width, tick position, or ribbon. */
+@media (max-width: 480px) {
+  #screen .unit-ruler-track .unit-ruler-cell:nth-child(2n) > b {
+    margin-bottom: 1.4em;
+  }
+}

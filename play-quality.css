@@ -1,0 +1,254 @@
+/* Learning scenes follow the content's size so every answer remains visible
+   through the screen's single scroll surface, including tablets in portrait. */
+#screen[data-view="play"] .roleplay-stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  align-content: start;
+  align-items: start;
+  gap: 22px 18px;
+  min-height: 560px;
+  padding: 22px clamp(12px, 2.4vw, 28px) 126px;
+}
+
+#screen[data-view="play"] .roleplay-speech--customer,
+#screen[data-view="play"] .roleplay-speech--guide {
+  position: relative;
+  inset: auto;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0;
+  padding: 11px 14px;
+  overflow-wrap: anywhere;
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.5;
+}
+
+#screen[data-view="play"] .roleplay-speech--customer { grid-area: 1 / 1; }
+#screen[data-view="play"] .roleplay-speech--guide { grid-area: 1 / 2; justify-self: end; }
+
+#screen[data-view="play"] .roleplay-task {
+  position: relative;
+  inset: auto;
+  grid-column: 1 / -1;
+  grid-template-rows: auto;
+  width: min(100%, 860px);
+  height: auto;
+  min-height: 0;
+  margin: 0 auto;
+  padding: clamp(8px, 1.5vw, 16px);
+  overflow: visible;
+  border-radius: 26px;
+}
+
+#screen[data-view="play"] .roleplay-task-title { display: none; }
+
+#screen[data-view="play"] .roleplay-task .play-space {
+  container: question / inline-size;
+  align-content: start;
+  width: 100%;
+  height: auto;
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  overflow: visible;
+  padding: clamp(7px, 1.4vw, 14px);
+  border-radius: 18px;
+}
+
+#screen[data-view="play"] .roleplay-play-content {
+  width: 100%;
+  min-width: 0;
+  gap: 16px;
+}
+
+#screen[data-view="play"] .roleplay-play-content > * { min-width: 0; }
+
+#screen[data-view="play"] .roleplay-actor--customer,
+#screen[data-view="play"] .roleplay-actor--hero {
+  width: 104px;
+  min-width: 0;
+  bottom: 4px;
+  pointer-events: none;
+}
+
+#screen[data-view="play"] .roleplay-actor--customer { left: 5%; }
+#screen[data-view="play"] .roleplay-actor--hero { right: 5%; }
+#screen[data-view="play"] .roleplay-actor--pet {
+  width: 66px;
+  min-width: 0;
+  bottom: 12px;
+  right: 32%;
+  pointer-events: none;
+}
+
+#screen[data-view="play"] .roleplay-speech--pet {
+  position: relative;
+  inset: auto;
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.roleplay-play-screen .roleplay-hud { flex-wrap: wrap; border-radius: 24px; }
+.roleplay-play-screen .roleplay-progress-line { flex-wrap: wrap; justify-content: center; }
+.roleplay-play-screen .roleplay-dot-row { flex-wrap: wrap; max-width: 132px; }
+.roleplay-play-screen .roleplay-hud .speak-button { min-width: 76px; }
+
+/* Shared legacy minimums must match the columns that hold the cards. */
+.roleplay-play-screen .count-zone {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 88px), 1fr));
+  gap: 12px;
+}
+
+.roleplay-play-screen .pick-object,
+.roleplay-play-screen .choice-card,
+.roleplay-play-screen .number-card {
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+.roleplay-play-screen .choice-grid,
+.roleplay-play-screen .number-card-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 100px), 1fr));
+  gap: 12px;
+}
+
+.roleplay-play-screen .slot-source-group { gap: 10px; padding: 10px; }
+.roleplay-play-screen .slot-source-token {
+  width: 68px;
+  min-width: 0;
+  min-height: 68px;
+  height: 68px;
+  padding: 6px;
+}
+.roleplay-play-screen .slot-source-token .question-token { width: 46px; height: 46px; }
+.roleplay-play-screen .slot-fill-arrow { width: 28px; justify-self: center; pointer-events: none; }
+
+.roleplay-play-screen .pair-link-board {
+  grid-template-columns: minmax(0, 1fr) minmax(58px, .5fr) minmax(0, 1fr);
+  gap: 8px;
+  padding: 10px;
+}
+.roleplay-play-screen .pair-link-column {
+  min-width: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 58px), 1fr));
+  gap: 10px;
+  padding: 6px;
+}
+.roleplay-play-screen .pair-link-token {
+  width: 100%;
+  min-width: 0;
+  min-height: 64px;
+  padding: 5px;
+  border-radius: 18px;
+}
+/* The old `pair-link-token span` badge selector also swallowed each sprite. */
+.roleplay-play-screen .pair-link-token > .question-token {
+  position: relative;
+  inset: auto;
+  display: block;
+  width: 42px;
+  height: 42px;
+  max-width: 100%;
+  border-radius: 0;
+  background: var(--src) center / contain no-repeat;
+}
+.roleplay-play-screen .pair-link-middle { overflow-wrap: anywhere; }
+.roleplay-play-screen .roleplay-tap-item { touch-action: manipulation; }
+.roleplay-play-screen .compare-gate-tile { width: 100%; min-width: 0; min-height: 72px; }
+.roleplay-play-screen .number-line { padding-bottom: 12px; scrollbar-width: thin; }
+.roleplay-play-screen .number-stop { flex-shrink: 0; }
+.roleplay-play-screen .number-stop,
+.roleplay-play-screen .route-step-stop,
+.roleplay-play-screen .builder-pick { min-width: 44px; }
+.roleplay-play-screen .curriculum-keypad { grid-template-columns: repeat(auto-fit, minmax(44px, 1fr)); }
+.roleplay-play-screen .pill-sprite-button.roleplay-submit {
+  width: min(100%, 180px);
+  min-width: 0;
+  min-height: 68px;
+  padding: 0;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  box-shadow: none;
+}
+
+.roleplay-play-screen .clock-setter { min-width: 0; max-width: 100%; }
+.roleplay-play-screen .clock-controls { min-width: 0; width: 100%; }
+.roleplay-play-screen .clock-control-row {
+  grid-template-columns: minmax(0, 1fr) 44px minmax(54px, auto) 44px;
+  min-width: 0;
+  gap: 5px;
+}
+.roleplay-play-screen .clock-control-row .icon-button { min-height: 44px; }
+.roleplay-play-screen .legacy-sound-layer { min-width: 0; flex-wrap: wrap; }
+.roleplay-play-screen .legacy-sound-layer .sound-cue-button { min-width: 0; max-width: 100%; }
+
+.roleplay-play-screen .curriculum-lab,
+.roleplay-play-screen .curriculum-answer-board { min-width: 0; }
+.roleplay-play-screen .curriculum-lab-kicker { flex-wrap: wrap; }
+.roleplay-play-screen .lab-calculation-board,
+.roleplay-play-screen .lab-money-board,
+.roleplay-play-screen .lab-proof-board { flex-wrap: wrap; }
+.roleplay-play-screen .curriculum-interaction-row { flex-wrap: wrap; }
+.roleplay-play-screen .curriculum-commit-button { max-width: 100%; }
+.roleplay-play-screen .lab-ruler-line span { flex: 1; min-width: 0; }
+
+@container question (max-width: 640px) {
+  #screen[data-view="play"] .roleplay-play-content--lab { grid-template-columns: minmax(0, 1fr); }
+  .roleplay-play-screen .clock-setter { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  .roleplay-play-screen .clock-sprite--settable { width: min(180px, 68cqw); }
+}
+
+@container question (max-width: 420px) {
+  .roleplay-play-screen .slot-fill-layout { grid-template-columns: minmax(0, 1fr); }
+  .roleplay-play-screen .slot-fill-arrow { transform: rotate(90deg); }
+  .roleplay-play-screen .slot-fill-target { min-height: 78px; }
+  .roleplay-play-screen .slot-source-token { width: 58px; height: 58px; min-height: 58px; }
+  .roleplay-play-screen .slot-source-token .question-token { width: 38px; height: 38px; }
+  .roleplay-play-screen .pair-link-board { gap: 5px; padding: 7px; }
+  .roleplay-play-screen .pair-link-column { padding: 4px; }
+  .roleplay-play-screen .clock-control-row { grid-template-columns: 44px minmax(0, 1fr) 44px; }
+  .roleplay-play-screen .clock-control-row > strong { grid-column: 1 / -1; }
+  .roleplay-play-screen .lab-geometry-board--evidence,
+  .roleplay-play-screen .lab-fraction-board:not(.lab-fraction-board--operation),
+  .roleplay-play-screen .lab-area-board,
+  .roleplay-play-screen .lab-coordinate-board { grid-template-columns: minmax(0, 1fr); justify-items: center; }
+  .roleplay-play-screen .curriculum-answer-options { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 640px) {
+  #screen[data-view="play"] .roleplay-stage {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+    gap: 17px;
+    padding: 17px 10px 115px;
+    min-height: 0;
+  }
+  #screen[data-view="play"] .roleplay-speech--customer { grid-area: 1 / 1; }
+  #screen[data-view="play"] .roleplay-speech--guide { grid-area: 2 / 1; max-width: 88%; font-size: .9rem; padding: 7px 11px; }
+  #screen[data-view="play"] .roleplay-speech--guide::after { width: 13px; height: 13px; bottom: -9px; }
+  #screen[data-view="play"] .roleplay-task { grid-row: 3; padding: 7px; }
+  #screen[data-view="play"] .roleplay-actor--customer,
+  #screen[data-view="play"] .roleplay-actor--hero { width: 88px; }
+  .roleplay-play-screen .roleplay-hud { padding: 7px; gap: 6px; }
+  .roleplay-play-screen .roleplay-progress-line { padding: 5px 8px; }
+  .roleplay-play-screen .roleplay-dot-row { max-width: 72px; }
+}
+
+@media (max-width: 430px) {
+  .roleplay-play-screen .roleplay-hud {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 4px;
+  }
+  .roleplay-play-screen .roleplay-hud > .pill-sprite-button { width: 96px; min-width: 0; }
+  .roleplay-play-screen .roleplay-progress-line { justify-self: center; max-width: 100%; gap: 3px; }
+  .roleplay-play-screen .roleplay-hud > span:last-child { gap: 3px; font-size: .8rem; }
+  .roleplay-play-screen .roleplay-hud .speak-button { min-width: 62px; padding-inline: 9px; }
+}

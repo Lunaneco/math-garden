@@ -1,0 +1,124 @@
+/* 数字そのものが、こたえを作る小さなチャームになる。 */
+#screen[data-view="play"] .calculation-input-scene .curriculum-lab { min-height: 0; padding: 10px; gap: 8px; }
+#screen[data-view="play"] .calculation-input-scene .curriculum-lab-kicker,
+#screen[data-view="play"] .calculation-input-scene .curriculum-bank-meta,
+#screen[data-view="play"] .calculation-input-scene .curriculum-mission-frame,
+#screen[data-view="play"] .calculation-input-scene .mission-instruction,
+#screen[data-view="play"] .calculation-input-scene .roleplay-instruction,
+#screen[data-view="play"] .calculation-input-scene .curriculum-answer-board > p { display: none; }
+#screen[data-view="play"] .calculation-input-scene .lab-calculation-board,
+#screen[data-view="play"] .calculation-input-scene .lab-decimal-board { min-height: 62px; }
+#screen[data-view="play"] .calculation-input-scene .curriculum-answer-board { margin-top: 0; }
+.calculation-answer-shortcut { display: none; }
+@media (max-width: 640px) {
+  #screen[data-view="play"] .calculation-input-scene .calculation-answer-shortcut {
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    width: 100%; min-width: 96px; min-height: 96px; padding: 12px;
+    border: 2px solid #c9a2bd; border-radius: 20px;
+    color: #583b4c; background: #fff4f9; font-weight: 800;
+  }
+  #screen[data-view="play"] .calculation-input-scene .roleplay-stage { padding: 12px 10px; gap: 8px; }
+  #screen[data-view="play"] .calculation-input-scene .roleplay-stage .roleplay-speech--customer { padding: 10px 10px 10px 54px; }
+  #screen[data-view="play"] .calculation-input-scene .roleplay-stage .roleplay-actor--customer { left: 15px; top: 16px; width: 38px; height: 38px; }
+  #screen[data-view="play"] .calculation-input-scene .joy-bloom-track { padding: 8px 12px; }
+  #screen[data-view="play"] .calculation-input-scene .joy-bloom-copy span { display: none; }
+  #screen[data-view="play"] .calculation-input-scene .calculation-charm-caption { display: none; }
+}
+.roleplay-play-screen .calculation-charms {
+  width: min(100%, 600px);
+  min-width: 0;
+  display: grid;
+  gap: 8px;
+  justify-items: center;
+}
+.calculation-charm-caption { color: #765166; font-weight: 800; font-size: .88rem; text-align: center; }
+.roleplay-play-screen .calculation-charm-tray {
+  width: 100%; min-height: 96px; padding: 14px 12px;
+  border: 2px solid #e4b9ce; border-radius: 24px;
+  background: linear-gradient(180deg, #fffafc, #fff3f7);
+  box-shadow: 0 5px 0 #f2dfeb;
+  letter-spacing: 0;
+}
+.calculation-charm-string { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px; max-width: 100%; }
+.calculation-digit-charm {
+  position: relative; display: grid; place-items: center;
+  width: 48px; min-height: 58px; flex: 0 0 48px;
+  padding: 7px 2px 0; border: 2px solid #fff;
+  border-radius: 13px 13px 21px 21px;
+  background: var(--charm-color, #ffe1eb);
+  box-shadow: 0 3px 0 #c6b8c4;
+  color: #59485d; font-weight: 900; font-size: 1.55rem;
+}
+.calculation-digit-charm::before { content: ''; position: absolute; top: 4px; left: calc(50% - 3px); width: 6px; height: 6px; border: 1px solid #b69caa; border-radius: 50%; background: #fff8fb; }
+.calculation-digit-charm i { font-style: normal; }
+.calculation-digit-charm.is-symbol { border-radius: 20px; background: #fff5db; }
+.calculation-charm-empty { color: #b0819c; font-size: 2rem; }
+.calculation-card-charm { padding: 12px; border-radius: 16px; color: #59485d; background: #eee4ff; font-size: 1.12rem; line-height: 1.5; overflow-wrap: anywhere; }
+.roleplay-play-screen .curriculum-keypad {
+  width: min(100%, 600px);
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+  gap: 12px;
+}
+.roleplay-play-screen .curriculum-key {
+  min-height: 96px; min-width: 96px; padding: 10px 8px;
+  border: 2px solid #dcc4d4; border-radius: 22px;
+  color: #59485d; background: #fff9fc;
+  box-shadow: 0 5px 0 #e6d2df; font-size: 1.2rem;
+  transition: background-color .15s, box-shadow .15s;
+  overflow-wrap: anywhere;
+}
+.roleplay-play-screen .calculation-charm-key { display: flex; gap: 3px; align-items: center; justify-content: center; flex-direction: column; background: var(--key-color, #ffe1eb); }
+.calculation-charm-key > span { font-size: 1.7rem; line-height: 1.15; }
+.calculation-charm-key small { font-size: .65rem; margin-left: 3px; }
+.calculation-charm-key > i { font-size: .8rem; font-style: normal; color: #967488; }
+.roleplay-play-screen .curriculum-key:hover:not(:disabled) { border-color: #a87896; background: #fff; }
+.roleplay-play-screen .curriculum-key:active:not(:disabled) { box-shadow: 0 1px 0 #d2b9c9; transform: translateY(3px); }
+.roleplay-play-screen .curriculum-key:focus-visible,
+.roleplay-play-screen .calculation-bead-help button:focus-visible { outline: 3px solid #965c87; outline-offset: 3px; }
+.roleplay-play-screen .curriculum-key--erase { grid-column: span 2; font-size: .9rem; background: #fff8ed; }
+.roleplay-play-screen .curriculum-answer-board--option-keypad .curriculum-keypad { grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); }
+.roleplay-play-screen .curriculum-answer-board--option-keypad .curriculum-key--erase { grid-column: 1 / -1; }
+.roleplay-play-screen .curriculum-answer-board--keypad .curriculum-interaction-row,
+.roleplay-play-screen .curriculum-answer-board--option-keypad .curriculum-interaction-row { width: min(100%, 600px); }
+.roleplay-play-screen .curriculum-commit-button { min-height: 96px; }
+.calculation-bead-help { width: min(100%, 600px); min-width: 0; margin: 18px auto 0; }
+.roleplay-play-screen .calculation-bead-toggle { min-height: 96px; width: 100%; border: 2px dashed #dfbdcf; color: #765166; background: #fff9fc; gap: 8px; }
+.calculation-bead-toggle > span { font-size: 1.5rem; color: #c880a1; }
+.calculation-bead-work { display: grid; gap: 12px; padding: 18px 12px; margin-top: 12px; border: 2px solid #e8ccdc; border-radius: 24px; background: #fffaf5; text-align: center; }
+.calculation-bead-work > p { margin: 0; color: #765166; font-size: .95rem; font-weight: 800; line-height: 1.6; overflow-wrap: anywhere; }
+.calculation-bead-trays { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.calculation-bead-dish { display: flex; flex-direction: column; gap: 10px; align-items: center; min-width: 0; padding: 14px 8px; border: 2px solid #e7c6d8; border-radius: 20px; background: #fff1f7; }
+.calculation-bead-dish + .calculation-bead-dish { background: #edf8f3; border-color: #c5ded3; }
+.calculation-bead-pickup { min-width: 96px; min-height: 96px; font: inherit; cursor: grab; touch-action: none; user-select: none; }
+.calculation-bead-pickup:active { cursor: grabbing; }
+.calculation-bead-pickup > small { color: #765166; font-size: .72rem; line-height: 1.5; }
+.calculation-bead-pickup:focus-visible { outline: 3px solid #965c87; outline-offset: 3px; }
+.calculation-bead-dish.is-bead-over { border-color: #965c87; box-shadow: inset 0 0 0 3px #ddbed8; }
+.calculation-drag-bead { position: fixed; display: grid; place-items: center; width: 72px; height: 72px; z-index: 1150; border: 3px solid #fff; border-radius: 50%; background: #ffd7e9; box-shadow: 0 4px 12px #997c9470; color: #8e4a6c; font-size: 2rem; pointer-events: none; }
+.calculation-bead-dish > span:first-child { color: #765166; font-size: .78rem; line-height: 1.5; overflow-wrap: anywhere; }
+.calculation-bead-dish > b { color: #624d64; font-size: 1.1rem; overflow-wrap: anywhere; }
+.calculation-bead-dots { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; width: 100%; max-width: 164px; min-height: 28px; padding: 4px; }
+.calculation-bead-dots > i { display: grid; place-items: center; min-width: 0; aspect-ratio: 1; border: 1px dashed #c7a7bb; border-radius: 50%; color: #8e4a6c; background: #fff; font-size: clamp(.55rem, 2vw, .85rem); font-style: normal; }
+.calculation-bead-dots > i.is-filled { border: 1px solid #eab2ca; background: #ffd7e9; box-shadow: 0 2px 0 #e8b4cd; }
+.calculation-bead-dots.is-ribbon { position: relative; border: 3px solid #c496bb; border-radius: 16px; background: #f3e5fa; padding-bottom: 13px; }
+.calculation-bead-bow { position: absolute; bottom: -12px; left: calc(50% - 24px); width: 48px; height: 26px; }
+.calculation-bead-work > .calculation-bead-equation { padding: 12px 8px; border-radius: 16px; background: #fff; color: #59485d; font-size: 1.3rem; font-variant-numeric: tabular-nums; }
+.calculation-bead-status { color: #786477; font-size: .9rem; }
+.roleplay-play-screen .calculation-bead-move { min-height: 96px; width: 100%; background: #6e4866; box-shadow: 0 5px 0 #52374c; color: #fff; }
+.calculation-touch { animation: calculation-charm-pop .38s ease-out both; }
+.roleplay-customer-pet.calculation-touch-pet { animation: calculation-pet-nod .38s ease-out both; }
+@keyframes calculation-charm-pop { 0% { transform: translateY(0) scale(.9); } 45% { transform: translateY(-5px) scale(1.05); } 100% { transform: translateY(0) scale(1); } }
+@keyframes calculation-pet-nod { 0%,100% { transform: rotate(0); } 40% { transform: rotate(-4deg); } 70% { transform: rotate(3deg); } }
+@media (max-width: 380px) {
+  .roleplay-play-screen .curriculum-keypad { gap: 8px; grid-template-columns: repeat(2, minmax(96px, 1fr)); }
+  .roleplay-play-screen .curriculum-answer-board--option-keypad .curriculum-keypad { grid-template-columns: repeat(2, minmax(96px, 1fr)); }
+  .calculation-bead-trays { gap: 10px; grid-template-columns: 1fr; }
+  .calculation-bead-work { padding: 12px 8px; }
+  .calculation-bead-dish { padding: 12px 4px; }
+  .calculation-bead-dots { gap: 3px; padding: 2px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .calculation-touch, .roleplay-customer-pet.calculation-touch-pet { animation: none !important; }
+  .roleplay-play-screen .curriculum-key { transition: none; }
+  .roleplay-play-screen .curriculum-key:active:not(:disabled) { transform: none; }
+}
