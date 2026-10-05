@@ -57,6 +57,7 @@ def prepare_git():
         'scripts/build-release.py', 'tests/deployment-readiness.mjs',
         'tests/garden-growth-audit-runtime.mjs',
         'tests/garden-floor-geometry.mjs',
+        'tests/garden-footprints.mjs',
     })
     parents = sorted({str(parent) for name in files for parent in Path(name).parents if str(parent) != '.'})
     lines = ['# Only reviewed runtime files and deployment tools are tracked.',

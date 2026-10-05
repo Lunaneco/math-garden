@@ -26,6 +26,7 @@ jobs:
           node --check placement.js
           node tests/deployment-readiness.mjs
           node tests/garden-floor-geometry.mjs
+          node tests/garden-footprints.mjs
       - name: Build static release
         run: python3 scripts/build-release.py
       - uses: actions/upload-pages-artifact@v3

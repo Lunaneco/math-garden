@@ -851,4 +851,5 @@
 !/styles.css
 !/tests/deployment-readiness.mjs
 !/tests/garden-floor-geometry.mjs
+!/tests/garden-footprints.mjs
 !/tests/garden-growth-audit-runtime.mjs

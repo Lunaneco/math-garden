@@ -1840,11 +1840,11 @@ const GARDEN_FINAL_DECOR = Object.freeze({
 });
 
 const GARDEN_FACILITIES = Object.freeze([
-  { id: "home", name: "おうち", sprite: "home", at: 0 },
+  { id: "home", name: "おうち", sprite: "home", footprint: 2, at: 0 },
   { id: "garden", name: "はたけ", sprite: "garden", at: 1 },
   { id: "tree", name: "ちえのき", sprite: "tree", at: 3 },
-  { id: "school", name: "おてつだいひろば", sprite: "school", at: 6 },
-  { id: "boutique", name: "おしゃれのおみせ", sprite: "boutique", at: 10 }
+  { id: "school", name: "おてつだいひろば", sprite: "school", footprint: 2, at: 6 },
+  { id: "boutique", name: "おしゃれのおみせ", sprite: "boutique", footprint: 2, at: 10 }
 ]);
 const GARDEN_FLOORS = Object.freeze([
   { id: "grass", name: "こもれびの しばふ", at: 0 },
@@ -3180,7 +3180,8 @@ document.addEventListener("keydown", (event) => {
 document.addEventListener("pointerdown", (event) => {
   const item = event.target?.closest?.('[data-garden-drag]');
   if (!view.gardenEditing || view.gardenTool === "floors" || !item || (Number.isFinite(event.button) && event.button !== 0) || !gardenOwnedItems().some(candidate => candidate.id === item.dataset.gardenDrag)) return;
-  activeGardenDrag = { item, id: item.dataset.gardenDrag, draft: view.gardenDraft, pointerId: event.pointerId, pointerType: event.pointerType, startX: event.clientX, startY: event.clientY, moved: false };
+  const position = view.gardenDraft.layout[item.dataset.gardenDrag];
+  activeGardenDrag = { item, id: item.dataset.gardenDrag, draft: view.gardenDraft, offsetX: item.dataset.x && position ? Number(item.dataset.x) - position.x : 0, offsetY: item.dataset.y && position ? Number(item.dataset.y) - position.y : 0, pointerId: event.pointerId, pointerType: event.pointerType, startX: event.clientX, startY: event.clientY, moved: false };
   item.setPointerCapture?.(event.pointerId);
 });
 
@@ -3198,7 +3199,14 @@ document.addEventListener("pointermove", (event) => {
   }
   drag.ghost.style.left = `${event.clientX - 48}px`; drag.ghost.style.top = `${event.clientY - 60}px`;
   const target = document.elementFromPoint?.(event.clientX, event.clientY)?.closest?.('[data-action="garden-cell"]');
-  document.querySelectorAll('[data-action="garden-cell"]').forEach(cell => cell.classList.toggle('is-drop-target', cell === target));
+  const destination = target ? { x: Number(target.dataset.x) - drag.offsetX, y: Number(target.dataset.y) - drag.offsetY } : null;
+  const cells = gardenItemCells(drag.id, destination);
+  const valid = destination && gardenPlacementPlan(drag.id, destination.x, destination.y, drag.draft.layout).valid;
+  document.querySelectorAll('[data-action="garden-cell"]').forEach(cell => {
+    const covered = cells.some(point => point.x === Number(cell.dataset.x) && point.y === Number(cell.dataset.y));
+    cell.classList.toggle('is-drop-target', covered);
+    cell.classList.toggle('is-drop-blocked', covered && !valid);
+  });
   event.preventDefault?.();
 });
 
@@ -3207,11 +3215,11 @@ function finishGardenDrag(event) {
   if (!drag || drag.pointerId !== event.pointerId) return;
   activeGardenDrag = null; drag.ghost?.remove(); drag.item.classList.remove('is-garden-dragging');
   const target = document.elementFromPoint?.(event.clientX, event.clientY)?.closest?.('[data-action="garden-cell"]');
-  document.querySelectorAll('.is-drop-target').forEach(cell => cell.classList.remove('is-drop-target'));
+  document.querySelectorAll('.is-drop-target').forEach(cell => cell.classList.remove('is-drop-target', 'is-drop-blocked'));
   if (!drag.moved) return;
   gardenDragClickBlocked = true; window.setTimeout(() => { gardenDragClickBlocked = false; }, 0);
   event.preventDefault?.();
-  if (event.type !== "pointercancel" && target && view.gardenEditing && view.gardenDraft === drag.draft) placeGardenItem(drag.id, Number(target.dataset.x), Number(target.dataset.y));
+  if (event.type !== "pointercancel" && target && view.gardenEditing && view.gardenDraft === drag.draft) placeGardenItem(drag.id, Number(target.dataset.x) - drag.offsetX, Number(target.dataset.y) - drag.offsetY);
 }
 
 document.addEventListener("pointerup", finishGardenDrag);
@@ -3430,7 +3438,7 @@ function createInitialState() {
       mapExpanded: false,
       expansionLevel: 0,
       inheritedExpansion: 0,
-      layout: { home: { x: 1, y: 1 }, avatar: { x: 2, y: 2 } },
+      layout: { home: { x: 1, y: 1 }, avatar: { x: 3, y: 2 } },
       ownedFloors: ["grass"],
       baseFloor: "grass",
       floorTiles: {}
@@ -3558,9 +3566,44 @@ function gardenCellIsLand(x, y, size = gardenMapSize()) {
   return Number.isInteger(x) && Number.isInteger(y) && x >= 1 && y >= 1 && x < size - 1 && y < size - 1;
 }
 
+function gardenItemFootprint(id) {
+  return GARDEN_FACILITIES.find(item => item.id === id)?.footprint || 1;
+}
+
+function gardenItemCells(id, position) {
+  if (!position || !Number.isInteger(position.x) || !Number.isInteger(position.y)) return [];
+  const side = gardenItemFootprint(id);
+  return Array.from({ length: side * side }, (_, index) => ({ x: position.x + index % side, y: position.y + Math.floor(index / side) }));
+}
+
+function gardenItemFits(id, x, y, size = gardenMapSize()) {
+  const side = gardenItemFootprint(id);
+  return gardenCellIsLand(x, y, size) && gardenCellIsLand(x + side - 1, y + side - 1, size);
+}
+
+function gardenItemAt(layout, x, y, exceptId) {
+  return Object.keys(layout).find(id => id !== exceptId && gardenItemCells(id, layout[id]).some(cell => cell.x === x && cell.y === y));
+}
+
+// Swaps are safe only between equally sized, already placed items. A delivery
+// never silently stores a neighbour, and all four building cells are reserved.
+function gardenPlacementPlan(id, x, y, layout, size = gardenMapSize()) {
+  if (!gardenItemFits(id, x, y, size)) return { valid: false, reason: "edge" };
+  const blockers = [...new Set(gardenItemCells(id, { x, y }).map(cell => gardenItemAt(layout, cell.x, cell.y, id)).filter(Boolean))];
+  if (!blockers.length) return { valid: true };
+  const other = blockers[0], original = layout[id];
+  if (blockers.length === 1 && original && gardenItemFootprint(id) === gardenItemFootprint(other)
+      && layout[other].x === x && layout[other].y === y
+      && gardenItemFits(other, original.x, original.y, size)
+      && gardenItemCells(other, original).every(cell => !Object.keys(layout).some(candidate => candidate !== id && candidate !== other && gardenItemCells(candidate, layout[candidate]).some(point => point.x === cell.x && point.y === cell.y)))) {
+    return { valid: true, swap: other };
+  }
+  return { valid: false, reason: "occupied" };
+}
+
 function gardenDefaultPosition(id, size) {
   const mid = Math.floor(size / 2);
-  const fixed = { home: { x: 1, y: 1 }, avatar: { x: 2, y: 2 }, school: { x: size - 2, y: 1 }, tree: { x: 1, y: size - 2 }, boutique: { x: mid, y: size - 2 }, garden: { x: size - 2, y: mid } };
+  const fixed = { home: { x: 1, y: 1 }, avatar: { x: 3, y: 2 }, school: { x: size - 3, y: 1 }, tree: { x: 1, y: size - 2 }, boutique: { x: mid, y: size - 3 }, garden: { x: size - 2, y: mid } };
   const offsets = { "garden-first-flower": [-2, -1], "garden-picnic-chair": [-1, -2], "garden-nap-bed": [-2, 1], "garden-shop-flower": [1, -2], "garden-shop-chair": [0, -1], "garden-shop-bed": [-1, 0] };
   const offset = offsets[id], step = Math.max(1, Math.floor(size / 6));
   if (id === "monument") return { x: mid + step, y: mid + step };
@@ -3571,19 +3614,26 @@ function gardenDefaultPosition(id, size) {
 function normaliseGardenLayout(raw, ids, size, legacy = false) {
   const source = isStateRecord(raw) ? raw : {};
   const result = {}, occupied = new Set();
-  for (const id of ids) {
+  const ordered = [...new Set([...["home", "avatar"].filter(id => ids.includes(id)), ...ids])];
+  for (const id of ordered) {
     const entry = source[id];
     if (entry === null && !["home", "avatar"].includes(id)) { result[id] = null; continue; }
     if (entry === undefined && !legacy && !["home", "avatar"].includes(id)) { result[id] = null; continue; }
     const fallback = gardenDefaultPosition(id, size);
-    let x = safeStateInteger(entry?.x, fallback.x, 1, size - 2);
-    let y = safeStateInteger(entry?.y, fallback.y, 1, size - 2);
-    if (occupied.has(`${x},${y}`)) {
-      const free = Array.from({ length: size - 2 }, (_, row) => Array.from({ length: size - 2 }, (_, column) => ({ x: column + 1, y: row + 1 }))).flat().find(point => !occupied.has(`${point.x},${point.y}`));
+    const max = size - 1 - gardenItemFootprint(id);
+    let x = safeStateInteger(entry?.x, fallback.x, 1, max);
+    let y = safeStateInteger(entry?.y, fallback.y, 1, max);
+    const freeAt = point => gardenItemFits(id, point.x, point.y, size) && gardenItemCells(id, point).every(cell => !occupied.has(`${cell.x},${cell.y}`));
+    if (!freeAt({ x, y })) {
+      // Keep moved legacy items near their old spot, with deterministic ties.
+      const free = Array.from({ length: max * max }, (_, index) => ({ x: index % max + 1, y: Math.floor(index / max) + 1 }))
+        .sort((a, b) => (Math.abs(a.x - x) + Math.abs(a.y - y)) - (Math.abs(b.x - x) + Math.abs(b.y - y)))
+        .find(freeAt);
       if (!free) { result[id] = null; continue; }
       ({ x, y } = free);
     }
-    occupied.add(`${x},${y}`); result[id] = { x, y };
+    for (const cell of gardenItemCells(id, { x, y })) occupied.add(`${cell.x},${cell.y}`);
+    result[id] = { x, y };
   }
   return result;
 }
@@ -5010,7 +5060,7 @@ function renderIslandBoard() {
 
   // Keep the same isometric coordinates at every size. Pixel-sized children
   // inside a shrinking flex item previously put the school off-screen.
-  let html = `<button class="soft-button garden-zoom-button" data-action="garden-zoom" aria-pressed="${view.gardenZoom}">${view.gardenZoom ? "おにわを ぜんぶみる" : "おにわを おおきくみる"}</button><div class="iso-scene ${view.gardenZoom ? "garden-zoomed" : ""}" style="--garden-headroom:${TW * 1.1}px" data-play-scroll="garden-overview"><div class="iso-board" style="width:${view.gardenZoom ? `${boardW}px` : `min(100%, ${boardW}px)`};aspect-ratio:${boardW} / ${boardH}">`;
+  let html = `<button class="soft-button garden-zoom-button" data-action="garden-zoom" aria-pressed="${view.gardenZoom}">${view.gardenZoom ? "おにわを ぜんぶみる" : "おにわを おおきくみる"}</button><div class="iso-scene ${view.gardenZoom ? "garden-zoomed" : ""}" style="--garden-headroom:${TW * 1.35}px" data-play-scroll="garden-overview"><div class="iso-board" style="width:${view.gardenZoom ? `${boardW}px` : `min(100%, ${boardW}px)`};aspect-ratio:${boardW} / ${boardH}">`;
   for (let sum = 2; sum <= 2 * (N - 2); sum += 1) {
     for (let x = 1; x < N - 1; x += 1) {
       const y = sum - x;
@@ -5022,14 +5072,16 @@ function renderIslandBoard() {
       const floor = gardenFloorAt(x, y);
       html += `<div class="iso-tile" style="left:${left / boardW * 100}%;top:${top / boardH * 100}%;width:${TW / boardW * 100}%;height:${imgH / boardH * 100}%;z-index:${z};" data-garden-x="${x}" data-garden-y="${y}"><span class="iso-floor" style="background-image:url('./assets/garden-floors/${floor}.svg?v=20261005-2')" aria-hidden="true"></span></div>`;
       if (object) {
-        const relativeWidth = { home:1.24, school:1.22, tree:1.12, boutique:1.2, garden:1.05, avatar:.72 }[object.id] || .85;
-        const objW = TW * relativeWidth;
-        // 絵の足元を床の中央へ。名前ラベルは絵の寸法に含めない。
-        const objBottom = boardH - top - TH / 2 - objW * .03;
+        const side = gardenItemFootprint(object.id);
+        const relativeWidth = { home:.86, school:.86, tree:.78, boutique:.86, garden:.76, avatar:.72 }[object.id] || .72;
+        const objW = TW * side * relativeWidth;
+        // A building stands at the centre of its four tiles; small items stay
+        // within one tile. Artwork padding is separate from the name label.
+        const objBottom = boardH - top - TH * side / 2 - objW * .03;
         const actionAttrs = object.place ? `data-action="visit-place" data-place="${object.place}" aria-label="${escapeHtml(object.label.replace(/<br>/g, ""))}をひらく"` : "";
         const objectTag = object.place ? "button" : "div";
         const typeAttr = object.place ? "type=\"button\"" : "";
-        html += `<${objectTag} ${typeAttr} class="iso-object ${object.className || ""} ${object.place ? "is-tappable" : ""} ${object.place === "school" && isFirstJourney() ? "is-next-place" : ""}" ${actionAttrs} style="left:${(left + TW / 2) / boardW * 100}%;bottom:${objBottom / boardH * 100}%;width:${objW / boardW * 100}%;z-index:${z + 400};--object-scale:1">
+        html += `<${objectTag} ${typeAttr} class="iso-object ${object.className || ""} ${object.place ? "is-tappable" : ""} ${object.place === "school" && isFirstJourney() ? "is-next-place" : ""}" ${actionAttrs} data-footprint="${side}" style="left:${(left + TW / 2) / boardW * 100}%;bottom:${objBottom / boardH * 100}%;width:${objW / boardW * 100}%;z-index:${z + side - 1 + 400};--object-scale:1">
           ${object.id === "avatar" ? `<span class="garden-map-companions">${renderAvatarLayered()}${renderPetCompanion(activePet(), { compact: true, showName: false })}</span>` : `<span class="iso-object-img" style="--src:url('${spriteUrl(object.sprite)}')"></span>`}
           <span class="iso-label">${object.label}</span>
         </${objectTag}>`;
@@ -5049,7 +5101,7 @@ function tileSprite(x, y, N) {
 function islandObjects(size) {
   return Object.fromEntries(gardenOwnedItems().flatMap(item => {
     const position = state.garden.layout[item.id];
-    if (!position || !gardenCellIsLand(position.x, position.y, size)) return [];
+    if (!position || !gardenItemFits(item.id, position.x, position.y, size)) return [];
     const facility = GARDEN_FACILITIES.some(f => f.id === item.id);
     return [[`${position.x},${position.y}`, { ...item, ...position, label: item.name, className: `obj-${item.id}`, place: facility ? item.id : null, scale: facility || item.id === "avatar" ? 1 : .8 }]];
   }));
@@ -5061,7 +5113,7 @@ function gardenHasFacility(id) {
 
 function gardenFacilityIsPlaced(id) {
   const position = state.garden.layout[id];
-  return gardenHasFacility(id) && gardenCellIsLand(position?.x, position?.y);
+  return gardenHasFacility(id) && gardenItemFits(id, position?.x, position?.y);
 }
 
 function gardenOwnedItems() {
@@ -5114,16 +5166,28 @@ function renderGardenEditor() {
   const floors = GARDEN_FLOORS.filter(floor => garden.ownedFloors.includes(floor.id));
   const paint = view.gardenTool === "floors" && floors.length > 1;
   const chosenFloor = floors.find(floor => floor.id === view.gardenSelectedFloor) || floors[0];
-  const cursor = view.gardenCursor || { x: 1, y: 1 };
-  const position = garden.layout[selected.id];
-  const itemAt = (x, y) => items.find(item => garden.layout[item.id]?.x === x && garden.layout[item.id]?.y === y);
+  const cursor = view.gardenCursor || { x: 1, y: 1 }, position = garden.layout[selected.id];
+  const side = gardenItemFootprint(selected.id);
+  const plan = gardenPlacementPlan(selected.id, cursor.x, cursor.y, garden.layout, size);
+  const previewCells = gardenItemCells(paint ? "floor" : selected.id, cursor);
+  const sizeLabel = id => gardenItemFootprint(id) === 2 ? "2×2マス" : "1マス";
   const rows = Array.from({ length: size - 2 }, (_, row) => `<div class="garden-edit-row" role="row">${Array.from({ length: size - 2 }, (_, column) => {
-    const x = column + 1, y = row + 1, item = itemAt(x, y);
+    const x = column + 1, y = row + 1;
+    const item = items.find(item => item.id === gardenItemAt(garden.layout, x, y));
+    const anchor = item && garden.layout[item.id].x === x && garden.layout[item.id].y === y;
     const current = x === cursor.x && y === cursor.y;
-    const floor = gardenFloorAt(x, y);
-    return `<div role="gridcell"><button class="garden-edit-cell floor-${floor} ${current ? "is-cursor" : ""} ${item?.id === selected.id && !paint ? "is-selected-item" : ""}" data-action="garden-cell" data-x="${x}" data-y="${y}" ${item && !paint ? `data-garden-drag="${item.id}"` : ""} tabindex="${current ? 0 : -1}" aria-label="${x}列 ${y}行、${item ? escapeHtml(item.name) : "あいている場所"}、${escapeHtml(GARDEN_FLOORS.find(f => f.id === floor)?.name || "しばふ")}。${paint ? "選んだ床をぬる" : "選んだものを置く"}">${item ? renderGardenItemArt(item) : '<span class="garden-empty-cell" aria-hidden="true">＋</span>'}${item ? `<span class="garden-cell-name">${escapeHtml(item.name)}</span>` : ""}</button></div>`;
+    const preview = previewCells.some(cell => cell.x === x && cell.y === y);
+    const floor = gardenFloorAt(x, y), large = item && gardenItemFootprint(item.id) === 2;
+    const art = anchor ? renderGardenItemArt(item) : item ? '<span class="garden-reserved-cell" aria-hidden="true">2 × 2</span>' : '<span class="garden-empty-cell" aria-hidden="true">＋</span>';
+    return `<div role="gridcell"><button class="garden-edit-cell floor-${floor} ${current ? "is-cursor" : ""} ${item?.id === selected.id && !paint ? "is-selected-item" : ""} ${large ? "is-building-cell" : ""} ${preview && !paint ? plan.valid ? "is-placement-preview" : "is-placement-blocked" : ""}" data-action="garden-cell" data-x="${x}" data-y="${y}" ${item ? `data-occupant="${item.id}"` : ""} ${item && !paint ? `data-garden-drag="${item.id}"` : ""} tabindex="${current ? 0 : -1}" aria-label="${x}列 ${y}行、${item ? escapeHtml(item.name) + 'の場所、' + sizeLabel(item.id) : "あいている場所"}、${escapeHtml(GARDEN_FLOORS.find(f => f.id === floor)?.name || "しばふ")}。${paint ? "選んだ床をぬる" : side === 2 ? "ここを左上にして2×2マスに置く" : "選んだものを置く"}">${art}${item ? `<span class="garden-cell-name">${escapeHtml(item.name)}${anchor && large ? '<small>2×2マス</small>' : ""}</span>` : ""}</button></div>`;
   }).join("")}</div>`).join("");
-  return `<section class="garden-editor" aria-label="おにわのもようがえ"><div class="garden-editor-heading"><h3>おにわの もようがえ</h3><p>${paint ? "すきな床を、すきな場所にぬろう。" : "すきなものを、すきな場所におこう。"}</p>${floors.length > 1 ? `<div class="garden-editor-tabs"><button class="soft-button" data-action="garden-tool" data-tool="objects" aria-pressed="${!paint}">ものを おく</button>${floors.length > 1 ? `<button class="soft-button" data-action="garden-tool" data-tool="floors" aria-pressed="${paint}">ゆかを ぬる</button>` : ""}</div>` : ""}</div><div class="garden-shelf" data-play-scroll="${paint ? "garden-floor-shelf" : "garden-object-shelf"}" aria-label="${paint ? "手に入れた床" : "手に入れたもの"}">${paint ? floors.map(floor => `<button class="garden-shelf-card ${chosenFloor.id === floor.id ? "is-chosen" : ""}" data-action="garden-floor-select" data-floor-id="${floor.id}" aria-pressed="${chosenFloor.id === floor.id}"><span class="garden-floor-sample floor-${floor.id}" aria-hidden="true"></span><b>${escapeHtml(floor.name)}</b></button>`).join("") : items.map(item => `<button class="garden-shelf-card ${selected.id === item.id ? "is-chosen" : ""}" data-action="garden-item-select" data-item-id="${item.id}" data-garden-drag="${item.id}" aria-pressed="${selected.id === item.id}">${renderGardenItemArt(item)}<b>${escapeHtml(item.name)}</b><small>${garden.layout[item.id] ? "おにわに あるよ" : "とどいたよ！ おいてみよう"}</small></button>`).join("")}</div><div class="garden-edit-workspace"><div class="garden-edit-preview">${paint ? `<span class="garden-floor-sample floor-${chosenFloor.id}" aria-hidden="true"></span>` : renderGardenItemArt(selected)}<strong>${escapeHtml(paint ? chosenFloor.name : selected.name)}</strong><p>${paint ? "マスをタップすると、ここだけぬれるよ。" : "ひっぱってはこぶか、マスをタップしてね。"}</p>${paint ? '<button class="soft-button" data-action="garden-paint-all">おにわ ぜんぶに ぬる</button><span>なんかいでも ぬれるよ</span>' : `<button class="soft-button" data-action="garden-stow" ${position && !["home", "avatar"].includes(selected.id) ? "" : "disabled"}>いったん しまう</button>`}<div class="garden-cursor-pad" aria-label="置く場所を動かす"><button class="soft-button" data-action="garden-cursor" data-dx="0" data-dy="-1" aria-label="上の場所へ">↑</button><button class="soft-button" data-action="garden-cursor" data-dx="-1" data-dy="0" aria-label="左の場所へ">←</button><button class="soft-button" data-action="garden-cursor" data-dx="1" data-dy="0" aria-label="右の場所へ">→</button><button class="soft-button" data-action="garden-cursor" data-dx="0" data-dy="1" aria-label="下の場所へ">↓</button></div><button class="primary-button" data-action="garden-place-cursor">${paint ? "ここに ぬる" : "ここに おく"}</button></div><div class="garden-edit-scroll" data-play-scroll="garden-editor" tabindex="0" aria-label="大きなおにわ。横と縦にスクロールできるよ"><div class="garden-edit-grid" role="grid" aria-label="おにわの配置マップ" style="--garden-columns:${size - 2}">${rows}</div></div></div><p class="garden-edit-status" role="status">${escapeHtml(view.gardenMessage || "みずいろのわくが、えらんでいる場所だよ。")}</p><div class="garden-editor-footer"><button class="soft-button" data-action="garden-undo" ${view.gardenHistory?.length ? "" : "disabled"}>ひとつ もどす</button><button class="primary-button" data-action="garden-edit">できあがり</button><button class="soft-button" data-action="garden-cancel">やめる</button></div></section>`;
+  return `<section class="garden-editor" aria-label="おにわのもようがえ">
+    <div class="garden-editor-heading"><h3>おにわの もようがえ</h3><p>${paint ? "すきな床を、すきな場所にぬろう。" : "建物は2×2マス。木や小物は1マスにおこう。"}</p>${floors.length > 1 ? `<div class="garden-editor-tabs"><button class="soft-button" data-action="garden-tool" data-tool="objects" aria-pressed="${!paint}">ものを おく</button><button class="soft-button" data-action="garden-tool" data-tool="floors" aria-pressed="${paint}">ゆかを ぬる</button></div>` : ""}</div>
+    <div class="garden-shelf" data-play-scroll="${paint ? "garden-floor-shelf" : "garden-object-shelf"}" aria-label="${paint ? "手に入れた床" : "手に入れたもの"}">${paint ? floors.map(floor => `<button class="garden-shelf-card ${chosenFloor.id === floor.id ? "is-chosen" : ""}" data-action="garden-floor-select" data-floor-id="${floor.id}" aria-pressed="${chosenFloor.id === floor.id}"><span class="garden-floor-sample floor-${floor.id}" aria-hidden="true"></span><b>${escapeHtml(floor.name)}</b></button>`).join("") : items.map(item => `<button class="garden-shelf-card ${selected.id === item.id ? "is-chosen" : ""}" data-action="garden-item-select" data-item-id="${item.id}" data-garden-drag="${item.id}" aria-pressed="${selected.id === item.id}">${renderGardenItemArt(item)}<b>${escapeHtml(item.name)}</b><span class="garden-size-badge">${sizeLabel(item.id)}</span><small>${garden.layout[item.id] ? "おにわに あるよ" : "とどいたよ！ おいてみよう"}</small></button>`).join("")}</div>
+    <div class="garden-edit-workspace"><div class="garden-edit-preview">${paint ? `<span class="garden-floor-sample floor-${chosenFloor.id}" aria-hidden="true"></span>` : renderGardenItemArt(selected)}<strong>${escapeHtml(paint ? chosenFloor.name : selected.name)}</strong>${paint ? "" : `<span class="garden-size-badge">${sizeLabel(selected.id)}</span>`}<p>${paint ? "マスをタップすると、ここだけぬれるよ。" : side === 2 ? "左上のマスをえらぶと、4マスにおけるよ。" : "ひっぱってはこぶか、マスをタップしてね。"}</p>${paint ? '<button class="soft-button" data-action="garden-paint-all">おにわ ぜんぶに ぬる</button><span>なんかいでも ぬれるよ</span>' : `<span class="garden-placement-note ${plan.valid ? "is-valid" : "is-invalid"}">${plan.valid ? plan.swap ? "同じ大きさのものと いれかえられるよ" : "みどりのわくに おけるよ" : plan.reason === "edge" ? "おにわの内側を えらんでね" : "あいた場所を えらんでね"}</span><button class="soft-button" data-action="garden-stow" ${position && !["home", "avatar"].includes(selected.id) ? "" : "disabled"}>いったん しまう</button>`}
+    <div class="garden-cursor-pad" aria-label="置く場所を動かす"><button class="soft-button" data-action="garden-cursor" data-dx="0" data-dy="-1" aria-label="上の場所へ">↑</button><button class="soft-button" data-action="garden-cursor" data-dx="-1" data-dy="0" aria-label="左の場所へ">←</button><button class="soft-button" data-action="garden-cursor" data-dx="1" data-dy="0" aria-label="右の場所へ">→</button><button class="soft-button" data-action="garden-cursor" data-dx="0" data-dy="1" aria-label="下の場所へ">↓</button></div><button class="primary-button" data-action="garden-place-cursor" ${!paint && !plan.valid ? "disabled" : ""}>${paint ? "ここに ぬる" : "ここに おく"}</button></div>
+    <div class="garden-edit-scroll" data-play-scroll="garden-editor" tabindex="0" aria-label="大きなおにわ。横と縦にスクロールできるよ"><div class="garden-edit-grid" role="grid" aria-label="おにわの配置マップ" style="--garden-columns:${size - 2}">${rows}</div></div></div>
+    <p class="garden-edit-status" role="status">${escapeHtml(view.gardenMessage || "みどりのわくが、えらんでいる場所だよ。")}</p><div class="garden-editor-footer"><button class="soft-button" data-action="garden-undo" ${view.gardenHistory?.length ? "" : "disabled"}>ひとつ もどす</button><button class="primary-button" data-action="garden-edit">できあがり</button><button class="soft-button" data-action="garden-cancel">やめる</button></div></section>`;
 }
 
 function openGardenEditor() {
@@ -5174,7 +5238,7 @@ function selectGardenItem(id) {
   if (!view.gardenEditing || !gardenOwnedItems().some(item => item.id === id)) return false;
   view.gardenTool = "objects"; view.gardenSelectedId = id;
   view.gardenCursor = view.gardenDraft.layout[id] || view.gardenCursor;
-  view.gardenMessage = "マスをタップすると、そこにおけるよ。";
+  view.gardenMessage = gardenItemFootprint(id) === 2 ? "2×2の あいた場所をえらぼう。左上のマスをタップしてね。" : "1マスの あいた場所におけるよ。";
   render(); focusGardenDestination(); return true;
 }
 
@@ -5185,37 +5249,50 @@ function selectGardenFloor(id) {
   render(); focusGardenDestination(); return true;
 }
 
+function revealGardenDestination(cell, frame) {
+  const side = view.gardenTool === "floors" ? 1 : gardenItemFootprint(view.gardenSelectedId);
+  const lastX = Math.min(gardenMapSize() - 2, view.gardenCursor.x + side - 1);
+  const lastY = Math.min(gardenMapSize() - 2, view.gardenCursor.y + side - 1);
+  const last = document.querySelector(`[data-action="garden-cell"][data-x="${lastX}"][data-y="${lastY}"]`) || cell;
+  const bounds = frame.getBoundingClientRect(), first = cell.getBoundingClientRect(), end = last.getBoundingClientRect();
+  if (first.left < bounds.left) frame.scrollLeft -= bounds.left - first.left + 8;
+  if (end.right > bounds.right) frame.scrollLeft += end.right - bounds.right + 8;
+  if (first.top < bounds.top) frame.scrollTop -= bounds.top - first.top + 8;
+  if (end.bottom > bounds.bottom) frame.scrollTop += end.bottom - bounds.bottom + 8;
+}
+
 function focusGardenDestination() {
   window.requestAnimationFrame(() => {
     if (!view.gardenEditing) return;
     const cell = document.querySelector(`[data-action="garden-cell"][data-x="${view.gardenCursor.x}"][data-y="${view.gardenCursor.y}"]`);
     const frame = document.querySelector('.garden-edit-scroll');
     if (!cell || !frame) return;
-    const bounds = frame.getBoundingClientRect(), target = cell.getBoundingClientRect();
-    if (target.left < bounds.left) frame.scrollLeft -= bounds.left - target.left + 8;
-    if (target.right > bounds.right) frame.scrollLeft += target.right - bounds.right + 8;
-    if (target.top < bounds.top) frame.scrollTop -= bounds.top - target.top + 8;
-    if (target.bottom > bounds.bottom) frame.scrollTop += target.bottom - bounds.bottom + 8;
+    revealGardenDestination(cell, frame);
     cell.focus({ preventScroll: true });
     frame.scrollIntoView({ block: "nearest", behavior: "auto" });
   });
 }
 
 function placeGardenItem(id, x, y) {
-  if (!view.gardenEditing || !view.gardenDraft || !gardenCellIsLand(x, y) || !gardenOwnedItems().some(item => item.id === id)) return false;
+  if (!view.gardenEditing || !view.gardenDraft || !gardenOwnedItems().some(item => item.id === id)) return false;
   const layout = view.gardenDraft.layout, original = layout[id];
-  if (original?.x === x && original?.y === y) return false;
-  const occupant = Object.keys(layout).find(other => other !== id && layout[other]?.x === x && layout[other]?.y === y);
-  // Required companions never go into storage when placing a new delivery.
-  if (occupant && !original && ["home", "avatar"].includes(occupant)) {
-    view.gardenMessage = "おうちと おともは、あいた場所へうごかしてね。"; render(); return false;
+  if (gardenCellIsLand(x, y)) { view.gardenSelectedId = id; view.gardenCursor = { x, y }; }
+  const plan = gardenPlacementPlan(id, x, y, layout);
+  if (!plan.valid) {
+    const area = gardenItemFootprint(id) === 2 ? "2×2の" : "1マスの";
+    view.gardenMessage = plan.reason === "edge" ? `${area} 場所が、おにわから はみ出すよ。もう少し内側をえらんでね。` : `${area} あいた場所がいるよ。ここにあるものを、先にうごかしてね。`;
+    render(); focusGardenDestination(); return false;
+  }
+  if (original?.x === x && original?.y === y) {
+    view.gardenMessage = "ここに おいてあるよ。";
+    render(); focusGardenDestination(); return false;
   }
   rememberGardenEdit();
-  if (occupant) layout[occupant] = original ? { ...original } : null;
+  if (plan.swap) layout[plan.swap] = { ...original };
   layout[id] = { x, y };
   view.gardenSelectedId = id; view.gardenCursor = { x, y };
-  view.gardenMessage = occupant ? "いれかえたよ！" : "ここに おいたよ！";
-  render(); playSfx("tap", "garden"); return true;
+  view.gardenMessage = plan.swap ? "同じ大きさのものを いれかえたよ！" : "ここに おいたよ！";
+  render(); focusGardenDestination(); playSfx("tap", "garden"); return true;
 }
 
 function paintGardenFloor(id, x, y, all = false) {
@@ -5238,17 +5315,14 @@ function gardenEditCell(x, y) {
 function moveGardenCursor(dx, dy, focusCell = false) {
   if (!view.gardenEditing || !Number.isInteger(dx) || !Number.isInteger(dy) || Math.abs(dx) + Math.abs(dy) !== 1) return false;
   const size = gardenMapSize(), cursor = view.gardenCursor;
-  view.gardenCursor = { x: Math.max(1, Math.min(size - 2, cursor.x + dx)), y: Math.max(1, Math.min(size - 2, cursor.y + dy)) };
+  const max = size - 1 - (view.gardenTool === "floors" ? 1 : gardenItemFootprint(view.gardenSelectedId));
+  view.gardenCursor = { x: Math.max(1, Math.min(max, cursor.x + dx)), y: Math.max(1, Math.min(max, cursor.y + dy)) };
   render();
   window.requestAnimationFrame(() => {
     const cell = document.querySelector(`[data-action="garden-cell"][data-x="${view.gardenCursor.x}"][data-y="${view.gardenCursor.y}"]`);
     const frame = document.querySelector('.garden-edit-scroll');
     if (frame && cell) {
-      const bounds = frame.getBoundingClientRect(), target = cell.getBoundingClientRect();
-      if (target.left < bounds.left) frame.scrollLeft -= bounds.left - target.left + 8;
-      if (target.right > bounds.right) frame.scrollLeft += target.right - bounds.right + 8;
-      if (target.top < bounds.top) frame.scrollTop -= bounds.top - target.top + 8;
-      if (target.bottom > bounds.bottom) frame.scrollTop += target.bottom - bounds.bottom + 8;
+      revealGardenDestination(cell, frame);
       if (focusCell) cell.focus({ preventScroll: true });
     }
   });
