@@ -6,7 +6,7 @@ const STORAGE_KEY = QA_MODE ? "math-garden-prototype-state-v2-qa" : "math-garden
 const SPRITE_SRC = {
   // 建物
   home: "buildings/01.png",
-  school: "buildings/25.png",
+  school: "./assets/generated/garden-help-plaza-20261005.png",
   tree: "buildings/14.png",
   boutique: "buildings/21.png",
   cafe: "buildings/23.png",
