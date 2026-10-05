@@ -1,6 +1,5 @@
 /* Keep decorative rewards smaller than the five buildings that open screens. */
 .iso-object:not(.is-tappable) {
-  width: 100% !important;
   padding: 0;
   border: 0;
   background: transparent;

@@ -6,9 +6,15 @@
 .garden-main-actions { display:flex; flex-wrap:wrap; gap:10px; min-width:0; }
 .garden-main-actions button, .garden-gather-actions button { min-width:96px; min-height:96px; white-space:normal; }
 .garden-main-actions button { max-width:230px; }
-.iso-floor { position:absolute; inset:0; background-size:116% 116%; background-position:center top; background-repeat:no-repeat; pointer-events:none; }
+.iso-scene { padding-top:var(--garden-headroom,86px); padding-bottom:18px; }
+.iso-tile { background:none; }
+.iso-floor { position:absolute; inset:0; background-size:100% 100%; background-position:center top; background-repeat:no-repeat; pointer-events:none; }
+.iso-object .iso-label { position:absolute; top:100%; margin-top:2px; }
+.iso-object-img { transform-origin:center bottom; filter:drop-shadow(0 2px 2px #68566e29); }
+.iso-object.is-tappable:hover .iso-object-img { transform:scale(var(--object-scale,1)); filter:brightness(1.05) drop-shadow(0 2px 3px #68566e38); }
+.iso-object.is-next-place .iso-object-img { animation:none; }
 .garden-zoom-button { min-width:96px; min-height:96px; margin:8px 0; }
-.iso-scene.garden-zoomed { display:block; max-height:560px; overflow:auto; overscroll-behavior:contain; border:2px solid #bad8cf; border-radius:24px; padding:65px 25px 20px; }
+.iso-scene.garden-zoomed { display:block; max-height:560px; overflow:auto; overscroll-behavior:contain; border:2px solid #bad8cf; border-radius:24px; padding:var(--garden-headroom,86px) 25px 20px; }
 .iso-scene.garden-zoomed .iso-board { margin:0; }
 .garden-place-dock { margin:12px 0; }
 .garden-place-dock h4 { margin:12px 0; color:#583b4c; }

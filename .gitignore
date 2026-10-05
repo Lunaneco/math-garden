@@ -58,6 +58,7 @@
 !/README.md
 !/app.js
 !/assets/garden-floors/check.svg
+!/assets/garden-floors/grass.svg
 !/assets/garden-floors/lavender.svg
 !/assets/garden-floors/peach.svg
 !/assets/garden-floors/stars-sample.svg
@@ -849,4 +850,5 @@
 !/scripts/build-release.py
 !/styles.css
 !/tests/deployment-readiness.mjs
+!/tests/garden-floor-geometry.mjs
 !/tests/garden-growth-audit-runtime.mjs

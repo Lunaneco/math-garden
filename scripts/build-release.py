@@ -12,7 +12,7 @@ MEDIA = {'.png', '.svg', '.wav', '.webp', '.jpg', '.jpeg', '.mp3', '.ogg'}
 def release_files():
     html = (ROOT / 'index.html').read_text()
     runtime = {'index.html', 'app.js', 'placement.js', 'daily-growth.mjs'}
-    runtime.update(re.findall(r'href="\./([^"\n]+\.css)"', html))
+    runtime.update(re.findall(r'href="\./([^"\n?]+\.css)(?:\?[^"\n]*)?"', html))
     source = '\n'.join((ROOT / name).read_text() for name in sorted(runtime))
     paths = set(re.findall(r'(?:\./)?assets/[A-Za-z0-9_.\-/]*', source))
     for raw in paths:
@@ -56,6 +56,7 @@ def prepare_git():
         '.gitignore', 'README.md', '.github/workflows/deploy-pages.yml',
         'scripts/build-release.py', 'tests/deployment-readiness.mjs',
         'tests/garden-growth-audit-runtime.mjs',
+        'tests/garden-floor-geometry.mjs',
     })
     parents = sorted({str(parent) for name in files for parent in Path(name).parents if str(parent) != '.'})
     lines = ['# Only reviewed runtime files and deployment tools are tracked.',

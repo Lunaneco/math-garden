@@ -4908,7 +4908,7 @@ function renderLegacyIsland() {
   const recommendation = recommendStage();
   const firstJourney = isFirstJourney();
   const nextStage = recommendation.stage || ALL_STAGES[0];
-  const landMessage = `${state.stats.landSize}×${state.stats.landSize}のにわ`;
+  const landMessage = `${state.stats.landSize - 2}×${state.stats.landSize - 2}のにわ`;
 
   return `
     <div class="island-wrap">
@@ -4956,7 +4956,7 @@ function renderLegacyIsland() {
         ${renderMeter("まなびの地図", progress)}
         <div class="summary-card garden-expansion-card ${mapReady ? "is-ready" : ""}">
           <strong>${state.garden.mapExpanded ? "にじのにわ ひろがった！" : "にじのにわを ひろげよう"}</strong>
-          <p class="question-sub">${state.garden.mapExpanded ? "14×14のマップで、もっとたくさん飾れるよ。" : mapReady ? "ぜんぶのステージをできた！ ゲートをひらこう。" : `あと ${Math.max(0, ALL_STAGES.length - completedCount)} ステージで ひろげられるよ。`}</p>
+          <p class="question-sub">${state.garden.mapExpanded ? "12×12のおにわで、もっとたくさん飾れるよ。" : mapReady ? "ぜんぶのステージをできた！ ゲートをひらこう。" : `あと ${Math.max(0, ALL_STAGES.length - completedCount)} ステージで ひろげられるよ。`}</p>
           ${mapReady && !state.garden.mapExpanded ? `<button class="primary-button tiny" data-action="expand-garden-map">にじのゲートをひらく</button>` : ""}
         </div>
         <div class="asset-ribbon">
@@ -4999,42 +4999,41 @@ function renderGardenDecorShop() {
 function renderIslandBoard() {
   if (view.gardenEditing) return renderGardenEditor();
   const N = state.stats.landSize;
+  const landSide = N - 2; // 保存座標の外周は予約領域。表示は置ける床だけ。
   const objects = islandObjects(N);
-  const TW = Math.round(view.gardenZoom ? 78 : Math.min(78, 540 / N)); // タイル菱形の横幅
-  const TH = TW / 2;                              // 菱形の縦（2:1）
-  const imgH = TW * (187 / 216);                  // タイル画像の高さ（スプライト比）
-  const originX = (N - 1) * (TW / 2);
-  const boardW = N * TW;
-  const boardH = (N - 1) * TH + imgH + 6;
-  const objBottom = Math.round(imgH - TH * 0.62);
-  const objW = Math.round(TW * 1.55);
+  const TW = view.gardenZoom ? 78 : Math.min(78, 540 / landSide);
+  const TH = TW / 2; // すべての床素材は同じ2:1の菱形、厚みは18/216。
+  const imgH = TW * (126 / 216);
+  const originX = (landSide - 1) * (TW / 2);
+  const boardW = landSide * TW;
+  const boardH = (landSide - 1) * TH + imgH;
 
   // Keep the same isometric coordinates at every size. Pixel-sized children
   // inside a shrinking flex item previously put the school off-screen.
-  let html = `<button class="soft-button garden-zoom-button" data-action="garden-zoom" aria-pressed="${view.gardenZoom}">${view.gardenZoom ? "おにわを ぜんぶみる" : "おにわを おおきくみる"}</button><div class="iso-scene ${view.gardenZoom ? "garden-zoomed" : ""}" data-play-scroll="garden-overview"><div class="iso-board" style="width:${view.gardenZoom ? `${boardW}px` : `min(100%, ${boardW}px)`};aspect-ratio:${boardW} / ${boardH}">`;
-  for (let sum = 0; sum <= 2 * (N - 1); sum += 1) {
-    for (let x = 0; x < N; x += 1) {
+  let html = `<button class="soft-button garden-zoom-button" data-action="garden-zoom" aria-pressed="${view.gardenZoom}">${view.gardenZoom ? "おにわを ぜんぶみる" : "おにわを おおきくみる"}</button><div class="iso-scene ${view.gardenZoom ? "garden-zoomed" : ""}" style="--garden-headroom:${TW * 1.1}px" data-play-scroll="garden-overview"><div class="iso-board" style="width:${view.gardenZoom ? `${boardW}px` : `min(100%, ${boardW}px)`};aspect-ratio:${boardW} / ${boardH}">`;
+  for (let sum = 2; sum <= 2 * (N - 2); sum += 1) {
+    for (let x = 1; x < N - 1; x += 1) {
       const y = sum - x;
-      if (y < 0 || y >= N) continue;
+      if (!gardenCellIsLand(x, y, N)) continue;
       const left = originX + (x - y) * (TW / 2);
-      const top = (x + y) * (TH / 2);
+      const top = (x + y - 2) * (TH / 2);
       const z = x + y + 1;
-      const tile = tileSprite(x, y, N);
       const object = objects[`${x},${y}`];
-      html += `<div class="iso-tile" style="left:${left / boardW * 100}%;top:${top / boardH * 100}%;width:${TW / boardW * 100}%;height:${imgH / boardH * 100}%;z-index:${z};--src:url('${spriteUrl(tile.sprite)}')">`;
       const floor = gardenFloorAt(x, y);
-      if (gardenCellIsLand(x, y, N) && floor !== "grass") html += `<span class="iso-floor" style="background-image:url('./assets/garden-floors/${floor}.svg')" aria-hidden="true"></span>`;
-      if (tile.flower && floor === "grass") html += `<span class="iso-deco" style="--src:url('${spriteUrl("tileFlowerDeco")}')"></span>`;
+      html += `<div class="iso-tile" style="left:${left / boardW * 100}%;top:${top / boardH * 100}%;width:${TW / boardW * 100}%;height:${imgH / boardH * 100}%;z-index:${z};" data-garden-x="${x}" data-garden-y="${y}"><span class="iso-floor" style="background-image:url('./assets/garden-floors/${floor}.svg?v=20261005-2')" aria-hidden="true"></span></div>`;
       if (object) {
+        const relativeWidth = { home:1.24, school:1.22, tree:1.12, boutique:1.2, garden:1.05, avatar:.72 }[object.id] || .85;
+        const objW = TW * relativeWidth;
+        // 絵の足元を床の中央へ。名前ラベルは絵の寸法に含めない。
+        const objBottom = boardH - top - TH / 2 - objW * .03;
         const actionAttrs = object.place ? `data-action="visit-place" data-place="${object.place}" aria-label="${escapeHtml(object.label.replace(/<br>/g, ""))}をひらく"` : "";
         const objectTag = object.place ? "button" : "div";
         const typeAttr = object.place ? "type=\"button\"" : "";
-        html += `<${objectTag} ${typeAttr} class="iso-object ${object.className || ""} ${object.place ? "is-tappable" : ""} ${object.place === "school" && isFirstJourney() ? "is-next-place" : ""}" ${actionAttrs} style="bottom:${objBottom / imgH * 100}%;width:${objW / TW * 100}%;z-index:${z + 400};--object-scale:${object.scale || 1}">
+        html += `<${objectTag} ${typeAttr} class="iso-object ${object.className || ""} ${object.place ? "is-tappable" : ""} ${object.place === "school" && isFirstJourney() ? "is-next-place" : ""}" ${actionAttrs} style="left:${(left + TW / 2) / boardW * 100}%;bottom:${objBottom / boardH * 100}%;width:${objW / boardW * 100}%;z-index:${z + 400};--object-scale:1">
           ${object.id === "avatar" ? `<span class="garden-map-companions">${renderAvatarLayered()}${renderPetCompanion(activePet(), { compact: true, showName: false })}</span>` : `<span class="iso-object-img" style="--src:url('${spriteUrl(object.sprite)}')"></span>`}
           <span class="iso-label">${object.label}</span>
         </${objectTag}>`;
       }
-      html += `</div>`;
     }
   }
   html += "</div></div>" + renderGardenPlaceDock();
@@ -5102,7 +5101,7 @@ function renderGardenGrowthStrip() {
   const runs = gardenJourneyCount(), next = GARDEN_EXPANSIONS[state.garden.expansionLevel + 1];
   const gifts = [...GARDEN_FACILITIES.filter(item => !gardenHasFacility(item.id)), ...GARDEN_FLOORS.filter(item => !state.garden.ownedFloors.includes(item.id))].sort((a, b) => a.at - b.at);
   const gift = gifts[0];
-  return `<section class="garden-growth-strip" aria-label="おにわのそだち"><div><strong>わたしだけの おにわ</strong><p>街のおてつだいで、おにわのプレゼントがとどくよ。</p><span class="garden-size-note">${gardenMapSize()} × ${gardenMapSize()}</span>${gift ? `<span>あと ${Math.max(0, gift.at - runs)}回で ${escapeHtml(gift.name)}</span>` : '<span>おにわのプレゼント、ぜんぶ とどいたね！</span>'}</div><div class="garden-main-actions"><button class="primary-button" data-action="garden-edit">${view.gardenEditing ? "できあがり" : "おにわを ならべる"}</button>${next ? `<button class="soft-button" data-action="expand-garden-map" ${gardenExpansionAvailable() && !view.gardenEditing ? "" : "disabled"}>${gardenExpansionAvailable() ? "おにわを ひろげる" : `あと ${Math.max(0, next.at - runs)}回で ひろがるよ`}</button>` : '<span class="garden-complete-note">おおきなおにわに なったね ✿</span>'}</div></section>`;
+  return `<section class="garden-growth-strip" aria-label="おにわのそだち"><div><strong>わたしだけの おにわ</strong><p>街のおてつだいで、おにわのプレゼントがとどくよ。</p><span class="garden-size-note">${gardenMapSize() - 2} × ${gardenMapSize() - 2}</span>${gift ? `<span>あと ${Math.max(0, gift.at - runs)}回で ${escapeHtml(gift.name)}</span>` : '<span>おにわのプレゼント、ぜんぶ とどいたね！</span>'}</div><div class="garden-main-actions"><button class="primary-button" data-action="garden-edit">${view.gardenEditing ? "できあがり" : "おにわを ならべる"}</button>${next ? `<button class="soft-button" data-action="expand-garden-map" ${gardenExpansionAvailable() && !view.gardenEditing ? "" : "disabled"}>${gardenExpansionAvailable() ? "おにわを ひろげる" : `あと ${Math.max(0, next.at - runs)}回で ひろがるよ`}</button>` : '<span class="garden-complete-note">おおきなおにわに なったね ✿</span>'}</div></section>`;
 }
 
 function renderGardenItemArt(item) {
@@ -7575,7 +7574,7 @@ function renderParent() {
         <div class="item-card"><strong>回答数</strong><p>${state.stats.totalAnswers} 回</p></div>
         <div class="item-card"><strong>ノート</strong><p>${notebookOpen} 問</p></div>
         <div class="item-card"><strong>シール</strong><p>${state.stickers.owned.length} 枚</p></div>
-        <div class="item-card"><strong>島サイズ</strong><p>${state.stats.landSize}×${state.stats.landSize}</p></div>
+        <div class="item-card"><strong>島サイズ</strong><p>${state.stats.landSize - 2}×${state.stats.landSize - 2}</p></div>
         <div class="item-card"><strong>初回でできた</strong><p>${overview.firstTry === null ? "まだ記録なし" : `${overview.firstTry}%`}</p></div>
         <div class="item-card"><strong>答えた正しさ</strong><p>${overview.accuracy === null ? "まだ記録なし" : `${overview.accuracy}%`}</p></div>
         <div class="item-card"><strong>ヒント</strong><p>${overview.hints} 回</p></div>
