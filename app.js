@@ -453,12 +453,12 @@ const STAGE_GAME_CATALOG = Object.freeze({
     authoredStageGame("w0-count-8", "ランタンまつり", "道沿いのランタンを順に灯して、まつりの門を開けよう。", "ランタンまつり", "stickerStar", "slot-fill", "手前から順にひとつずつ灯そう。", "順序を保った数唱と総数の理解", "最後に灯った数が、ぜんぶのランタンの数だよ。", "門の上で星がはじける", "まつりの門が ひらいた！", "lantern", 1)
   ]),
   compare: Object.freeze([
-    authoredStageGame("w0-compare-1", "おはなのペア", "左右のお花を1本ずつ結んで、余った方を見つけよう。", "おはなのペア", "flower", "pair-link", "左と右をひとりずつ組にしよう。", "1対1対応で量の大小を比較すること", "組になれなかったお花が多い方を教えてくれるよ。", "花びらがひらひら舞う", "おはなが ひらり！", "bloom", 2),
-    authoredStageGame("w0-compare-2", "ピクニックのおさら", "おやつをお皿へ配って、まだ足りないかごを見つけよう。", "ピクニックのおさら", "cake", "pair-link", "お皿とおやつをひとつずつ組にしよう。", "余りから多い・少ないを判断すること", "配り終わって残った方が、たくさんある方だよ。", "テーブルクロスが広がる", "ピクニック かんせい！", "picnic", 3),
-    authoredStageGame("w0-compare-3", "うさぎのごはん", "2つのお皿のにんじんをくらべて、同じかを見よう。", "うさぎのごはん", "petRabbit", "compare-gate", "お皿の数を見て、まんなかのしるしを選ぼう。", "等量も比較の答えになること", "どちらにも余りがなければ、同じだよ。", "うさぎが前足をぱちぱちする", "うさぎが よろこんだ！", "pet", 4),
-    authoredStageGame("w0-compare-4", "まほうのてんびん", "左右の実を見て、まんなかにぴったりの魔法石を置こう。", "まほうのてんびん", "numbers", "compare-gate", "多い方へ口が開くしるしを選ぼう。", "量の比較を記号に表すこと", "しるしの大きい口は、たくさんの方を向くよ。", "てんびんがきらりと光る", "まほう石が ぴかり！", "crystal", 5),
-    authoredStageGame("w0-compare-5", "お店の補充係", "2段の棚を見て、先に補充する棚を決めよう。", "お店の補充係", "questBakeryBread", "pair-link", "上下のパンをひとつずつ組にしよう。", "少ない側の認識と比較の転移", "組になれない棚がない方は、先に足す場所だよ。", "お店の看板が点灯する", "おみせが オープン！", "oven", 0),
-    authoredStageGame("w0-compare-6", "にじの門番", "左右の雲玉を見て、不等号タイルでにじの門を開こう。", "にじの門番", "bridge", "compare-gate", "雲玉が多い方へ大きい口を向けよう。", "多い・少ない・同じを記号へ転移すること", "左右が同じなら、まっすぐな同じしるしだよ。", "にじの橋がのびる", "にじのはしが のびた！", "bridge", 1)
+    authoredStageGame("w0-compare-1", "おはなのペア", "左右のお花をくらべて、多い方・少ない方・同じを見つけよう。", "おはなのペア", "flower", "pair-link", "ひとりずつ組にしたり、しるしを置いたりして たしかめよう。", "1対1対応で量の大小を比較すること", "組になれなかったお花が多い方を教えてくれるよ。", "花びらがひらひら舞う", "おはなが ひらり！", "bloom", 2),
+    authoredStageGame("w0-compare-2", "ピクニックのおさら", "左右のケーキをくらべて、多い方・少ない方・同じを見つけよう。", "ピクニックのおさら", "cake", "pair-link", "ひとりずつ組にしたり、しるしを置いたりして たしかめよう。", "余りから多い・少ないを判断すること", "組になれずに残った方が、たくさんある方だよ。", "テーブルクロスが広がる", "ピクニック かんせい！", "picnic", 3),
+    authoredStageGame("w0-compare-3", "うさぎのごはん", "うさぎの2つのお皿のりんごをくらべて、多い方・少ない方・同じを見つけよう。", "うさぎのごはん", "petRabbit", "compare-gate", "ひとりずつ組にしたり、しるしを置いたりして たしかめよう。", "等量も比較の答えになること", "どちらにも余りがなければ、同じだよ。", "うさぎが前足をぱちぱちする", "うさぎが よろこんだ！", "pet", 4),
+    authoredStageGame("w0-compare-4", "まほうのてんびん", "左右のいちごをくらべて、多い方・少ない方・同じを見つけよう。", "まほうのてんびん", "numbers", "compare-gate", "ひとりずつ組にしたり、しるしを置いたりして たしかめよう。", "量の比較を記号に表すこと", "しるしの大きい口は、たくさんの方を向くよ。", "てんびんがきらりと光る", "まほう石が ぴかり！", "crystal", 5),
+    authoredStageGame("w0-compare-5", "お店の補充係", "左右の棚のパンをくらべて、多い方・少ない方・同じを見つけよう。", "お店の補充係", "questBakeryBread", "pair-link", "ひとりずつ組にしたり、しるしを置いたりして たしかめよう。", "少ない側の認識と比較の転移", "組になれずに残った棚が、パンの多い方だよ。", "お店の看板が点灯する", "おみせが オープン！", "oven", 0),
+    authoredStageGame("w0-compare-6", "にじの門番", "左右のくもをくらべて、多い方・少ない方・同じを見つけよう。", "にじの門番", "bridge", "compare-gate", "ひとりずつ組にしたり、しるしを置いたりして たしかめよう。", "多い・少ない・同じを記号へ転移すること", "左右が同じなら、まっすぐな同じしるしだよ。", "にじの橋がのびる", "にじのはしが のびた！", "bridge", 1)
   ]),
   shape: Object.freeze([
     authoredStageGame("w0-shape-1", "かたち郵便", "封筒の穴と同じ形の荷物を郵便受けへ入れよう。", "かたち郵便", "shapes", "place", "色より輪郭を見て、ぴったりの穴へ入れよう。", "輪郭で円・三角・四角を同定すること", "角や丸いところが、かたちの手がかりだよ。", "ポストの旗が上がる", "おてがみ とどいた！", "sparkle", 2),
@@ -771,7 +771,24 @@ function sceneForMission(mission, variantSeed = 0) {
   return { ...scene, visual, visualVariantId: `${scene.id}:${visual.id}` };
 }
 
+// くらべるステージは、ステージカードの物語（おやつ・りんご・パン・くも…）と
+// 盤面の小物をそろえる。ここを揃えないと、カードは「パン」なのに図は「おはな」になる。
+const COMPARE_STAGE_SCENES = Object.freeze({
+  "w0-compare-1": ["flowers", "flower"],
+  "w0-compare-2": ["picnic", "cake"],
+  "w0-compare-3": ["orchard", "apple"],
+  "w0-compare-4": ["orchard", "strawberry"],
+  "w0-compare-5": ["bakery", "bread"],
+  "w0-compare-6": ["bridge", "clock-cloud"]
+});
 function sceneForStage(stage, mission) {
+  const composed = COMPARE_STAGE_SCENES[stage?.id];
+  if (composed) {
+    const [composedSceneId, visualId] = composed;
+    const composedScene = QUEST_SCENES[composedSceneId];
+    const visual = Object.values(QUEST_SCENE_VARIANTS).flat().find((candidate) => candidate.id === visualId);
+    if (composedScene && visual) return { ...composedScene, visual: { ...visual }, visualVariantId: `${composedScene.id}:${visual.id}` };
+  }
   const sceneId = STAGE_SCENE_BY_MODE[stage?.mode] || mission?.sceneId || "garden";
   const scene = QUEST_SCENES[sceneId] || QUEST_SCENES.garden;
   const variants = QUEST_SCENE_VARIANTS[scene.id] || [scene.visual];
@@ -880,6 +897,11 @@ function applyMissionToQuestion(question, stage, mission, effectiveLevel, sceneV
       decorated.explanation = `${materialName}を ${decorated.answer}こ えらべたね。`;
     } else if (decorated.mode === "compare") {
       decorated.subPrompt = `${materialName}のかずをくらべよう。`;
+      // 見出しの札も、盤面に出ている小物の名前でそろえる（「パンの かず」なのに図はお花、を防ぐ）。
+      const compareLabel = mission.kind === "balance"
+        ? `${materialName}の かずを くらべよう`
+        : mission.kind === "pair" ? `${materialName}を ペアにしよう` : `${materialName}は どちらが おおい？`;
+      decorated.missionLabel = mission.roundAction ? `${mission.roundAction}・${compareLabel}` : compareLabel;
     } else if (decorated.mode === "size") {
       const asksSmall = question.prompt.includes("ちいさい");
       decorated.prompt = `いちばん ${asksSmall ? "ちいさい" : "おおきい"} ${materialName}はどれ？`;
@@ -1079,7 +1101,7 @@ function stageActivityContract(stage) {
   const material = scene.visual;
   const activities = {
     count: ["くだもののおとどけ", `${material.name}を、注文の数だけ そろえよう。`],
-    compare: ["おはなのペア", `${material.name}を ひとつずつ組にして、数をくらべよう。`],
+    compare: ["おはなのペア", `${material.name}の数をくらべて、おおい・すくない・おなじを見つけよう。`],
     shape: ["かたちのアトリエ", "丸いところや角を見て、ぴったりの形をさがそう。"],
     size: ["おやつのおさら", `${material.name}の大きさをくらべて、おさらをそろえよう。`],
     order: ["おはなのならび", `${material.name}のならびを、右や左から たどろう。`],
@@ -1103,7 +1125,9 @@ function stageActivityContract(stage) {
     "result-card": "まとめてたしかめよう", "clock-set": "時計の約束", "clock-read": "何時にしよう",
     "length-sort": "リボンをならべよう", "length-measure": "リボンをはかろう"
   };
-  const activity = waysToPlay[firstMission.kind] || title;
+  // くらべるステージは、ペア・しるし・えらぶ…と遊びが入れ替わる。最初の1問の遊び名を
+  // ステージ全体の題にすると、2問目以降の画面とずれるので、全部にあてはまる名前にする。
+  const activity = stage.mode === "compare" ? "おおい・すくない" : waysToPlay[firstMission.kind] || title;
   const subject = ["count", "compare", "size", "order", "add", "subtract"].includes(stage.mode) ? `${material.name}・` : "";
   return { ...game, title: `${subject}${activity} ${stage.level}`, goal, material };
 }
@@ -6626,8 +6650,8 @@ function renderSoundPairGame(question, game, state) {
       <div class="sound-pair-middle"><span>${pairs.length}/${pairCount} ペア</span><div>${pairs.map((_, index) => `<i>♪</i>`).join("") || "なかまをつなごう"}</div></div>
       <div class="sound-pair-column"><strong>みぎ</strong>${column("right", game.pairRight, usedRight)}</div>
     </div>
-    <p class="mission-instruction">ひだりを選んでから、みぎのなかまと音をつなごう。</p>
-    ${ready && game.needsAnswerChoice ? renderSoundAnswerChoices(question, game) : ready ? `<div class="action-row"><button class="primary-button" data-action="sound-submit">合奏できた</button></div>` : ""}
+    <p class="mission-instruction">${game.needsAnswerChoice ? "音をつないでたしかめても、わかったらすぐ答えてもいいよ。" : "ひだりを選んでから、みぎのなかまと音をつなごう。"}</p>
+    ${game.needsAnswerChoice ? renderSoundAnswerChoices(question, game) : ready ? `<div class="action-row"><button class="primary-button" data-action="sound-submit">合奏できた</button></div>` : ""}
   `;
 }
 
@@ -6802,6 +6826,21 @@ function renderSlotFillQuestion(question) {
   `;
 }
 
+// ペアむすびは「たしかめる道具」。ぜんぶ結ばなくても、見てわかったらすぐ答えられる。
+function pairLinkInstruction(question, allPaired) {
+  if (question.allowSame) {
+    return allPaired
+      ? "のこりが なければ「おなじ」。のこりが あれば、のこったほうを えらぼう。"
+      : "むすんでたしかめてもいいし、わかったら すぐえらんでもいいよ。";
+  }
+  const word = question.asksLess ? "すくない" : "おおい";
+  if (!allPaired) return `むすんでたしかめてもいいし、わかったら「${word}」ほうを すぐえらんでもいいよ。`;
+  const rest = question.asksLess
+    ? "のこったほうが おおいほう。ペアが ぜんぶできたほうが すくないほうだよ。"
+    : "のこったほうが おおいほうだよ。";
+  return `${rest}「${word}」ほうを えらぼう。`;
+}
+
 function renderPairLinkQuestion(question) {
   const visual = questionMaterialVisual(question, questionVisual("compare", { order: 0 }, 0));
   const pairLink = question.pairLink || question.groups || { left: 0, right: 0 };
@@ -6822,9 +6861,9 @@ function renderPairLinkQuestion(question) {
       <div class="pair-link-middle"><span class="pair-link-count">${links.length}/${pairsNeeded} ペア</span><div class="pair-link-rungs">${links.map((link) => `<span>${link.left + 1} ↔ ${link.right + 1}</span>`).join("") || "ペアをつくろう"}</div></div>
       <div class="pair-link-column"><strong>みぎ</strong>${column("right", Number(pairLink.right) || 0, pairedRight)}</div>
     </div>
-    <p class="mission-instruction">${links.length < pairsNeeded ? "ひだりをえらんでから、みぎのなかまとむすぼう。" : "ペアにできなかったほうを、もんだいの言葉にあわせてえらぼう。"}</p>
+    <p class="mission-instruction">${pairLinkInstruction(question, links.length >= pairsNeeded)}</p>
     <div class="choice-grid pair-result-grid">
-      ${resultChoices.map((side) => `<button class="choice-card ${answerChoiceClass(question, side)}" data-action="pair-result" data-value="${side}" ${links.length < pairsNeeded || question.solved ? "disabled" : ""}>${side === "same" ? "おなじ" : side === "left" ? "ひだり" : "みぎ"}${renderAnswerMark(question, side)}</button>`).join("")}
+      ${resultChoices.map((side) => `<button class="choice-card ${answerChoiceClass(question, side)}" data-action="pair-result" data-value="${side}" ${question.solved ? "disabled" : ""}>${side === "same" ? "おなじ" : side === "left" ? "ひだり" : "みぎ"}${renderAnswerMark(question, side)}</button>`).join("")}
     </div>
   `;
 }
@@ -9273,6 +9312,7 @@ function makeCompareQuestion(stage, seed) {
     subPrompt: `${visual.name}のかずをくらべよう。`,
     answer,
     allowSame,
+    asksLess,
     groups: { left, right },
     hints: [
       "ひだりとみぎを、ひとつずつ かぞえてみよう。",
@@ -9798,12 +9838,7 @@ function choosePairToken(side, index) {
 function submitPairResult(value) {
   const question = currentQuestion();
   if (!question || question.solved || question.responseType !== "pair-link") return;
-  const pairsNeeded = Math.min(Number(question.pairLink?.left) || 0, Number(question.pairLink?.right) || 0);
-  if ((view.pairLinks || []).length < pairsNeeded) {
-    view.routeNote = "まだ ペアにできるなかまがいるよ。";
-    render();
-    return;
-  }
+  // ペアを作り終えていなくても答えてよい（見てわかる子を待たせない）。
   submitAnswer(value);
 }
 
@@ -9814,9 +9849,18 @@ function stepRoute(value) {
   if (!route) return;
   const cursor = Number.isFinite(view.routeCursor) ? view.routeCursor : route.start;
   const expected = Number(cursor) + Number(route.direction);
+  // 一歩ずつ進むのは確かめる手段。ゴールがわかっているなら、そこを直接タップして答えてよい。
+  if (Number(value) === Number(route.target) && route.values.includes(Number(value))) {
+    clearRetryFeedback();
+    view.routeCursor = Number(value);
+    playSfx("tap");
+    playLegacyLayerTone(question, value, true);
+    submitAnswer(question.answer);
+    return;
+  }
   if (Number(value) !== expected || !route.values.includes(Number(value))) {
     clearRetryFeedback();
-    view.routeNote = question.stageGame?.proofCue || "となりのマスへ、ひとつずつ進もう。";
+    view.routeNote = "となりのマスへ進んでたしかめてもいいし、ゴールがわかったら そこをタップしてもいいよ。";
     playSfx("tap");
     render();
     return;
@@ -10456,7 +10500,6 @@ function chooseSoundAnswer(index) {
   const question = activeSoundQuestion();
   if (!question || question.solved) return;
   const game = question.soundGame;
-  if (game.needsAnswerChoice && game.interaction === "pair" && (currentSoundGameState().pairs || []).length < Math.min(game.pairLeft, game.pairRight)) return;
   const choice = game.answerChoices?.[index];
   if (!choice) return;
   clearRetryFeedback();
