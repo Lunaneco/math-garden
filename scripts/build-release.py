@@ -11,7 +11,7 @@ MEDIA = {'.png', '.svg', '.wav', '.webp', '.jpg', '.jpeg', '.mp3', '.ogg'}
 
 def release_files():
     html = (ROOT / 'index.html').read_text()
-    runtime = {'index.html', 'app.js', 'placement.js', 'daily-growth.mjs'}
+    runtime = {'index.html', 'app.js', 'placement.js', 'hissan.js', 'daily-growth.mjs'}
     runtime.update(re.findall(r'href="\./([^"\n?]+\.css)(?:\?[^"\n]*)?"', html))
     source = '\n'.join((ROOT / name).read_text() for name in sorted(runtime))
     paths = set(re.findall(r'(?:\./)?assets/[A-Za-z0-9_.\-/]*', source))

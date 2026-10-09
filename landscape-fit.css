@@ -1,0 +1,1398 @@
+/*
+ * 横長タブレット（iPad など、横向き 900px 以上）用の「ひと画面に収める」レイアウト。
+ *
+ * 方針
+ * - ヘッダーとナビを1行にまとめて、本体の高さを最大にする。
+ * - ページ全体はスクロールしない。収まらない一覧だけが、その枠の中でスクロールする。
+ * - 遊ぶ画面は「操作する盤面」を主役にして、説明は横に逃がす。
+ *
+ * 最後に読み込むこと（以前の横長用ルールを上書きする）。
+ */
+/* もようがえのお店を開く／とじるボタンは、横長の画面でだけ使う */
+.garden-shop-toggle,
+.garden-shop-close,
+.boutique-tabs,
+.pet-tabs {
+  display: none;
+}
+
+.boutique-section {
+  display: contents;
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  :root {
+    --fit-gutter: clamp(12px, 1.6vw, 20px);
+    --fit-header: 60px;
+  }
+
+  body {
+    height: 100dvh;
+    overflow: hidden;
+  }
+
+  /* ---- シェル: ブランド | ナビ | ステータス を1行に ---- */
+  .app-shell {
+    height: 100dvh;
+    min-height: 0;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: var(--fit-header) minmax(0, 1fr);
+    column-gap: 14px;
+    padding: 0 var(--fit-gutter);
+  }
+
+  .topbar {
+    display: contents;
+  }
+
+  .brand {
+    grid-column: 1;
+    grid-row: 1;
+    align-self: center;
+    min-width: 0;
+    gap: 10px;
+  }
+
+  .brand-mark {
+    width: 36px;
+    height: 36px;
+    font-size: 0.74rem;
+  }
+
+  .brand h1 {
+    font-size: 1.12rem;
+    white-space: nowrap;
+  }
+
+  .brand p {
+    display: none;
+  }
+
+  .tabbar {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    display: flex;
+    gap: 6px;
+    padding: 0;
+    min-width: 0;
+  }
+
+  .tabbar .tab-button {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 46px;
+    padding: 6px 8px;
+    gap: 6px;
+    font-size: 0.92rem;
+    white-space: nowrap;
+  }
+
+  .tabbar .tab-sprite {
+    width: 26px;
+    height: 26px;
+  }
+
+  .stats-bar {
+    grid-column: 3;
+    grid-row: 1;
+    align-self: center;
+    flex-wrap: nowrap;
+  }
+
+  .stat-pill {
+    min-height: 36px;
+    padding: 6px 10px;
+  }
+
+  .screen,
+  #screen {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    min-height: 0;
+    padding: 0 0 var(--fit-gutter);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
+
+/* =========================================================================
+   あそぶ画面（問題）: 左=おともとセリフ / 右=さわる盤面
+   縦に積むのをやめて、横の余白を使う。
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-view="play"] {
+    overflow-y: auto;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  /* HUD と お花の道を1行ぶんに */
+  #screen[data-view="play"] .roleplay-hud {
+    flex: none;
+    min-height: 0;
+    height: 52px;
+    padding: 2px 10px;
+  }
+
+  #screen[data-view="play"] .roleplay-hud > .pill-sprite-button {
+    height: 42px;
+    width: 96px;
+  }
+
+  #screen[data-view="play"] .roleplay-hud .speak-button {
+    min-height: 42px;
+    height: 42px;
+  }
+
+  #screen[data-view="play"] .joy-bloom-track {
+    flex: none;
+    min-height: 0;
+    height: 40px;
+    padding: 2px 14px;
+  }
+
+  #screen[data-view="play"] .joy-bloom-copy span {
+    display: none;
+  }
+
+  #screen[data-view="play"] .joy-bloom-copy strong {
+    font-size: .92rem;
+  }
+
+  #screen[data-view="play"] .joy-flower-trail {
+    height: 32px;
+  }
+
+  #screen[data-view="play"] .joy-flower-trail span {
+    transform: scale(.9);
+  }
+
+  /* 舞台: 2カラム */
+  #screen[data-view="play"] .roleplay-stage {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: minmax(200px, 25%) minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+    column-gap: 16px;
+    row-gap: 8px;
+    padding: 14px 16px;
+    align-content: stretch;
+  }
+
+  #screen[data-view="play"] .roleplay-stage .roleplay-speech--customer {
+    grid-area: 1 / 1;
+    padding: 12px 14px;
+    font-size: 1.02rem;
+    line-height: 1.45;
+  }
+
+  #screen[data-view="play"] .roleplay-stage .roleplay-speech--guide {
+    grid-area: 2 / 1;
+    align-self: start;
+  }
+
+  #screen[data-view="play"] .roleplay-stage .roleplay-actor--customer {
+    position: static;
+    grid-area: 3 / 1;
+    align-self: end;
+    justify-self: center;
+    width: min(100%, 160px);
+    height: auto;
+    aspect-ratio: 1;
+  }
+
+  #screen[data-view="play"] .roleplay-stage .roleplay-task {
+    grid-area: 1 / 2 / 4 / 3;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    position: relative;
+    inset: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    /* 中身の大きさで行の高さを押し広げない（舞台の高さが先に決まる） */
+    contain: size;
+    align-self: stretch;
+    height: auto;
+  }
+
+  #screen[data-view="play"] .roleplay-task .play-space {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 4px 2px;
+  }
+}
+
+/* ---- 学年ミッション（計算・図・グラフ）: 盤面 | 答え の2段組み ---- */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-view="play"] .roleplay-play-content--lab {
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 430px);
+    align-items: stretch;
+    gap: 10px;
+    min-height: 0;
+  }
+
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-lab,
+  #screen[data-view="play"] .roleplay-play-content--lab .curriculum-answer-board {
+    margin-top: 0;
+    min-width: 0;
+  }
+
+  /* すうじキー: 5列×2段。小さな画面でもひと目で全部さわれる */
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-keypad {
+    width: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-key {
+    min-width: 0;
+    min-height: 76px;
+    padding: 4px;
+    border-radius: 18px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .calculation-charm-key > span {
+    font-size: 1.5rem;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-key--erase,
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-board--option-keypad .curriculum-key--erase {
+    grid-column: 1 / -1;
+    min-height: 52px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-board--keypad .curriculum-interaction-row,
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-board--option-keypad .curriculum-interaction-row {
+    width: 100%;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-commit-button {
+    min-height: 64px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-board {
+    gap: 6px;
+    padding: 8px;
+    align-content: start;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-board > p {
+    display: none;
+  }
+}
+
+/* ---- 広い画面ぶん、答えカードと盤面を大きく見せる（5さいの指でも押せる） ---- */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-view="play"] .roleplay-play-content--lab {
+    align-content: center;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-options {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-option {
+    min-height: 104px;
+    padding: 10px 14px;
+    gap: 10px;
+    align-items: center;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-answer-option > b {
+    font-size: clamp(1.4rem, 2.3vw, 2rem);
+    line-height: 1.2;
+  }
+
+  #screen[data-view="play"] .roleplay-play-screen .curriculum-lab {
+    align-content: center;
+    min-height: min(100%, 340px);
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  /* 盤面は、空いた高さの中でまんなかに */
+  #screen[data-view="play"] .roleplay-task .play-space {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  #screen[data-view="play"] .roleplay-task .play-space > .roleplay-play-content {
+    flex: 0 1 auto;
+  }
+}
+
+/* =========================================================================
+   おうち（ホーム）: 左=わたしとおとも / 中=おにわ / 右=きょうのおてつだい
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="island"] {
+    overflow-y: hidden;
+  }
+
+  #screen[data-screen="island"] .atelier-home {
+    height: 100%;
+    max-width: none;
+    margin: 0;
+    gap: 12px;
+    grid-template-columns: minmax(230px, .8fr) minmax(0, 1.45fr) minmax(300px, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  /* わたしとおとも */
+  #screen[data-screen="island"] .atelier-home-hero {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    min-height: 0;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  #screen[data-screen="island"] .atelier-home-copy {
+    flex: none;
+    padding: 12px 16px 16px;
+  }
+
+  #screen[data-screen="island"] .atelier-home-copy .atelier-kicker,
+  #screen[data-screen="island"] .atelier-home-copy > p,
+  #screen[data-screen="island"] .atelier-home-tip {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .atelier-home-copy h2 {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+    line-height: 1.25;
+  }
+
+  #screen[data-screen="island"] .atelier-home-copy h2 br {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .atelier-home-copy .action-row {
+    display: grid;
+    gap: 8px;
+  }
+
+  #screen[data-screen="island"] .atelier-home-portrait {
+    flex: 1 1 auto;
+    min-height: 0;
+    padding: 10px;
+  }
+
+  #screen[data-screen="island"] .atelier-home-portrait .atelier-avatar {
+    width: auto;
+    height: min(100%, 440px);
+    aspect-ratio: 1 / 2;
+    max-width: 78%;
+  }
+
+  #screen[data-screen="island"] .atelier-home-pet {
+    right: 8px;
+    bottom: 38px;
+    width: 92px;
+  }
+
+  /* おにわ */
+  #screen[data-screen="island"] .atelier-garden-home {
+    grid-column: 2;
+    grid-row: 1 / 4;
+    min-height: 0;
+    padding: 12px 14px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home > .section-heading {
+    flex: none;
+    margin-bottom: 4px;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home > .section-heading p {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .garden-growth-strip {
+    flex: none;
+    margin: 4px 0;
+    padding: 8px 12px;
+    gap: 10px;
+  }
+
+  #screen[data-screen="island"] .garden-growth-strip p {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home .garden-zoom-button {
+    flex: none;
+    align-self: flex-start;
+    min-height: 44px;
+    min-width: 0;
+    margin: 4px 0;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home .iso-scene {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    padding-top: 12px;
+    padding-bottom: 4px;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home .garden-decor-shop {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .garden-gather-actions {
+    flex: none;
+    margin-top: 6px;
+  }
+
+  /* きょうのおてつだい */
+  #screen[data-screen="island"] .atelier-home-grid {
+    grid-column: 3;
+    grid-row: 1;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  #screen[data-screen="island"] .atelier-home-grid > section {
+    padding: 12px 14px;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .help-auto-note {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .atelier-order-preview {
+    gap: 10px;
+  }
+
+  #screen[data-screen="island"] .atelier-wish .atelier-wish-image,
+  #screen[data-screen="island"] .atelier-wish .atelier-thread-track + small {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .placement-entry {
+    grid-column: 3;
+    grid-row: 2;
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  #screen[data-screen="island"] .placement-entry p {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .placement-entry-pet {
+    width: 56px;
+    height: 56px;
+  }
+
+  #screen[data-screen="island"] #dailyGrowthHost {
+    grid-column: 3;
+    grid-row: 3;
+    min-height: 0;
+  }
+
+  #screen[data-screen="island"] .daily-growth {
+    padding: 10px 12px;
+    gap: 6px;
+  }
+
+  #screen[data-screen="island"] .daily-growth__visitor,
+  #screen[data-screen="island"] .daily-growth__body {
+    display: none;
+  }
+}
+
+/* おうち: 右の列をさらに詰める */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="island"] .garden-growth-strip button {
+    min-height: 44px;
+    min-width: 0;
+    padding: 6px 12px;
+    font-size: .9rem;
+  }
+
+  #screen[data-screen="island"] .garden-growth-strip strong {
+    font-size: 1rem;
+  }
+
+  #screen[data-screen="island"] .atelier-wish--idle {
+    padding: 10px 14px;
+  }
+
+  #screen[data-screen="island"] .atelier-wish--idle p,
+  #screen[data-screen="island"] .atelier-wish--idle .atelier-kicker {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .atelier-wish--idle strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: .98rem;
+  }
+
+  #screen[data-screen="island"] .atelier-home-grid .atelier-first-orders h3 {
+    margin: 2px 0 6px;
+    font-size: 1.05rem;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .help-home-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 6px;
+    margin-top: 6px;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .help-home-actions button {
+    min-height: 44px;
+    white-space: nowrap;
+    padding: 6px 10px;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .stage-material-token,
+  #screen[data-screen="island"] .atelier-first-orders .asset-sprite {
+    width: 52px;
+    height: 52px;
+  }
+
+  #screen[data-screen="island"] .placement-entry h3 {
+    margin: 0;
+    font-size: .95rem;
+  }
+
+  #screen[data-screen="island"] .placement-entry .atelier-kicker {
+    display: none;
+  }
+
+  #screen[data-screen="island"] .placement-entry button {
+    min-height: 40px;
+    padding: 4px 10px;
+    font-size: .88rem;
+  }
+
+  #screen[data-screen="island"] .daily-growth__heading h3 {
+    font-size: 1rem;
+  }
+
+  #screen[data-screen="island"] .daily-growth__quest {
+    min-height: 0;
+    padding: 6px 8px;
+  }
+
+  #screen[data-screen="island"] .daily-growth__actions {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  #screen[data-screen="island"] .daily-growth__button {
+    min-height: 40px;
+    padding: 4px 10px;
+    font-size: .88rem;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="island"] .atelier-first-orders .help-home-actions {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .help-home-actions button {
+    flex-direction: row;
+    gap: 4px;
+    font-size: .85rem;
+    padding: 6px 6px;
+  }
+
+  #screen[data-screen="island"] .atelier-first-orders .text-button {
+    font-size: .8rem;
+    margin-top: 4px;
+  }
+
+  #screen[data-screen="island"] .garden-growth-strip > div:first-child span {
+    margin: 2px 8px 2px 0;
+  }
+}
+
+/* おにわは、あいた場所いっぱいに大きく（盤面は割合で組まれているので、そのまま拡大できる） */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="island"] .atelier-garden-home .iso-scene:not(.garden-zoomed) {
+    align-items: center;
+    padding-top: clamp(40px, 9%, 70px);
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home .iso-scene:not(.garden-zoomed) .iso-board {
+    width: min(100%, 760px) !important;
+    max-height: 100%;
+  }
+}
+
+/* おにわの もようがえ: 横長では、ひらいたときだけ重ねて出す */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="island"] .garden-shop-toggle,
+  #screen[data-screen="island"] .garden-shop-close {
+    display: inline-flex;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home {
+    position: relative;
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home .garden-decor-shop {
+    display: none;
+    position: absolute;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    z-index: 20;
+    margin: 0;
+    padding: 14px;
+    border: 1px solid #e2c9d3;
+    border-radius: 20px;
+    background: #fffaf6;
+    box-shadow: 0 12px 32px rgba(95, 74, 88, .22);
+  }
+
+  #screen[data-screen="island"] .atelier-garden-home .garden-decor-shop.is-open {
+    display: block;
+  }
+
+  #screen[data-screen="island"] .garden-gather-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+}
+
+/* =========================================================================
+   おてつだい（えらぶ画面）
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="learn"][data-view="browse"] {
+    overflow-y: hidden;
+  }
+
+  #screen[data-screen="learn"][data-view="browse"] > .atelier-orders {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: 12px 16px;
+    gap: 8px;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="learn"] .atelier-orders > * {
+    flex: none;
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+
+  #screen[data-screen="learn"] .atelier-orders .section-heading {
+    align-items: center;
+    min-height: 0;
+  }
+
+  #screen[data-screen="learn"] .atelier-orders .section-heading h2 {
+    margin: 0;
+    font-size: 1.45rem;
+  }
+
+  #screen[data-screen="learn"] .atelier-orders .section-heading p,
+  #screen[data-screen="learn"] .atelier-orders .section-heading .atelier-kicker {
+    display: none;
+  }
+
+  #screen[data-screen="learn"] .help-mode-picker {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  #screen[data-screen="learn"] .help-mode-choice {
+    min-height: 64px;
+    padding: 8px 14px;
+  }
+
+  #screen[data-screen="learn"] .help-mode-choice small {
+    display: none;
+  }
+
+  #screen[data-screen="learn"] .help-domain-picker {
+    margin: 0;
+  }
+
+  #screen[data-screen="learn"] .atelier-place-picker {
+    margin: 0;
+    gap: 6px;
+  }
+
+  #screen[data-screen="learn"] .atelier-place-picker button {
+    min-height: 64px;
+    padding: 6px 4px;
+    gap: 2px;
+  }
+
+  #screen[data-screen="learn"] .atelier-place-picker button > span {
+    font-size: 1.4rem;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-heading {
+    margin: 0;
+    gap: 12px;
+    min-height: 0;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-heading p {
+    display: none;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-heading .atelier-wish {
+    display: none;
+  }
+
+  /* ステージのカード: 3列で、絵・ことば・ボタンを1行に */
+  #screen[data-screen="learn"] .atelier-order-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-auto-rows: minmax(88px, auto);
+    gap: 8px;
+    align-content: start;
+    padding-right: 2px;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card {
+    grid-template-columns: 56px minmax(0, 1fr) auto;
+    align-items: center;
+    padding: 8px 12px;
+    gap: 8px;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card .stage-visual {
+    height: 56px;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card .stage-visual .asset-sprite,
+  #screen[data-screen="learn"] .atelier-order-card .stage-visual .question-token {
+    width: 52px;
+    height: 52px;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card p {
+    display: none;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card > div:nth-child(2) {
+    min-width: 0;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card > button {
+    grid-column: 3;
+    width: auto;
+    min-width: 88px;
+    min-height: 56px;
+    padding: 6px 14px;
+  }
+
+  /* おまかせ */
+  #screen[data-screen="learn"] .help-auto-card {
+    padding: 12px 18px;
+    gap: 18px;
+  }
+
+  #screen[data-screen="learn"] .help-auto-card .primary-button {
+    min-height: 56px;
+    margin-top: 6px;
+  }
+
+  #screen[data-screen="learn"] .placement-entry {
+    padding: 8px 14px;
+  }
+
+  #screen[data-screen="learn"] .placement-entry p {
+    display: none;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="learn"] .atelier-order-card small,
+  #screen[data-screen="learn"] .atelier-order-card .atelier-kicker {
+    display: none;
+  }
+
+  #screen[data-screen="learn"] .atelier-order-card strong {
+    font-size: .95rem;
+    line-height: 1.35;
+  }
+}
+
+/* =========================================================================
+   きせかえ（ドレッシングルーム）: 左=しちゃく / 右=セット・ブローチ・バッグ
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="dress"],
+  #screen[data-screen="boutique"] {
+    overflow-y: hidden;
+  }
+
+  #screen[data-screen="dress"] > .atelier-dress,
+  #screen[data-screen="boutique"] > .atelier-boutique {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="dress"] .atelier-dress > *,
+  #screen[data-screen="boutique"] .atelier-boutique > * {
+    flex: none;
+    margin-top: 0;
+  }
+
+  #screen[data-screen="dress"] .section-heading,
+  #screen[data-screen="boutique"] .section-heading {
+    align-items: center;
+    min-height: 0;
+    margin: 0;
+  }
+
+  #screen[data-screen="dress"] .section-heading h2,
+  #screen[data-screen="boutique"] .section-heading h2 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  #screen[data-screen="dress"] .section-heading p,
+  #screen[data-screen="dress"] .section-heading .atelier-kicker,
+  #screen[data-screen="boutique"] .section-heading p,
+  #screen[data-screen="boutique"] .section-heading .atelier-kicker {
+    display: none;
+  }
+
+  #screen[data-screen="dress"] .atelier-dress-workbench,
+  #screen[data-screen="boutique"] .atelier-project-workbench {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: minmax(250px, 300px) minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  #screen[data-screen="dress"] .atelier-fitting,
+  #screen[data-screen="boutique"] .atelier-project-preview {
+    position: relative;
+    min-height: 0;
+    padding: 12px;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="dress"] .atelier-fitting .atelier-avatar,
+  #screen[data-screen="boutique"] .atelier-project-preview .atelier-avatar {
+    width: auto;
+    height: min(38vh, 300px);
+    aspect-ratio: 1 / 2;
+    max-width: 100%;
+    min-height: 0;
+  }
+
+  #screen[data-screen="dress"] .atelier-frame-picker {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  #screen[data-screen="dress"] .atelier-frame-picker button {
+    min-height: 40px;
+    padding: 4px;
+    font-size: .74rem;
+  }
+
+  /* 右: セット / ブローチ / バッグ を1画面に */
+  #screen[data-screen="dress"] .atelier-closet {
+    min-height: 0;
+    gap: 8px;
+    grid-template-rows: minmax(0, 1.9fr) minmax(0, 1fr) minmax(0, 1fr);
+    overflow: hidden;
+  }
+
+  #screen[data-screen="dress"] .atelier-closet > section {
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  #screen[data-screen="dress"] .atelier-closet h3 {
+    flex: none;
+    margin: 0 0 4px;
+    font-size: .95rem;
+  }
+
+  #screen[data-screen="dress"] .atelier-look-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: repeat(auto-fill, minmax(124px, 1fr));
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="dress"] .atelier-look-card {
+    padding: 6px;
+    gap: 2px;
+    min-height: 0;
+  }
+
+  #screen[data-screen="dress"] .atelier-look-card .atelier-avatar {
+    height: min(15vh, 124px);
+  }
+
+  #screen[data-screen="dress"] .atelier-part-picker {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: repeat(auto-fill, minmax(88px, 1fr));
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="dress"] .atelier-part-picker button {
+    min-height: 0;
+    padding: 4px;
+  }
+
+  #screen[data-screen="dress"] .atelier-note {
+    display: none;
+  }
+
+  /* しゃしん・まえのクローゼットは、下の細い帯に */
+  #screen[data-screen="dress"] .atelier-photos {
+    margin: 0;
+    padding-top: 6px;
+    max-height: 90px;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="dress"] .atelier-photos .section-heading {
+    margin: 0;
+  }
+
+  #screen[data-screen="dress"] .atelier-legacy {
+    margin: 0;
+    padding-top: 6px;
+  }
+}
+
+/* =========================================================================
+   つくりたい: タブで ひとつずつ見せる（コーデ / おにわ / シール / まえのお店）
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="boutique"] .boutique-tabs {
+    display: flex;
+    gap: 8px;
+    flex: none;
+  }
+
+  #screen[data-screen="boutique"] .boutique-tabs .soft-button {
+    min-height: 44px;
+    padding: 6px 18px;
+  }
+
+  #screen[data-screen="boutique"] .boutique-tabs .is-selected {
+    background: #f7e8ed;
+    border: 2px solid #9b5974;
+    color: #6a3b50;
+  }
+
+  #screen[data-screen="boutique"] .atelier-boutique [data-boutique-section] {
+    display: none;
+  }
+
+  #screen[data-screen="boutique"] .atelier-boutique[data-boutique-tab="projects"] [data-boutique-section="projects"],
+  #screen[data-screen="boutique"] .atelier-boutique[data-boutique-tab="garden"] [data-boutique-section="garden"],
+  #screen[data-screen="boutique"] .atelier-boutique[data-boutique-tab="keepsakes"] [data-boutique-section="keepsakes"],
+  #screen[data-screen="boutique"] .atelier-boutique[data-boutique-tab="legacy"] [data-boutique-section="legacy"] {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="boutique"] .atelier-boutique[data-boutique-tab="projects"] [data-boutique-section="projects"] {
+    display: grid;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="boutique"] .atelier-boutique[data-boutique-tab="keepsakes"] .boutique-section {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  /* コーデのカード: 2列 */
+  #screen[data-screen="boutique"] .atelier-projects {
+    min-height: 0;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    align-content: start;
+    padding-right: 4px;
+  }
+
+  #screen[data-screen="boutique"] .atelier-project-card {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    min-height: 0;
+  }
+
+  #screen[data-screen="boutique"] .atelier-project-card .atelier-avatar {
+    width: auto;
+    height: 120px;
+    aspect-ratio: 1 / 2;
+  }
+
+  #screen[data-screen="boutique"] .atelier-story-note {
+    grid-column: 1 / -1;
+  }
+
+  #screen[data-screen="boutique"] .atelier-garden-projects,
+  #screen[data-screen="boutique"] .atelier-keepsakes {
+    margin: 0;
+  }
+
+  #screen[data-screen="boutique"] .atelier-thread-bank {
+    font-size: .85rem;
+  }
+}
+
+/* =========================================================================
+   ペットのおうち: タブ（おとも / なでなで / おしゃれ / とくいわざ）
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="pets"] {
+    overflow-y: hidden;
+  }
+
+  #screen[data-screen="pets"] > .pet-home {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="pets"] .pet-home > * {
+    flex: none;
+    margin: 0;
+  }
+
+  #screen[data-screen="pets"] .pet-home > .section-heading {
+    align-items: center;
+    min-height: 0;
+  }
+
+  #screen[data-screen="pets"] .pet-home > .section-heading h2 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  #screen[data-screen="pets"] .pet-home > .section-heading p {
+    display: none;
+  }
+
+  #screen[data-screen="pets"] .pet-tabs {
+    display: flex;
+    gap: 8px;
+  }
+
+  #screen[data-screen="pets"] .pet-tabs .soft-button {
+    min-height: 44px;
+    padding: 6px 18px;
+  }
+
+  #screen[data-screen="pets"] .pet-tabs .is-selected {
+    background: #f7e8ed;
+    border: 2px solid #9b5974;
+    color: #6a3b50;
+  }
+
+  #screen[data-screen="pets"] .pet-home [data-pet-section] {
+    display: none;
+  }
+
+  #screen[data-screen="pets"] .pet-home[data-pet-tab="home"] [data-pet-section="home"],
+  #screen[data-screen="pets"] .pet-home[data-pet-tab="play"] [data-pet-section="play"],
+  #screen[data-screen="pets"] .pet-home[data-pet-tab="look"] [data-pet-section="look"],
+  #screen[data-screen="pets"] .pet-home[data-pet-tab="tricks"] [data-pet-section="tricks"] {
+    display: grid;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="pets"] .pet-home[data-pet-tab="look"] .boutique-section {
+    display: block;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="pets"] .pet-home-layout {
+    grid-template-columns: minmax(0, 1.6fr) minmax(250px, 1fr);
+    gap: 14px;
+  }
+
+  #screen[data-screen="pets"] .pet-showcase,
+  #screen[data-screen="pets"] .pet-roster {
+    min-height: 0;
+    align-self: stretch;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="pets"] .pet-play-zone {
+    align-items: center;
+  }
+}
+
+/* =========================================================================
+   おてつだい けっか画面: 左=わたしとおとも / 右=ごほうびとつぎの一歩
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-view="result"] {
+    overflow-y: hidden;
+  }
+
+  #screen[data-view="result"] > .atelier-result {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+
+  #screen[data-view="result"] .atelier-result > * {
+    flex: none;
+    margin: 0;
+  }
+
+  #screen[data-view="result"] .atelier-result .section-heading {
+    min-height: 0;
+  }
+
+  #screen[data-view="result"] .atelier-result .section-heading h2 {
+    margin: 0;
+    font-size: 1.45rem;
+  }
+
+  #screen[data-view="result"] .atelier-result .section-heading p,
+  #screen[data-view="result"] .atelier-result .section-heading .atelier-kicker {
+    display: none;
+  }
+
+  #screen[data-view="result"] .joy-finale-keepsake {
+    padding: 6px 14px;
+  }
+
+  #screen[data-view="result"] .atelier-result-grid {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(200px, 270px) minmax(0, 1fr);
+    gap: 14px;
+    align-items: stretch;
+  }
+
+  #screen[data-view="result"] .atelier-result-portrait {
+    min-height: 0;
+    overflow: hidden;
+    padding: 8px;
+  }
+
+  #screen[data-view="result"] .atelier-result-portrait .atelier-avatar {
+    width: auto;
+    height: min(100%, 360px);
+    aspect-ratio: 1 / 2;
+    max-width: 85%;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy {
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy .atelier-wish {
+    padding: 8px 12px;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy .atelier-wish .atelier-wish-image {
+    display: none;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy .action-row {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy .action-row button {
+    min-height: 48px;
+    padding: 6px 14px;
+  }
+}
+
+@media (min-width: 900px) and (orientation: landscape) {
+  /* けっか: 左にこれからの一歩、右におにわのプレゼント */
+  #screen[data-view="result"] .atelier-result-copy {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    grid-auto-rows: min-content;
+    align-content: start;
+    gap: 8px 14px;
+    overflow-y: auto;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy > h3,
+  #screen[data-view="result"] .atelier-result-copy > .atelier-wish,
+  #screen[data-view="result"] .atelier-result-copy > .action-row,
+  #screen[data-view="result"] .atelier-result-copy > .atelier-result-sticker,
+  #screen[data-view="result"] .atelier-result-copy > details,
+  #screen[data-view="result"] .atelier-result-copy > .text-button {
+    grid-column: 1;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy > .garden-delivery {
+    grid-column: 2;
+    grid-row: 1 / span 5;
+    align-self: start;
+    margin: 0;
+  }
+
+  #screen[data-view="result"] .atelier-result-copy > p {
+    grid-column: 1;
+  }
+}
+
+/* =========================================================================
+   シールちょう: ページ(左) と どうぐ(右) をひと画面に
+   ========================================================================= */
+@media (min-width: 900px) and (orientation: landscape) {
+  #screen[data-screen="stickers"] {
+    overflow-y: hidden;
+  }
+
+  #screen[data-screen="stickers"] > .sticker-deco-panel {
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 16px;
+    overflow: hidden;
+  }
+
+  #screen[data-screen="stickers"] .sticker-deco-panel > * {
+    flex: none;
+    margin: 0;
+  }
+
+  #screen[data-screen="stickers"] .sticker-deco-panel .section-heading {
+    align-items: center;
+    min-height: 0;
+  }
+
+  #screen[data-screen="stickers"] .sticker-deco-panel .section-heading h2 {
+    margin: 0;
+    font-size: 1.4rem;
+  }
+
+  #screen[data-screen="stickers"] .sticker-deco-panel .section-heading p {
+    display: none;
+  }
+
+  #screen[data-screen="stickers"] .deco-workbench {
+    flex: 1 1 auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr) minmax(240px, 300px);
+    gap: 12px;
+  }
+
+  #screen[data-screen="stickers"] .deco-canvas {
+    min-height: 0;
+    height: 100%;
+  }
+
+  #screen[data-screen="stickers"] .deco-tool-tray {
+    min-height: 0;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-auto-rows: min-content;
+    gap: 6px;
+    padding: 10px;
+    overflow-y: auto;
+  }
+
+  #screen[data-screen="stickers"] .deco-tool-tray > h3,
+  #screen[data-screen="stickers"] .deco-tool-tray > p,
+  #screen[data-screen="stickers"] .deco-tool-tray > .deco-sticker-list {
+    grid-column: 1 / -1;
+  }
+
+  #screen[data-screen="stickers"] .deco-tool-tray button {
+    min-height: 44px;
+    min-width: 0;
+    padding: 4px 8px;
+    font-size: .9rem;
+  }
+
+  #screen[data-screen="stickers"] .deco-sticker-choice {
+    min-height: 64px;
+  }
+}
+
+/* せまい横長（1024px前後）では、ナビの絵を小さく */
+@media (min-width: 900px) and (max-width: 1120px) and (orientation: landscape) {
+  .tabbar .tab-button {
+    padding: 4px 4px;
+    font-size: .82rem;
+    gap: 3px;
+  }
+
+  .tabbar .tab-sprite {
+    width: 20px;
+    height: 20px;
+  }
+
+  .brand h1 {
+    font-size: 1rem;
+  }
+}

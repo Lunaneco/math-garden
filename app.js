@@ -1542,6 +1542,7 @@ const NUMBER_CARD = (() => {
 const NAV_ITEMS = [
   { id: "island", label: "おうち", sprite: "navIsland" },
   { id: "learn", label: "おてつだい", sprite: "navLearn" },
+  { id: "hissan", label: "ひっさん", sprite: "numbers" },
   { id: "pets", label: "ペット", sprite: "petCat" },
   { id: "dress", label: "きせかえ", sprite: "navDress" },
   { id: "boutique", label: "つくりたい", sprite: "navBoutique" },
@@ -1753,7 +1754,7 @@ function renderAtelierDress() {
 function renderAtelierBoutique() {
   const atelier = state.atelier;
   const preview = atelierLookById(view.atelierPreviewId) || atelierLookById(atelier.wishId) || ATELIER_LOOKS[3];
-  return `<section class="wide-panel atelier-boutique"><div class="section-heading"><div><span class="atelier-kicker">LITTLE ATELIER</span><h2>つぎは なにをつくる？</h2><p>お店のおてつだいで、すきなコーデをつくろう。</p></div><div><span class="atelier-thread-bank">とってある糸 ${atelier.threadBank}こ</span>${atelier.wishId ? '<button class="text-button" data-action="atelier-bank">糸を とっておく</button>' : ""}</div></div><div class="atelier-project-workbench"><aside class="atelier-project-preview atelier-frame-garden">${renderAtelierAvatar({ lookId: preview.id, pinId: atelier.pinId, bagId: atelier.bagId }, "しちゃくコーデ")}<h3>${preview.name}</h3><p>${atelier.owned.includes(preview.id) ? "できあがっているよ！" : `あと${preview.cost - (atelier.progress[preview.id] || 0)}この糸で できあがり`}</p>${atelier.owned.includes(preview.id) ? `<button class="primary-button" data-action="atelier-look" data-look-id="${preview.id}">このコーデを 着る</button>` : `<button class="primary-button" data-action="atelier-wish" data-look-id="${preview.id}" ${atelier.wishId === preview.id ? "disabled" : ""}>${atelier.wishId === preview.id ? "いま つくっているよ" : "これを つくりたい"}</button>`}<button class="soft-button" data-action="nav" data-screen="learn">お店を てつだいにいく</button></aside><div class="atelier-projects">${ATELIER_LOOKS.filter((look) => look.cost).map((look) => { const owned = atelier.owned.includes(look.id); return `<button class="atelier-project-card ${preview.id === look.id ? "is-selected" : ""}" data-action="atelier-preview" data-look-id="${look.id}" aria-pressed="${preview.id === look.id}">${renderAtelierAvatar({ lookId: look.id, pinId: "none", bagId: "none" }, look.name)}<div><strong>${look.name}</strong><p>${owned ? "できあがり ✿" : `糸 ${atelier.progress[look.id] || 0}/${look.cost}`}</p><span>${atelier.wishId === look.id ? "つくっているよ" : "おおきく しちゃく"}</span></div></button>`; }).join("")}<div class="atelier-story-note"><strong>おともを てつだうと、糸がとどくよ。</strong><p>ヒントも、えらびなおしも だいじょうぶ。できたら、糸はおなじだけもらえるよ。つくりかけは、あとでつづけられるよ。</p></div></div></div><section class="atelier-garden-projects"><h3>おにわにも おめかし</h3><p>とってある糸 5こで、かざりをひとつ。服より先に庭をかざるときは「糸をとっておく」をえらんでね。</p><div class="garden-decor-choices">${GARDEN_DECOR_SHOP.map((decor) => `<button class="garden-decor-choice ${state.garden.purchased.includes(decor.id) ? "is-owned" : ""}" data-action="atelier-decor" data-item-id="${decor.id}" ${state.garden.purchased.includes(decor.id) || atelier.threadBank < 5 ? "disabled" : ""}>${renderAssetSprite(decor.sprite, decor.name)}<span>${decor.name}</span><small>${state.garden.purchased.includes(decor.id) ? "とどいているよ" : "糸 5こ"}</small></button>`).join("")}</div>${atelier.owned.length === ATELIER_LOOKS.length && GARDEN_DECOR_SHOP.every((decor) => state.garden.purchased.includes(decor.id)) ? '<p>ぜんぶできあがり！ おてつだいでは、おともがそだって、新しいシールやおにわの場所もふえるよ。</p><button class="soft-button" data-action="nav" data-screen="pets">おとものおうちへ</button>' : ""}</section>${renderAtelierKeepsakes()}<details class="atelier-legacy"><summary>まえの おしゃれのお店</summary>${renderLegacyBoutique()}</details></section>`;
+  return `<section class="wide-panel atelier-boutique" data-boutique-tab="${view.boutiqueTab || "projects"}"><div class="section-heading"><div><span class="atelier-kicker">LITTLE ATELIER</span><h2>つぎは なにをつくる？</h2><p>お店のおてつだいで、すきなコーデをつくろう。</p></div><div><span class="atelier-thread-bank">とってある糸 ${atelier.threadBank}こ</span>${atelier.wishId ? '<button class="text-button" data-action="atelier-bank">糸を とっておく</button>' : ""}</div></div>${renderBoutiqueTabs()}<div class="atelier-project-workbench" data-boutique-section="projects"><aside class="atelier-project-preview atelier-frame-garden">${renderAtelierAvatar({ lookId: preview.id, pinId: atelier.pinId, bagId: atelier.bagId }, "しちゃくコーデ")}<h3>${preview.name}</h3><p>${atelier.owned.includes(preview.id) ? "できあがっているよ！" : `あと${preview.cost - (atelier.progress[preview.id] || 0)}この糸で できあがり`}</p>${atelier.owned.includes(preview.id) ? `<button class="primary-button" data-action="atelier-look" data-look-id="${preview.id}">このコーデを 着る</button>` : `<button class="primary-button" data-action="atelier-wish" data-look-id="${preview.id}" ${atelier.wishId === preview.id ? "disabled" : ""}>${atelier.wishId === preview.id ? "いま つくっているよ" : "これを つくりたい"}</button>`}<button class="soft-button" data-action="nav" data-screen="learn">お店を てつだいにいく</button></aside><div class="atelier-projects">${ATELIER_LOOKS.filter((look) => look.cost).map((look) => { const owned = atelier.owned.includes(look.id); return `<button class="atelier-project-card ${preview.id === look.id ? "is-selected" : ""}" data-action="atelier-preview" data-look-id="${look.id}" aria-pressed="${preview.id === look.id}">${renderAtelierAvatar({ lookId: look.id, pinId: "none", bagId: "none" }, look.name)}<div><strong>${look.name}</strong><p>${owned ? "できあがり ✿" : `糸 ${atelier.progress[look.id] || 0}/${look.cost}`}</p><span>${atelier.wishId === look.id ? "つくっているよ" : "おおきく しちゃく"}</span></div></button>`; }).join("")}<div class="atelier-story-note"><strong>おともを てつだうと、糸がとどくよ。</strong><p>ヒントも、えらびなおしも だいじょうぶ。できたら、糸はおなじだけもらえるよ。つくりかけは、あとでつづけられるよ。</p></div></div></div><section class="atelier-garden-projects" data-boutique-section="garden"><h3>おにわにも おめかし</h3><p>とってある糸 5こで、かざりをひとつ。服より先に庭をかざるときは「糸をとっておく」をえらんでね。</p><div class="garden-decor-choices">${GARDEN_DECOR_SHOP.map((decor) => `<button class="garden-decor-choice ${state.garden.purchased.includes(decor.id) ? "is-owned" : ""}" data-action="atelier-decor" data-item-id="${decor.id}" ${state.garden.purchased.includes(decor.id) || atelier.threadBank < 5 ? "disabled" : ""}>${renderAssetSprite(decor.sprite, decor.name)}<span>${decor.name}</span><small>${state.garden.purchased.includes(decor.id) ? "とどいているよ" : "糸 5こ"}</small></button>`).join("")}</div>${atelier.owned.length === ATELIER_LOOKS.length && GARDEN_DECOR_SHOP.every((decor) => state.garden.purchased.includes(decor.id)) ? '<p>ぜんぶできあがり！ おてつだいでは、おともがそだって、新しいシールやおにわの場所もふえるよ。</p><button class="soft-button" data-action="nav" data-screen="pets">おとものおうちへ</button>' : ""}</section><div class="boutique-section" data-boutique-section="keepsakes">${renderAtelierKeepsakes()}</div><details class="atelier-legacy" data-boutique-section="legacy"><summary>まえの おしゃれのお店</summary>${renderLegacyBoutique()}</details></section>`;
 }
 
 // ===== マイペット =====
@@ -2733,6 +2734,25 @@ const placementEngine = window?.MathGardenPlacement?.install?.({
   stopSpeech: stopQuestionSpeech
 }) || null;
 
+// ひっさんキッチン（筆算を、くらいの おうちで すこしずつ おぼえるミニゲーム）
+const hissanEngine = window?.MathGardenHissan?.install?.({
+  getState: () => state, getView: () => view, render, saveState,
+  spriteUrl, spriteFile, renderPetCompanion, activePet, playSfx, triggerMoment,
+  // 1もん できるたびに、ほかの おてつだいと おなじ ごほうび（学習したときだけ）
+  onProblemSolved: () => {
+    const shards = grantQuestionReward();
+    const atelier = grantAtelierThread();
+    state.stats.totalAnswers += 1;
+    if (atelier?.completed) toast("あたらしい コーデが できあがったよ！ きせかえで きてみてね");
+    return { shards, atelier };
+  },
+  onLessonCleared: (lesson, stars, first) => {
+    state.stats.shards += first ? 10 : 3;
+    saveState();
+    toast(first ? `${lesson.dish.name}が おみせに ならんだよ！` : "もういちど できたね！");
+  }
+}) || null;
+
 render();
 
 document.addEventListener("toggle", (event) => {
@@ -2753,6 +2773,7 @@ document.addEventListener("click", (event) => {
   }
   const { action } = target.dataset;
   if (placementEngine?.handleAction?.(action, target)) return;
+  if (hissanEngine?.handleAction?.(action, target)) return;
 
  if (action === "atelier-menu") {
    view.utilityMenuOpen = !view.utilityMenuOpen; render();
@@ -2942,6 +2963,13 @@ document.addEventListener("click", (event) => {
     if (view.gardenEditing) closeGardenEditor(true); else openGardenEditor();
   } else if (action === "garden-zoom") {
     view.gardenZoom = !view.gardenZoom; render();
+  } else if (action === "pet-tab") {
+    view.petTab = ["home", "play", "look", "tricks"].includes(target.dataset.tab) ? target.dataset.tab : "home"; render();
+  } else if (action === "boutique-tab") {
+    view.boutiqueTab = ["projects", "garden", "keepsakes", "legacy"].includes(target.dataset.tab) ? target.dataset.tab : "projects"; render();
+  } else if (action === "garden-shop-toggle") {
+    // 横長の画面では、もようがえのお店は必要なときだけ開く。
+    view.gardenShopOpen = !view.gardenShopOpen; render();
   } else if (action === "garden-visit") {
     visitIslandPlace(target.dataset.place);
   } else if (action === "garden-cancel") {
@@ -3398,6 +3426,12 @@ function renderResult() {
 }
 
 function renderDress() { return renderAtelierDress(); }
+function renderBoutiqueTabs() {
+  const tab = view.boutiqueTab || "projects";
+  const tabs = [["projects", "コーデ"], ["garden", "おにわ"], ["keepsakes", "シール"], ["legacy", "まえのお店"]];
+  return `<div class="boutique-tabs" role="tablist" aria-label="つくりたいの しゅるい">${tabs.map(([id, label]) => `<button class="soft-button ${tab === id ? "is-selected" : ""}" role="tab" aria-selected="${tab === id}" data-action="boutique-tab" data-tab="${id}">${label}</button>`).join("")}</div>`;
+}
+
 function renderBoutique() { return renderAtelierBoutique(); }
 
 function createInitialState() {
@@ -3741,6 +3775,7 @@ function withDerivedState(nextState) {
   nextState.stats.questionSeed = safeStateInteger(nextState.stats.questionSeed, 0, 0, 996);
   nextState.learning = normaliseLearningState(nextState.learning);
   if (window?.MathGardenPlacement?.normalise) nextState.placement = window.MathGardenPlacement.normalise(nextState.placement);
+  if (window?.MathGardenHissan?.normalise) nextState.hissan = window.MathGardenHissan.normalise(nextState.hissan);
   if (!isStateRecord(nextState.likedIslands)) nextState.likedIslands = {};
   if (!isStateRecord(nextState.stickers)) nextState.stickers = { owned: ["stk_flower_count"], board: ["stk_flower_count"], layout: {}, duplicates: 0 };
   const knownStickerIds = new Set(STICKER_DEFS.map((sticker) => sticker.id));
@@ -4768,6 +4803,7 @@ function render() {
     notebook: renderNotebook,
     outing: renderOuting,
     parent: renderParent,
+    hissan: () => hissanEngine?.renderScreen?.() || "",
     placement: () => placementEngine?.renderScreen?.() || ""
   };
   const openDetails = [...(screen.querySelectorAll?.("details[open]") || [])].map((detail) => detail.className);
@@ -4780,8 +4816,46 @@ function render() {
   restoreScreenScrollPosition(screenScrollPosition, shouldResetScreenScroll);
   restorePlayScrollPositions(playScrollPositions);
   if (view.screen === "island") mountDailyGrowthIfAvailable();
+  fitPlayBoard();
+  if (view.screen === "hissan") hissanEngine?.afterRender?.();
   restoreUiFocus(focusedControl, shouldResetScreenScroll);
 }
+
+// 横長タブレットでは、あそぶ画面をスクロールなしで見せる。CSSで収まらない大きな盤面だけ、
+// 枠に合わせてほんの少し縮める（下限あり。小さくなりすぎるときは枠内スクロールにまかせる）。
+const FIT_LANDSCAPE_QUERY = "(min-width: 900px) and (orientation: landscape)";
+const FIT_MIN_ZOOM = 0.72;
+function fitPlayBoard() {
+  const space = document.querySelector('#screen[data-view="play"] .roleplay-task .play-space');
+  const content = space?.firstElementChild;
+  if (!content) return;
+  content.style.zoom = "";
+  if (!window.matchMedia?.(FIT_LANDSCAPE_QUERY)?.matches) return;
+  let zoom = 1;
+  for (let pass = 0; pass < 4; pass += 1) {
+    const frame = space.getBoundingClientRect();
+    if (!frame.height) return;
+    let bottom = frame.top;
+    let right = frame.left;
+    for (const child of content.querySelectorAll("*")) {
+      const box = child.getBoundingClientRect();
+      if (!box.width || !box.height) continue;
+      bottom = Math.max(bottom, box.bottom);
+      right = Math.max(right, box.right);
+    }
+    const heightRatio = (frame.height - 2) / Math.max(1, bottom - frame.top);
+    const widthRatio = (frame.width - 2) / Math.max(1, right - frame.left);
+    const ratio = Math.min(heightRatio, widthRatio);
+    if (ratio >= 0.995) break;
+    zoom = Math.max(FIT_MIN_ZOOM, zoom * ratio * 0.99);
+    content.style.zoom = String(zoom);
+    if (zoom <= FIT_MIN_ZOOM) break;
+  }
+}
+window.addEventListener?.("resize", () => {
+  if (view.screen === "learn") fitPlayBoard();
+  else if (view.screen === "hissan") hissanEngine?.afterRender?.();
+});
 
 function dailyGrowthSnapshot() {
   return {
@@ -4830,7 +4904,7 @@ function renderStats() {
 function renderNav() {
   const hasResume = Boolean(view.active && !view.result);
   const markup = (item) => `<button class="tab-button ${view.screen === item.id ? "active" : ""}" data-action="nav" data-screen="${item.id}" ${view.screen === item.id ? 'aria-current="page"' : ""} aria-label="${item.label}${item.id === "learn" && hasResume ? "、おてつだいのつづき" : ""}"><span class="asset-sprite tab-sprite" aria-hidden="true" style="--src:url('${spriteUrl(item.sprite)}')"></span><span>${item.label}</span>${item.id === "learn" && hasResume ? '<span class="tab-resume-dot" aria-hidden="true"></span>' : ""}</button>`;
-  const primary = ["island", "dress", "learn", "boutique", "pets"].map((id) => NAV_ITEMS.find((item) => item.id === id));
+  const primary = ["island", "dress", "learn", "hissan", "boutique", "pets"].map((id) => NAV_ITEMS.find((item) => item.id === id));
   const utilities = NAV_ITEMS.filter((item) => !primary.includes(item));
   document.querySelector("#navTabs").innerHTML = primary.map(markup).join("") + `<button class="tab-button ${utilities.some((item) => item.id === view.screen) ? "active" : ""}" data-action="atelier-menu" aria-expanded="${Boolean(view.utilityMenuOpen)}" ${view.utilityMenuOpen ? 'aria-controls="atelier-utilities"' : ""}><span aria-hidden="true" style="font-size:24px">✿</span><span>もっと</span></button>${view.utilityMenuOpen ? `<div class="atelier-utility-menu" id="atelier-utilities">${utilities.map(markup).join("")}</div>` : ""}`;
 }
@@ -4919,18 +4993,25 @@ function renderPetCommands(pet) {
   return `<section class="pet-commands" aria-label="${escapeHtml(pet.name)}の覚えたコマンド"><h4>おぼえた とくいわざ</h4><div class="pet-command-list" aria-label="覚えた技の一覧">${tricks.map(trick => `<button class="pet-command-button ${playing === trick.id ? 'is-playing' : ''}" data-action="pet-command" data-pet-id="${pet.id}" data-trick-id="${trick.id}" aria-label="${escapeHtml(trick.name)}、${escapeHtml(trick.hint)}" aria-pressed="${playing === trick.id}"><span class="pet-command-portrait" aria-hidden="true">${renderPetCompanion(pet, { compact: true, showName: false, className: `pet-command-preview ${playing === trick.id ? 'pet-command-preview--playing' : ''}` })}<i>${motionIcon[trick.motion] || "♥"}</i></span><strong>${escapeHtml(trick.name)}</strong><small>${escapeHtml(trick.hint)}</small></button>`).join("")}</div><p class="pet-command-status" role="status" aria-live="polite" aria-atomic="true">${active ? `${escapeHtml(pet.name)}「${escapeHtml(active.hint)}」` : view.petMotion?.petId === pet.id && view.petMotion.motion === "cuddle" ? `${escapeHtml(pet.name)}「もっと なでなで！」` : "すきな わざを おねがいしてね"}</p></section>`;
 }
 
+function renderPetTabs() {
+  const tab = view.petTab || "home";
+  const tabs = [["home", "おとも"], ["play", "なでなで"], ["look", "おしゃれ"], ["tricks", "とくいわざ"]];
+  return `<div class="pet-tabs" role="tablist" aria-label="ペットのおうち">${tabs.map(([id, label]) => `<button class="soft-button ${tab === id ? "is-selected" : ""}" role="tab" aria-selected="${tab === id}" data-action="pet-tab" data-tab="${id}">${label}</button>`).join("")}</div>`;
+}
+
 function renderPets() {
   const pet = activePet();
   const species = speciesForPet(pet);
   const canEvolve = petEvolutionAvailableForLevel(pet.level) > pet.evolution;
   const nextStage = PET_EVOLUTION_STAGES[Math.min(pet.evolution + 1, PET_EVOLUTION_STAGES.length - 1)];
   return `
-    <section class="wide-panel pet-home">
+    <section class="wide-panel pet-home" data-pet-tab="${view.petTab || "home"}">
       <div class="section-heading">
         <div><h2>ペットのおうち</h2><p>学びをさいごまで終えると、今日のおともも すこしずつ育ちます。急がなくて大丈夫。</p></div>
         <span class="tag peach">おとも ${state.pets.roster.length}ひき</span>
       </div>
-      <div class="pet-home-layout">
+      ${renderPetTabs()}
+      <div class="pet-home-layout" data-pet-section="home">
         <section class="pet-showcase pet-tone-${species?.tone || "peach"}">
           ${renderPetCompanion(pet, { className: "pet-showcase-art" })}
           <div class="pet-showcase-copy">
@@ -4952,8 +5033,8 @@ function renderPets() {
           }).join("")}
         </aside>
       </div>
-      ${renderPetAppearancePicker(pet)}
-      <section class="pet-play-zone ${view.petMotion?.petId === pet.id ? "is-patted" : ""}" aria-label="${escapeHtml(pet.name)}となかよくなる場所">
+      <div class="boutique-section" data-pet-section="look">${renderPetAppearancePicker(pet)}</div>
+      <section data-pet-section="play" class="pet-play-zone ${view.petMotion?.petId === pet.id ? "is-patted" : ""}" aria-label="${escapeHtml(pet.name)}となかよくなる場所">
         ${renderPetCompanion(pet, { className: "pet-play-zone-art" })}
         <div class="pet-play-zone-copy">
           <span class="tag mint">${escapeHtml(pet.name)}と ひとやすみ</span>
@@ -4963,7 +5044,7 @@ function renderPets() {
           ${renderPetCommands(pet)}
         </div>
       </section>
-      <div class="pet-detail-grid">
+      <div class="pet-detail-grid" data-pet-section="tricks">
         <section class="pet-trick-section"><div class="section-heading"><div><h3>${escapeHtml(pet.name)}の とくいわざ</h3><p class="question-sub">レベルにとどいた芸は、タップしておぼえたり みせたりできます。</p></div></div><div class="pet-trick-grid">${tricksForPet(pet).map((trick) => renderPetTrickCard(pet, trick)).join("")}</div></section>
       </div>
     </section>
@@ -5048,9 +5129,10 @@ function renderLegacyIsland() {
 
 function renderGardenDecorShop() {
   return `
-    <section class="garden-decor-shop">
+    <section class="garden-decor-shop ${view.gardenShopOpen ? "is-open" : ""}">
       <div>
         <strong>にわの もようがえ</strong>
+        <button class="soft-button garden-shop-close" data-action="garden-shop-toggle">とじる</button>
         <p class="question-sub">コイン ${state.stats.coins}こ。すきなものを ひとつえらぼう。</p>
       </div>
       <div class="garden-decor-choices">
@@ -5167,10 +5249,14 @@ function gardenExpansionAvailable() {
   return Boolean(next && gardenJourneyCount() >= next.at);
 }
 
+function renderGardenShopToggle() {
+  return view.gardenEditing ? "" : `<button class="soft-button garden-shop-toggle" data-action="garden-shop-toggle" aria-expanded="${Boolean(view.gardenShopOpen)}">にわの もようがえ</button>`;
+}
+
 function renderGardenGatherButtons() {
   if (view.gardenEditing) return "";
   const buttons = [gardenFacilityIsPlaced("tree") ? `<button class="soft-button" data-action="collect-tree" ${state.garden.treeReady ? "" : "disabled"}>木のプレゼント</button>` : "", gardenFacilityIsPlaced("garden") ? `<button class="soft-button" data-action="harvest-garden" ${state.garden.harvestReady ? "" : "disabled"}>おはなを あつめる</button>` : ""].join("");
-  return buttons ? `<div class="action-row garden-gather-actions">${buttons}</div>` : "";
+  return `<div class="action-row garden-gather-actions">${buttons}${renderGardenShopToggle()}</div>`;
 }
 
 function renderGardenGrowthStrip() {
