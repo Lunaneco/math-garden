@@ -485,6 +485,8 @@ button.hissan-cell { cursor: pointer; }
   .hissan-play { height: 100%; }
   .hissan-stage { grid-template-rows: minmax(0, 1fr); }
   .hissan-desk { overflow: hidden; }
+  /* ノートは中身の大きさのまま（入りきらないときは JS が少し縮める） */
+  .hissan-paper { max-width: none; overflow: visible; flex: none; }
   .hissan-pad { align-content: center; max-height: 100%; }
 }
 @media (min-width: 900px) and (max-width: 1120px) and (orientation: landscape) {
@@ -509,3 +511,7 @@ button.hissan-cell { cursor: pointer; }
 }
 .hissan-point i { font-style: normal; font-size: 1.2rem; }
 .hissan-note b.is-ghost { color: rgba(108, 78, 14, .35); }
+
+.hissan-cell.is-slot.is-hintcell { border-color: var(--hs-butter); background: var(--hs-butter-soft); animation: hissan-glow 1.3s ease-in-out infinite; }
+
+.hissan-cell.is-slot.is-decoy { border-color: #ecdce3; background: rgba(255, 255, 255, .55); }

@@ -156,12 +156,12 @@
     {
       id: 'div-exact', op: 'div', section: 'div', title: 'わり算の ひっさん', point: 'たてる → かける → ひく → おろす',
       dish: { name: 'ピクニックパン', art: 'questBakeryBread' },
-      gen: (r) => sample(r, ([a, b]) => a % b === 0 && a >= 20, (x) => { const d = randInt(x, 2, 9); const q = randInt(x, 11, 49); return [d * q, d]; }, [84, 4])
+      gen: (r) => sample(r, ([a, b]) => a % b === 0 && a >= 20 && !String(a / b).includes('0'), (x) => { const d = randInt(x, 2, 9); const q = randInt(x, 11, 49); return [d * q, d]; }, [84, 4])
     },
     {
       id: 'div-rest', op: 'div', section: 'div', title: 'あまりの ある わり算', point: 'さいごに のこったのが あまり',
       dish: { name: 'マカロンタワー', art: 'stickerMacaron' },
-      gen: (r) => sample(r, ([a, b]) => a % b !== 0 && a >= 20 && a < 100, (x) => { const d = randInt(x, 2, 9); return [randInt(x, 20, 99), d]; }, [86, 4])
+      gen: (r) => sample(r, ([a, b]) => a % b !== 0 && a >= 20 && a < 100 && !String(Math.floor(a / b)).includes('0'), (x) => { const d = randInt(x, 2, 9); return [randInt(x, 20, 99), d]; }, [86, 4])
     },
     {
       id: 'div-3digit', op: 'div', section: 'div', title: '3けたの わり算', point: 'おなじ やりかたを もういっかい くりかえすだけ',
@@ -212,14 +212,14 @@
     if (!board.cells[k]) board.cells[k] = { r, c, span: span || 1, given: null, slot: true, kind: kind || 'digit' };
     return k;
   }
-  function pushStep(board, step) { board.steps.push(step); return step; }
+  function pushStep(board, step) { step.index = board.steps.length; board.steps.push(step); return step; }
 
   function addHeads(board, L) {
     // くらいの おうち（ひゃく・じゅう・いち）
     for (let p = 0; p < L; p += 1) board.heads.push({ c: L - p, p, name: placeName(p) });
   }
 
-  function buildAdd(problem, notes) {
+  function buildAdd(problem, notes, decoys) {
     const { a, b } = problem;
     const sum = a + b;
     const L = lenOf(sum);
@@ -229,21 +229,31 @@
     for (let p = 0; p < lenOf(a); p += 1) addGiven(board, 1, L - p, digitAt(a, p), { who: 'a', p });
     addGiven(board, 2, 0, '＋', { sign: true });
     board.rules.push({ row: 3, from: 0, to: L });
+    const placeIdx = {};
     if (problem.setup) {
-      for (let p = 0; p < lenOf(b); p += 1) {
-        const k = addSlot(board, 2, L - p, 'place');
-        board.cells[k].who = 'b';
-        board.cells[k].p = p;
-        pushStep(board, {
-          kind: 'place', phase: 'ならべる', cell: k, expect: String(digitAt(b, p)),
-          say: p === 0 ? `${b} の 「いち」の くらいを、いちの おうちの したに 書こう` : `${b} の 「${placeName(p)}」の くらいを、${placeName(p)}の おうちの したに`,
-          hint: `${placeName(p)}の おうちの まっすぐ したに ${digitAt(b, p)} を おこう`
-        });
+      for (let p = 0; p < L; p += 1) {
+        if (p < lenOf(b)) {
+          const k = addSlot(board, 2, L - p, 'place');
+          board.cells[k].who = 'b';
+          board.cells[k].p = p;
+          placeIdx[p] = board.steps.length;
+          pushStep(board, {
+            kind: 'place', phase: 'ならべる', cell: k, expect: String(digitAt(b, p)), deps: [],
+            say: p === 0 ? `${b} の 「いち」の くらいを、いちの おうちの したに 書こう` : `${b} の 「${placeName(p)}」の くらいを、${placeName(p)}の おうちの したに`,
+            hint: `${placeName(p)}の おうちの まっすぐ したに ${digitAt(b, p)} を おこう`
+          });
+        } else if (decoys) {
+          // ならべる数が ない くらいにも ますを おいて、そろえ方を えらばせる
+          const k = addSlot(board, 2, L - p, 'decoy');
+          board.cells[k].who = 'b';
+          board.cells[k].p = p;
+        }
       }
     } else {
       for (let p = 0; p < lenOf(b); p += 1) addGiven(board, 2, L - p, digitAt(b, p), { who: 'b', p });
     }
     let carry = 0;
+    let carryIdx = null; // となりの くらいから ひっこしてきた 1 を 書いた手順
     for (let p = 0; p < L; p += 1) {
       const c = L - p;
       const da = p < lenOf(a) ? digitAt(a, p) : null;
@@ -252,7 +262,7 @@
       if (da === null && db === null) {
         const k = addSlot(board, 4, c, 'digit');
         pushStep(board, {
-          kind: 'carryout', phase, cell: k, expect: String(carry),
+          kind: 'carryout', phase, cell: k, expect: String(carry), deps: carryIdx === null ? [] : [carryIdx],
           say: `のこった ${carry} を そのまま おろそう`,
           hint: `ひっこして きた ${carry} を、したに おろすよ`, effect: { type: 'bundle-in', place: p }
         });
@@ -260,7 +270,9 @@
       }
       const total = (da || 0) + (db || 0) + carry;
       const terms = [da, db].filter((x) => x !== null).join(' + ') + (carry ? ' + 1' : '');
+      let noteIdx = null;
       if (notes && total >= 10) {
+        noteIdx = board.steps.length;
         pushStep(board, {
           kind: 'note', phase, cell: 'note', expect: String(total), eq: `${terms} =`,
           say: `まず ${placeName(p)}の くらいを たしてみよう。${terms} は いくつ？`,
@@ -269,29 +281,42 @@
       }
       const k = addSlot(board, 4, c, 'digit');
       const ones = total % 10;
+      const sumDeps = [noteIdx, placeIdx[p], carryIdx].filter((x) => x !== null && x !== undefined);
+      const sumIdx = board.steps.length;
+      const alone = (da === null) !== (db === null) && !carry; // うえか したの どちらかしか 数が ない くらい
+      const only = da !== null ? da : db;
       pushStep(board, {
-        kind: 'sum', phase, cell: k, expect: String(ones), eq: `${terms} =`, total,
-        say: total >= 10
-          ? `${total} は 10こと ${ones}こ。${placeName(p)}の おうちには ${ones} だけ 書こう`
-          : `${terms} は ${total}。${placeName(p)}の おうちに 書こう`,
-        hint: total >= 10 ? `${total} から 10を とると のこりは ${ones}` : `${terms} は ${total} だよ`
+        kind: 'sum', phase, cell: k, expect: String(ones), eq: `${terms} =`, total, deps: sumDeps,
+        say: alone
+          ? `${placeName(p)}の くらいは ${only} だけ。そのまま したに 書こう`
+          : total === 10
+            ? `${terms} は ちょうど 10！ 10こは となりへ ひっこすから、${placeName(p)}の おうちには 0 を 書こう`
+            : total >= 10
+              ? `${terms} は ${total}。10こと ${ones}こ だから、${placeName(p)}の おうちには ${ones} だけ 書こう`
+              : `${terms} は ${total}。${placeName(p)}の おうちに 書こう`,
+        hint: alone
+          ? `うえの ${only} を そのまま したに うつすよ`
+          : total >= 10 ? `${total} から 10を とると のこりは ${ones}` : `${terms} は ${total} だよ`
       });
       if (total >= 10) {
         const target = L - (p + 1);
         const ck = addSlot(board, 0, target, 'carry');
         board.cells[ck].carry = true;
+        carryIdx = board.steps.length;
         pushStep(board, {
-          kind: 'carry', phase, cell: ck, expect: '1',
+          kind: 'carry', phase, cell: ck, expect: '1', deps: [sumIdx],
           say: `10こ あつまったから、1パックに して ${placeName(p + 1)}の おうちへ ひっこし！`,
           hint: `10こで 1つ うえの くらいの 1に なるよ`, effect: { type: 'bundle', from: p, to: p + 1 }
         });
+      } else {
+        carryIdx = null;
       }
       carry = total >= 10 ? 1 : 0;
     }
     return board;
   }
 
-  function buildSub(problem, notes) {
+  function buildSub(problem, notes, decoys) {
     const { a, b } = problem;
     const diff = a - b;
     const L = lenOf(a);
@@ -302,21 +327,31 @@
     for (let p = 0; p < L; p += 1) addGiven(board, 1, L - p, digitAt(a, p), { who: 'a', p });
     addGiven(board, 2, 0, '−', { sign: true });
     board.rules.push({ row: 3, from: 0, to: L });
+    const placeIdx = {};
     if (problem.setup) {
-      for (let p = 0; p < lenOf(b); p += 1) {
-        const k = addSlot(board, 2, L - p, 'place');
-        board.cells[k].who = 'b';
-        board.cells[k].p = p;
-        pushStep(board, {
-          kind: 'place', phase: 'ならべる', cell: k, expect: String(digitAt(b, p)),
-          say: `${b} の 「${placeName(p)}」の くらいを、${placeName(p)}の おうちの したに 書こう`,
-          hint: `${placeName(p)}の おうちの まっすぐ したに ${digitAt(b, p)} を おこう`
-        });
+      for (let p = 0; p < L; p += 1) {
+        if (p < lenOf(b)) {
+          const k = addSlot(board, 2, L - p, 'place');
+          board.cells[k].who = 'b';
+          board.cells[k].p = p;
+          placeIdx[p] = board.steps.length;
+          pushStep(board, {
+            kind: 'place', phase: 'ならべる', cell: k, expect: String(digitAt(b, p)), deps: [],
+            say: `${b} の 「${placeName(p)}」の くらいを、${placeName(p)}の おうちの したに 書こう`,
+            hint: `${placeName(p)}の おうちの まっすぐ したに ${digitAt(b, p)} を おこう`
+          });
+        } else if (decoys) {
+          const k = addSlot(board, 2, L - p, 'decoy');
+          board.cells[k].who = 'b';
+          board.cells[k].p = p;
+        }
       }
     } else {
       for (let p = 0; p < lenOf(b); p += 1) addGiven(board, 2, L - p, digitAt(b, p), { who: 'b', p });
     }
     const top = String(a).split('').reverse().map(Number);
+    const borrowSteps = []; // かりた あとの数を 書いた手順（ぜんぶ）
+    const borrowByColumn = {};
     for (let p = 0; p < L; p += 1) {
       const bd = p < lenOf(b) ? digitAt(b, p) : 0;
       const phase = `${placeName(p)}の くらい`;
@@ -331,10 +366,16 @@
           const kk = addSlot(board, 0, L - q, 'borrow');
           board.cells[kk].borrow = true;
           const lender = q > p;
+          const myIdx = board.steps.length;
+          const earlier = borrowSteps.slice();
+          borrowSteps.push(myIdx);
+          (borrowByColumn[q] = borrowByColumn[q] || []).push(myIdx);
           pushStep(board, {
-            kind: 'borrow', phase, cell: kk, expect: String(top[q]), column: q,
+            kind: 'borrow', phase, cell: kk, expect: String(top[q]), column: q, deps: earlier,
             say: q === k
-              ? `${placeName(p)}の くらいは ${before[p]} から ${bd} が ひけないよ。となりの おうちから 1つ かりよう！ ${placeName(q)}の ${before[q]} は ${top[q]} に なるよ`
+              ? (k === p + 1
+                ? `${placeName(p)}の くらいは ${before[p]} から ${bd} が ひけないよ。となりの おうちから 1つ かりよう！ ${placeName(q)}の ${before[q]} は ${top[q]} に なるよ`
+                : `${placeName(p)}の くらいは ${before[p]} から ${bd} が ひけないよ。となりは 0 だから かせないね。${placeName(q)}の おうちから かりよう！ ${before[q]} は ${top[q]} に なるよ`)
               : lender
                 ? `0の おうちは かせないから、さらに となりから もらって ${placeName(q)}の くらいは ${top[q]} に なるよ`
                 : `${placeName(p)}の くらいは 10こ もらって ${top[q]} に なるよ`,
@@ -346,10 +387,15 @@
       if (p < R) {
         const k = addSlot(board, 4, L - p, 'digit');
         const value = top[p] - bd;
+        const nothing = p >= lenOf(b) || bd === 0; // ひく数が ない くらい
         pushStep(board, {
           kind: 'diff', phase, cell: k, expect: String(value), eq: `${top[p]} − ${bd} =`,
-          say: `${top[p]} − ${bd} は いくつ？ ${placeName(p)}の おうちに 書こう`,
-          hint: `${top[p]} から ${bd} を ひくよ`, effect: { type: 'take', place: p, count: bd }
+          deps: [placeIdx[p], ...(borrowByColumn[p] || [])].filter((x) => x !== undefined),
+          say: nothing
+            ? `${placeName(p)}の くらいは ひく数が ないよ。${top[p]} を そのまま 書こう`
+            : `${top[p]} − ${bd} は いくつ？ ${placeName(p)}の おうちに 書こう`,
+          hint: nothing ? `ひかないから ${top[p]} の まま だよ` : `${top[p]} から ${bd} を ひくよ`,
+          effect: { type: 'take', place: p, count: bd }
         });
       }
     }
@@ -368,40 +414,49 @@
     addGiven(board, 2, L, b, { who: 'b', p: 0 });
     board.rules.push({ row: 3, from: 0, to: L });
     let carry = 0;
+    let mulCarryIdx = null;
     for (let p = 0; p < lenOf(a); p += 1) {
       const c = L - p;
       const da = digitAt(a, p);
       const total = da * b + carry;
       const terms = `${da} × ${b}${carry ? ` + ${carry}` : ''}`;
       const phase = `${placeName(p)}の くらい`;
+      let mulNoteIdx = null;
       if (notes && total >= 10) {
+        mulNoteIdx = board.steps.length;
         pushStep(board, {
           kind: 'note', phase, cell: 'note', expect: String(total), eq: `${terms} =`,
           say: `まず ${terms} を けいさんしよう。いくつかな？`, hint: `${da} × ${b} は ${da * b}${carry ? `。それに ${carry} を たすよ` : ''}`
         });
       }
       const k = addSlot(board, 4, c, 'digit');
+      const prodIdx = board.steps.length;
       pushStep(board, {
         kind: 'prod', phase, cell: k, expect: String(total % 10), eq: `${terms} =`, total,
-        say: total >= 10
-          ? `${total} は 10が ${Math.floor(total / 10)}こと ${total % 10}こ。${placeName(p)}の おうちには ${total % 10} だけ 書こう`
-          : `${terms} は ${total}。${placeName(p)}の おうちに 書こう`,
+        deps: [mulNoteIdx, mulCarryIdx].filter((x) => x !== null),
+        say: total === 10
+          ? `${terms} は ちょうど 10！ 10は となりへ ひっこすから、${placeName(p)}の おうちには 0 を 書こう`
+          : total >= 10
+            ? `${terms} は ${total}。10が ${Math.floor(total / 10)}こと ${total % 10}こ だから、${placeName(p)}の おうちには ${total % 10} だけ 書こう`
+            : `${terms} は ${total}。${placeName(p)}の おうちに 書こう`,
         hint: `${terms} は ${total}${total >= 10 ? ` → のこりの ${total % 10}` : ''}`
       });
       carry = Math.floor(total / 10);
+      mulCarryIdx = null;
       if (carry > 0) {
         if (p + 1 < lenOf(a)) {
           const ck = addSlot(board, 0, L - (p + 1), 'carry');
           board.cells[ck].carry = true;
+          mulCarryIdx = board.steps.length;
           pushStep(board, {
-            kind: 'carry', phase, cell: ck, expect: String(carry),
+            kind: 'carry', phase, cell: ck, expect: String(carry), deps: [prodIdx],
             say: `10が ${carry}こ だから、${placeName(p + 1)}の おうちに ${carry} を ひっこし！`,
             hint: `${total} の 10の くらいの ${carry} を ちいさく 書くよ`, effect: { type: 'bundle', from: p, to: p + 1 }
           });
         } else {
           const k2 = addSlot(board, 4, L - (p + 1), 'digit');
           pushStep(board, {
-            kind: 'carryout', phase, cell: k2, expect: String(carry),
+            kind: 'carryout', phase, cell: k2, expect: String(carry), deps: [prodIdx],
             say: `のこった ${carry} を そのまま おろそう`, hint: `${carry} を したに おろすよ`
           });
         }
@@ -480,7 +535,13 @@
         pushStep(board, { kind: 'note', phase, cell: 'note', expect: String(t), eq: `${terms} =`, say: `${terms} は いくつ？`, hint: `${terms} を かぞえよう` });
       }
       const k = addSlot(board, 8, W - p, 'digit');
-      pushStep(board, { kind: 'sum', phase, cell: k, expect: String(t % 10), eq: `${terms} =`, total: t, say: t >= 10 ? `${t} の 1の くらいの ${t % 10} を 書こう` : `${terms} は ${t}`, hint: `${terms} は ${t}` });
+      const alone2 = (da === null) !== (db === null) && !carry;
+      const only2 = da !== null ? da : db;
+      pushStep(board, {
+        kind: 'sum', phase, cell: k, expect: String(t % 10), eq: `${terms} =`, total: t,
+        say: alone2 ? `${only2} は そのまま したに おろそう` : t >= 10 ? `${terms} は ${t}。1の くらいの ${t % 10} を 書こう` : `${terms} は ${t}`,
+        hint: alone2 ? `うえの ${only2} を そのまま うつすよ` : `${terms} は ${t}`
+      });
       if (t >= 10) {
         const ck = addSlot(board, 6, W - (p + 1), 'carry');
         board.cells[ck].carry = true;
@@ -524,22 +585,28 @@
       const qk = addSlot(board, 0, col(i), 'quotient');
       pushStep(board, {
         kind: 'q', phase: 'たてる', cell: qk, expect: String(q), eq: `${label} =`,
-        say: `${current} の なかに ${divisor} は なんこ はいる？ うえに 「たてる」よ`,
-        hint: `${divisor} の だん で ${current} に ちかい ところを さがそう`
+        say: current < divisor
+          ? `${current} は ${divisor} より ちいさいね。${divisor} は はいるかな？ はいらないときは 0 を 「たてる」よ`
+          : `${current} の なかに ${divisor} は なんこ はいる？ うえに 「たてる」よ`,
+        hint: current < divisor
+          ? `${current} の なかに ${divisor} は 1つも はいらないから 0`
+          : `${divisor} の だん で ${current} に ちかい ところを さがそう`
       });
       const prodText = String(prod);
       const pk = addSlot(board, pr, col(i) - prodText.length + 1, 'product', prodText.length);
       addGiven(board, pr, 1, '−', { sign: true });
       pushStep(board, {
         kind: 'prod', phase: 'かける', cell: pk, expect: prodText, eq: `${divisor} × ${q} =`,
-        say: `${divisor} × ${q} を けいさんして、した に 書こう`, hint: `${divisor} × ${q} は ${prod}`
+        say: q === 0 ? `${divisor} × 0 は 0。0 を したに 書こう` : `${divisor} × ${q} を けいさんして、した に 書こう`,
+        hint: `${divisor} × ${q} は ${prod}`
       });
       const remText = String(rem);
       const dk = addSlot(board, dr, col(i) - remText.length + 1, 'remainder', remText.length);
       board.rules.push({ row: dr, from: col(i) - prodText.length + 1, to: col(i), over: true });
       pushStep(board, {
         kind: 'diff', phase: 'ひく', cell: dk, expect: remText, eq: `${current} − ${prod} =`,
-        say: `${current} − ${prod} は いくつ？`, hint: `${current} から ${prod} を ひくよ`
+        say: prod === 0 ? `0 を ひくから ${current} の まま。そのまま 書こう` : `${current} − ${prod} は いくつ？`,
+        hint: prod === 0 ? `なにも ひかないから ${current} の まま` : `${current} から ${prod} を ひくよ`
       });
       if (i < n - 1) {
         const bk = addSlot(board, dr, col(i + 1), 'bring');
@@ -562,9 +629,10 @@
 
   function buildBoard(problem, options) {
     const notes = !options || options.notes !== false;
+    const decoys = Boolean(options && options.decoys);
     let board;
-    if (problem.op === 'add') board = buildAdd(problem, notes);
-    else if (problem.op === 'sub') board = buildSub(problem, notes);
+    if (problem.op === 'add') board = buildAdd(problem, notes, decoys);
+    else if (problem.op === 'sub') board = buildSub(problem, notes, decoys);
     else if (problem.op === 'mul') board = buildMul(problem, notes);
     else if (problem.op === 'mul2') board = buildMul2(problem, notes);
     else board = buildDiv(problem);
@@ -575,9 +643,28 @@
   }
 
   // 書いていく順に、盤面の状態を作る（テスト・描画の共通の土台）
-  function applySteps(board, count) {
+  // 書き終えた手順の番号（さきに 書いた ぶんも ふくむ）を じゅんに ならべる
+  function doneList(board, count, early) {
+    const list = [];
+    for (let i = 0; i < count && i < board.steps.length; i += 1) list.push(i);
+    for (const j of Array.from(early || []).sort((x, y) => x - y)) if (j >= count && j < board.steps.length) list.push(j);
+    return list;
+  }
+
+  // その手順を いま 書いてよいか（まえに 書くべき手順が 終わっているか）
+  function isReady(board, index, isDone) {
+    const step = board.steps[index];
+    if (!step) return false;
+    if (step.deps === undefined) {
+      for (let i = 0; i < index; i += 1) if (!isDone(i)) return false;
+      return true;
+    }
+    return step.deps.every((i) => isDone(i));
+  }
+
+  function applySteps(board, count, early) {
     const filled = {};
-    for (let i = 0; i < count && i < board.steps.length; i += 1) {
+    for (const i of doneList(board, count, early)) {
       const step = board.steps[i];
       if (step.cell === 'note') { filled.note = { value: step.expect, history: [] }; continue; }
       const prev = filled[step.cell];
@@ -606,7 +693,7 @@
   }
 
   // ひっこし／かしてもらう の いちごの数（ひゃく・じゅう・いち の おうちごと）
-  function tokenCounts(board, doneCount) {
+  function tokenCounts(board, doneCount, early) {
     const p = board.problem;
     if (p.op !== 'add' && p.op !== 'sub') return null;
     const L = board.L;
@@ -618,7 +705,7 @@
     } else {
       for (let q = 0; q < L; q += 1) counts[q] = digitAt(p.a, q);
     }
-    for (let i = 0; i < doneCount && i < board.steps.length; i += 1) {
+    for (const i of doneList(board, doneCount, early)) {
       const step = board.steps[i];
       if (!step.effect) continue;
       if (step.effect.type === 'bundle') {
@@ -634,7 +721,7 @@
   }
 
   const engine = Object.freeze({
-    LESSONS, SECTIONS, ROUND_MODES, ROUND_LABELS, lessonById, makeProblem, buildBoard, applySteps, readAnswer, tokenCounts,
+    LESSONS, SECTIONS, ROUND_MODES, ROUND_LABELS, lessonById, makeProblem, buildBoard, applySteps, readAnswer, tokenCounts, isReady,
     rng, hashText, placeName, countCarries, analyseBorrow, countMulCarries
   });
 
@@ -709,8 +796,9 @@
     session.round = round;
     session.mode = mode;
     session.problem = E.makeProblem(lesson.id, plays * 11 + round * 3 + (session.seedShift || 0));
-    session.board = E.buildBoard(session.problem, { notes: mode !== 'solo' });
+    session.board = E.buildBoard(session.problem, { notes: mode !== 'solo', decoys: mode === 'solo' });
     session.step = 0;
+    session.early = new Set(); // じゅんばんを とばして さきに 書いた手順
     session.typed = '';
     session.selected = null;
     session.showHint = false;
@@ -751,9 +839,63 @@
     session.effectId += 1;
     session.lastEffect = step.effect ? { id: session.effectId, ...step.effect } : null;
     session.step += 1;
+    // さきに 書いてあった 手順は とばす
+    while (session.early.has(session.step)) session.step += 1;
     clearTyped();
     session.selected = null;
+    session.say = '';
     if (session.step >= board.steps.length) completeProblem();
+  }
+
+  const isDone = (i) => i < session.step || session.early.has(i);
+
+  // ひとりでの とき、いま 目の前の手順ではない ますに 書いたとき。
+  // 書いてよい ますなら（まえの手順に よらない 数なら）さきに 書ける。
+  function writeOnOtherCell(digit) {
+    const board = session.board;
+    const cell = board.cells[session.selected];
+    if (!cell || cell.kind === 'decoy') {
+      session.say = cell && cell.who === 'b'
+        ? `ここは ${E.placeName(cell.p)}の おうち。ならべる 数が ないよ。${session.problem.b} の 1のくらいは いちの おうちだよ`
+        : 'ここには なにも 書かないよ';
+      return strayTap(session.selected, true);
+    }
+    let j = -1;
+    for (let i = session.step + 1; i < board.steps.length; i += 1) {
+      if (board.steps[i].cell === session.selected && !session.early.has(i)) { j = i; break; }
+    }
+    if (j < 0) {
+      session.say = 'ここは もう 書いたよ。ひかっている ますに すすもう';
+      return strayTap(session.selected, true);
+    }
+    if (!E.isReady(board, j, isDone)) {
+      session.say = 'ここは まだ あと！ 1のくらいから じゅんばんに 書こうね';
+      return strayTap(session.selected, true);
+    }
+    const step = board.steps[j];
+    session.typed += String(digit);
+    if (session.typed.length < step.expect.length) { deps.playSfx?.('tap', 'hissan'); deps.render(); return undefined; }
+    if (session.typed === step.expect) {
+      session.early.add(j);
+      deps.playSfx?.('bloom', 'hissan');
+      session.effectId += 1;
+      session.lastEffect = step.effect ? { id: session.effectId, ...step.effect } : null;
+      clearTyped();
+      session.selected = null;
+      session.wrongKey = null;
+      session.say = 'いいね！ そこから 書いたんだね。つぎは どこかな？';
+      deps.render();
+      return undefined;
+    }
+    session.mistakes += 1;
+    session.roundMistakes += 1;
+    session.soloMistakes += 1;
+    session.wrongKey = session.selected;
+    session.say = 'おしい！ もういちど やってみよう';
+    clearTyped();
+    deps.playSfx?.('try', 'hissan');
+    deps.render();
+    return undefined;
   }
 
   function completeProblem() {
@@ -778,7 +920,7 @@
         return;
       }
       if (session.selected !== step.cell) {
-        return strayTap(session.selected);
+        return writeOnOtherCell(digit);
       }
     }
     session.typed += String(digit);
@@ -797,12 +939,15 @@
     deps.render();
   }
 
-  function strayTap(cellKey) {
+  function strayTap(cellKey, keepSay) {
     session.stray += 1;
-    const step = currentStep();
-    session.say = session.stray >= 2
-      ? `つぎは ひかっている ますだよ。${step ? step.phase : ''}から じゅんばんに！`
-      : 'ひっさんは 1のくらいから じゅんばんに 書くよ';
+    if (!keepSay) {
+      session.say = session.stray >= 2
+        ? 'つぎは きいろく ひかっている ますに 書こう！'
+        : 'ひっさんは 1のくらいから じゅんばんに 書くよ';
+    } else if (session.stray >= 3) {
+      session.say = 'つぎは きいろく ひかっている ますに 書こう！';
+    }
     session.wrongKey = cellKey;
     clearTyped();
     deps.playSfx?.('tap', 'hissan');
@@ -815,7 +960,6 @@
     if (!step) return;
     clearTyped();
     session.wrongKey = null;
-    if (cellKey !== step.cell) { session.selected = cellKey; return strayTap(cellKey); }
     session.selected = cellKey;
     session.say = '';
     deps.playSfx?.('tap', 'hissan');
@@ -924,7 +1068,8 @@
     const items = [];
     for (let i = 0; i < Math.max(0, count); i += 1) {
       const gone = i >= count - removed;
-      const isB = bPart > 0 && i >= count - bPart - (fresh ? 0 : 0) && i < count && !(fresh && i >= count - fresh);
+      const endOfOld = count - (fresh || 0);
+      const isB = bPart > 0 && i >= endOfOld - bPart && i < endOfOld;
       items.push(`<i class="hissan-token hissan-token--u${unit} ${gone ? 'is-gone' : ''} ${isB ? 'is-b' : ''} ${fresh && i >= count - fresh ? 'is-new' : ''}">${unit === 0 ? '' : `<b>${unit === 1 ? '10' : unit === 2 ? '100' : '1000'}</b>`}</i>`);
     }
     return items.join('');
@@ -932,7 +1077,7 @@
 
   function renderHouses() {
     const b = session.board;
-    const info = E.tokenCounts(b, session.step);
+    const info = E.tokenCounts(b, session.step, session.early);
     if (!info) return '';
     const effect = session.lastEffect;
     const houses = [];
@@ -991,7 +1136,7 @@
   function renderBoard() {
     const b = session.board;
     const step = currentStep();
-    const filled = E.applySteps(b, session.step);
+    const filled = E.applySteps(b, session.step, session.early);
     const heads = b.problem.op !== 'div';
     const ro = heads ? 1 : 0;
     const rowSizes = [];
@@ -1031,19 +1176,23 @@
       const k = `${cell.r},${cell.c}`;
       const value = filled[k]?.value ?? '';
       const history = filled[k]?.history || [];
-      const isActive = step && step.cell === k;
+      const isTarget = step && step.cell === k;
+      // ひとりで: どこに 書くかは じぶんで えらぶ。ひかるのは えらんだ ますだけ（まよったら ヒント）
+      const isActive = isTarget && (session.mode !== 'solo' || session.selected === k);
       const typed = isActive ? session.typed : '';
       const reveal = isActive && session.reveal ? step.expect : '';
       const cls = ['hissan-cell', 'is-slot', `is-${cell.kind}`];
       if (value) cls.push('is-filled');
       if (isActive && !session.solved) cls.push('is-active');
+      if (isTarget && !isActive && !session.solved && session.mode === 'solo' && (session.stray >= 2 || session.showHint)) cls.push('is-hintcell');
       if (session.wrongKey === k) cls.push('is-wrong');
       if (solo && session.selected === k) cls.push('is-picked');
       if (cell.kind === 'carry' || cell.kind === 'borrow') cls.push('is-mark');
+      if (cell.kind === 'decoy') cls.push('is-decoy');
       const shown = typed || value || reveal;
       const old = history.length ? `<s>${esc(history[history.length - 1])}</s>` : '';
       const inner = `${old}<span class="${reveal && !typed && !value ? 'is-ghost' : ''}">${esc(shown)}</span>${isActive && !value && !typed && !reveal && session.mode !== 'demo' ? '<u class="hissan-caret"></u>' : ''}`;
-      const aria = `${cell.kind === 'carry' ? 'ひっこしの ちいさい 数' : cell.kind === 'borrow' ? 'かりた あとの 数' : 'こたえを 書く ます'}`;
+      const aria = cell.kind === 'decoy' ? 'ならべる ますの ひとつ' : `${cell.kind === 'carry' ? 'ひっこしの ちいさい 数' : cell.kind === 'borrow' ? 'かりた あとの 数' : 'こたえを 書く ます'}`;
       if (solo) parts.push(`<button class="${cls.join(' ')}" style="${area}" data-action="hissan-cell" data-key="${k}" aria-label="${aria}">${inner}</button>`);
       else parts.push(`<div class="${cls.join(' ')}" style="${area}" aria-label="${aria}">${inner}</div>`);
     }
@@ -1174,7 +1323,8 @@
     document.addEventListener('keydown', (event) => {
       if (!session || deps.getView().screen !== 'hissan') return;
       if (event.target && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) return;
-      if (/^[0-9]$/.test(event.key)) { event.preventDefault(); pressKey(event.key); }
+      const half = String(event.key || '').replace(/[０-９]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0xFEE0));
+      if (/^[0-9]$/.test(half)) { event.preventDefault(); pressKey(half); }
       else if (event.key === 'Backspace') { event.preventDefault(); erase(); }
       else if (event.key === 'Enter' || event.key === ' ') {
         if (session.solved) { event.preventDefault(); nextProblem(); }
@@ -1211,7 +1361,15 @@
   const api = {
     install, normalise, renderScreen, handleAction, afterRender,
     isPlaying: () => Boolean(session),
-    peek: () => (session ? { mode: session.mode, round: session.round, step: currentStep(), solved: session.solved, lessonDone: session.lessonDone, problem: session.problem } : null),
+    peek: () => {
+      if (!session) return null;
+      const ready = [];
+      session.board.steps.forEach((step, i) => {
+        if (i < session.step || session.early.has(i) || step.cell === 'note') return;
+        if (E.isReady(session.board, i, (k) => k < session.step || session.early.has(k))) ready.push({ index: i, cell: step.cell, expect: step.expect });
+      });
+      return { mode: session.mode, round: session.round, step: currentStep(), solved: session.solved, lessonDone: session.lessonDone, problem: session.problem, ready, mistakes: session.mistakes, decoys: Object.values(session.board.cells).filter((c) => c.kind === 'decoy').map((c) => `${c.r},${c.c}`) };
+    },
     summary: () => ({ stars: session ? 0 : totalStars(), cleared: E.LESSONS.filter((l) => hs().lessons[l.id]?.cleared).length })
   };
   global.MathGardenHissan = Object.freeze({ ...api, engine: E });
