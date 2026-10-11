@@ -914,11 +914,9 @@
     if (!step) return;
     if (session.mode === 'demo') return;
     if (session.mode === 'solo' && step.cell !== 'note') {
-      if (!session.selected) {
-        session.say = 'どこに 書くのかな？ まず ますを タップしてね';
-        deps.render();
-        return;
-      }
+      // ますを えらばずに 数字を おしたら、ふつうの じゅんばんの ますに 書く
+      // （えらばないと 入らない、で 止まらないように）
+      if (!session.selected) session.selected = step.cell;
       if (session.selected !== step.cell) {
         return writeOnOtherCell(digit);
       }
@@ -1185,6 +1183,7 @@
       if (value) cls.push('is-filled');
       if (isActive && !session.solved) cls.push('is-active');
       if (isTarget && !isActive && !session.solved && session.mode === 'solo' && (session.stray >= 2 || session.showHint)) cls.push('is-hintcell');
+      else if (isTarget && !session.solved && session.mode === 'solo' && !session.selected) cls.push('is-next-soft');
       if (session.wrongKey === k) cls.push('is-wrong');
       if (solo && session.selected === k) cls.push('is-picked');
       if (cell.kind === 'carry' || cell.kind === 'borrow') cls.push('is-mark');
@@ -1212,7 +1211,7 @@
     if (session.showHint && step) return step.hint;
     if (session.mode === 'solo') {
       if (session.wrongKey && session.tries) return 'おしい！ もういちど やってみよう';
-      return session.step === 0 ? `ひとりで いけるかな？ 1のくらいから はじめよう` : 'つぎは どこかな？ ますを タップしてね';
+      return session.step === 0 ? `ひとりで いけるかな？ 1のくらいから はじめよう` : 'いいね！ そのまま つづけて 書こう';
     }
     if (session.wrongKey && session.tries) return session.tries >= 3 ? 'いっしょに やろう。うすい 数を なぞってね' : 'だいじょうぶ、もういちど！';
     return step ? step.say : '';

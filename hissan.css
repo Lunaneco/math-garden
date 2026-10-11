@@ -515,3 +515,4 @@ button.hissan-cell { cursor: pointer; }
 .hissan-cell.is-slot.is-hintcell { border-color: var(--hs-butter); background: var(--hs-butter-soft); animation: hissan-glow 1.3s ease-in-out infinite; }
 
 .hissan-cell.is-slot.is-decoy { border-color: #ecdce3; background: rgba(255, 255, 255, .55); }
+.hissan-cell.is-slot.is-next-soft { border-color: #eeb4c8; border-style: solid; }
