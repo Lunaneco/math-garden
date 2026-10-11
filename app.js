@@ -1541,6 +1541,7 @@ const NUMBER_CARD = (() => {
 
 const NAV_ITEMS = [
   { id: "island", label: "おうち", sprite: "navIsland" },
+  { id: "garden", label: "おにわ", sprite: "flower" },
   { id: "learn", label: "おてつだい", sprite: "navLearn" },
   { id: "hissan", label: "ひっさん", sprite: "numbers" },
   { id: "pets", label: "ペット", sprite: "petCat" },
@@ -2990,11 +2991,17 @@ document.addEventListener("click", (event) => {
     paintGardenFloor(view.gardenSelectedFloor, null, null, true);
   } else if (action === "garden-stow") {
     stowGardenItem();
+  } else if (action === "garden-stroll") {
+    wanderGarden(Number(target.dataset.x), Number(target.dataset.y));
+  } else if (action === "garden-flutter") {
+    target.classList.add("is-away");
+    playSfx("tap", "garden");
+    window.setTimeout(() => target.classList.remove("is-away"), 720);
   } else if (action === "garden-undo") {
     undoGardenEdit();
   } else if (action === "garden-reward-open") {
     view.gardenSelectedId = view.result?.gardenGifts?.find(gift => gift.kind === "facility")?.id || "home";
-    setScreen("island"); openGardenEditor();
+    setScreen("garden"); openGardenEditor();
   } else if (action === "start-treasure") {
     startTreasure(target.dataset.noteId);
   } else if (action === "finish-treasure") {
@@ -3354,9 +3361,69 @@ function gardenJourneyCount(snapshot = state) {
   return ALL_STAGES.reduce((count, stage) => count + (snapshot?.completedStages?.[stage.id] ? safeStateInteger(snapshot.completedStages[stage.id].times, 1, 1) : 0), 0);
 }
 
+function renderGardenGate() {
+  const unplaced = gardenOwnedItems().some((item) => !state.garden.layout[item.id]);
+  const ready = (gardenFacilityIsPlaced("tree") && state.garden.treeReady) || (gardenFacilityIsPlaced("garden") && state.garden.harvestReady);
+  const note = unplaced ? "とどいたよ" : ready ? "きらきら" : "ひらく";
+  return `<button class="garden-gate ${unplaced || ready ? "is-glowing" : ""}" data-action="nav" data-screen="garden" aria-label="わたしのおにわをひらく"><span class="garden-gate-art">${renderGardenScene({ postcard: true })}</span><span class="garden-gate-label"><b>わたしの おにわ</b><small>${note}</small></span></button>`;
+}
+
+function renderGardenRound(spriteId, label) {
+  return `<span class="asset-sprite garden-round-sprite" aria-hidden="true" style="--src:url('${spriteUrl(spriteId)}')"></span><span>${label}</span>`;
+}
+
+function renderGardenBar() {
+  const arranging = Boolean(view.gardenEditing);
+  const unplaced = gardenOwnedItems().some((item) => !["home", "avatar"].includes(item.id) && !state.garden.layout[item.id]);
+  return `<div class="garden-world-bar"><button class="garden-round" data-action="nav" data-screen="island" aria-label="おうちへ">${renderGardenRound("home", "おうち")}</button><div class="garden-world-bar-group">${arranging ? "" : `<button class="garden-round" data-action="garden-zoom" aria-pressed="${Boolean(view.gardenZoom)}" aria-label="${view.gardenZoom ? "おにわを ぜんぶみる" : "おにわを おおきくみる"}">${renderGardenRound("star", view.gardenZoom ? "ぜんぶ" : "近く")}</button>`}${!arranging && gardenExpansionAvailable() ? `<button class="garden-round garden-round-grow" data-action="expand-garden-map" aria-label="おにわを ひろげる">${renderGardenRound("flower", "ひろげる")}</button>` : ""}${arranging ? "" : `<button class="garden-round" data-action="garden-shop-toggle" aria-expanded="${Boolean(view.gardenShopOpen)}" aria-label="かざりを えらぶ">${renderGardenRound("flower", "かざり")}</button>`}<button class="garden-round garden-round-main ${!arranging && unplaced ? "is-waiting" : ""}" data-action="garden-edit" aria-label="${arranging ? "できあがり" : "おにわを ならべる"}">${renderGardenRound(arranging ? "btnDone" : "chair", arranging ? "できた" : "ならべる")}</button></div></div>`;
+}
+
+function renderGardenAtmosphere() {
+  return `<div class="garden-sky" aria-hidden="true"><i class="garden-cloud garden-cloud-a"></i><i class="garden-cloud garden-cloud-b"></i><i class="garden-petal garden-petal-a"></i><i class="garden-petal garden-petal-b"></i><i class="garden-petal garden-petal-c"></i></div><button class="garden-flutter garden-flutter-a" data-action="garden-flutter" aria-label="ちょうちょ"><span aria-hidden="true">🦋</span></button><button class="garden-flutter garden-flutter-b" data-action="garden-flutter" aria-label="みつばち"><span aria-hidden="true">🐝</span></button>`;
+}
+
+function renderGarden() {
+  const arranging = Boolean(view.gardenEditing);
+  return `<div class="garden-world ${arranging ? "is-arranging" : "is-strolling"}">${renderGardenAtmosphere()}${renderGardenBar()}${arranging ? renderGardenEditor() : `<div class="garden-stage">${renderIslandBoard()}</div>${view.gardenShopOpen ? renderGardenDecorShop() : ""}`}</div>`;
+}
+
+function wanderGarden(x, y) {
+  if (view.gardenEditing || !gardenCellIsLand(x, y)) return false;
+  const occupant = gardenItemAt(state.garden.layout, x, y);
+  if (occupant && occupant !== "avatar") {
+    if (GARDEN_FACILITIES.some((item) => item.id === occupant)) {
+      visitIslandPlace(occupant);
+      return true;
+    }
+    view.gardenBoop = occupant;
+    playSfx("tap", "garden");
+    render();
+    view.gardenBoop = null;
+    return true;
+  }
+  const current = state.garden.layout.avatar;
+  if (current?.x === x && current?.y === y) {
+    view.gardenHop = true;
+    playSfx("tap", "garden");
+    render();
+    view.gardenHop = null;
+    return true;
+  }
+  const plan = gardenPlacementPlan("avatar", x, y, state.garden.layout);
+  if (!plan.valid) return false;
+  if (plan.swap) state.garden.layout[plan.swap] = { ...current };
+  state.garden.layout.avatar = { x, y };
+  view.gardenHop = true;
+  saveState();
+  playSfx("tap", "garden");
+  render();
+  view.gardenHop = null;
+  return true;
+}
+
 function renderIsland() {
   const currentLook = atelierLookById(state.atelier.lookId);
-  return `<div class="atelier-home"><section class="atelier-home-hero"><div class="atelier-home-copy"><span class="atelier-kicker">MY LITTLE ATELIER</span><h2>きょうは、<br>どんな わたし？</h2><p>すきなコーデで、おともとおでかけ。<br>お店をてつだって、おめかしをつくろう。</p><div class="action-row"><button class="primary-button" data-action="nav" data-screen="dress">コーデを えらぶ</button><button class="soft-button" ${view.active ? 'data-action="help-resume"' : 'data-action="help-picker"'}>${view.active ? "おてつだいの つづき" : "お店を てつだう"}</button></div><span class="atelier-home-tip">ヒントも、えらびなおしも だいじょうぶ。</span></div><div class="atelier-home-portrait atelier-frame-garden">${renderAvatarLayered()}<div class="atelier-home-pet">${renderPetCompanion(activePet(), { compact: true, showName: false })}</div><span class="atelier-outfit-label">${state.atelier.mode === "legacy" ? "まえのクローゼットのコーデ" : currentLook.name}</span></div></section>${placementEngine?.renderEntry?.() || ""}<div class="atelier-home-grid">${renderAtelierWish()}${renderHelpHome()}</div><section class="panel atelier-garden-home"><div class="section-heading"><div><span class="atelier-kicker">MY GARDEN</span><h3>わたしと おともの おにわ</h3><p>おてつだいで、少しずつ お店やおはながふえるよ。</p></div><button class="soft-button" data-action="nav" data-screen="pets">おともの おうち</button></div>${renderGardenGrowthStrip()}${renderIslandBoard()}${renderGardenGatherButtons()}${renderGardenDecorShop()}</section><div id="dailyGrowthHost" aria-live="polite"></div></div>`;
+  return `<div class="atelier-home"><section class="atelier-home-hero"><div class="atelier-home-copy"><span class="atelier-kicker">MY LITTLE ATELIER</span><h2>きょうは、<br>どんな わたし？</h2><p>すきなコーデで、おともとおでかけ。<br>お店をてつだって、おめかしをつくろう。</p><div class="action-row"><button class="primary-button" data-action="nav" data-screen="dress">コーデを えらぶ</button><button class="soft-button" ${view.active ? 'data-action="help-resume"' : 'data-action="help-picker"'}>${view.active ? "おてつだいの つづき" : "お店を てつだう"}</button></div><span class="atelier-home-tip">ヒントも、えらびなおしも だいじょうぶ。</span></div><div class="atelier-home-portrait atelier-frame-garden">${renderAvatarLayered()}<div class="atelier-home-pet">${renderPetCompanion(activePet(), { compact: true, showName: false })}</div><span class="atelier-outfit-label">${state.atelier.mode === "legacy" ? "まえのクローゼットのコーデ" : currentLook.name}</span></div></section>${renderGardenGate()}${placementEngine?.renderEntry?.() || ""}<div class="atelier-home-grid">${renderAtelierWish()}${renderHelpHome()}</div><div id="dailyGrowthHost" aria-live="polite"></div></div>`;
 }
 
 function renderLearn() {
@@ -4795,6 +4862,7 @@ function render() {
       : "browse";
   const renderers = {
     island: renderIsland,
+    garden: renderGarden,
     learn: renderLearn,
     dress: renderDress,
     pets: renderPets,
@@ -4904,7 +4972,7 @@ function renderStats() {
 function renderNav() {
   const hasResume = Boolean(view.active && !view.result);
   const markup = (item) => `<button class="tab-button ${view.screen === item.id ? "active" : ""}" data-action="nav" data-screen="${item.id}" ${view.screen === item.id ? 'aria-current="page"' : ""} aria-label="${item.label}${item.id === "learn" && hasResume ? "、おてつだいのつづき" : ""}"><span class="asset-sprite tab-sprite" aria-hidden="true" style="--src:url('${spriteUrl(item.sprite)}')"></span><span>${item.label}</span>${item.id === "learn" && hasResume ? '<span class="tab-resume-dot" aria-hidden="true"></span>' : ""}</button>`;
-  const primary = ["island", "dress", "learn", "hissan", "boutique", "pets"].map((id) => NAV_ITEMS.find((item) => item.id === id));
+  const primary = ["island", "garden", "dress", "learn", "hissan", "boutique", "pets"].map((id) => NAV_ITEMS.find((item) => item.id === id));
   const utilities = NAV_ITEMS.filter((item) => !primary.includes(item));
   document.querySelector("#navTabs").innerHTML = primary.map(markup).join("") + `<button class="tab-button ${utilities.some((item) => item.id === view.screen) ? "active" : ""}" data-action="atelier-menu" aria-expanded="${Boolean(view.utilityMenuOpen)}" ${view.utilityMenuOpen ? 'aria-controls="atelier-utilities"' : ""}><span aria-hidden="true" style="font-size:24px">✿</span><span>もっと</span></button>${view.utilityMenuOpen ? `<div class="atelier-utility-menu" id="atelier-utilities">${utilities.map(markup).join("")}</div>` : ""}`;
 }
@@ -5152,21 +5220,25 @@ function renderGardenDecorShop() {
 }
 
 // マイガーデン：アイソメトリックのタイルマップ（地形タイルを継ぎ目なく敷き詰める）
-function renderIslandBoard() {
-  if (view.gardenEditing) return renderGardenEditor();
-  const N = state.stats.landSize;
-  const landSide = N - 2; // 保存座標の外周は予約領域。表示は置ける床だけ。
-  const objects = islandObjects(N);
-  const TW = view.gardenZoom ? 78 : Math.min(78, 540 / landSide);
-  const TH = TW / 2; // すべての床素材は同じ2:1の菱形、厚みは18/216。
+function renderGardenScene({ editing = false, postcard = false } = {}) {
+  const garden = editing ? gardenWorkingState() : state.garden;
+  const N = state.stats.landSize || gardenMapSize();
+  const landSide = N - 2;
+  const zoom = !postcard && !editing && view.gardenZoom;
+  const TW = zoom ? 120 : Math.max(88, Math.min(150, Math.floor(880 / landSide)));
+  const TH = TW / 2;
   const imgH = TW * (126 / 216);
   const originX = (landSide - 1) * (TW / 2);
   const boardW = landSide * TW;
   const boardH = (landSide - 1) * TH + imgH;
-
-  // Keep the same isometric coordinates at every size. Pixel-sized children
-  // inside a shrinking flex item previously put the school off-screen.
-  let html = `<button class="soft-button garden-zoom-button" data-action="garden-zoom" aria-pressed="${view.gardenZoom}">${view.gardenZoom ? "おにわを ぜんぶみる" : "おにわを おおきくみる"}</button><div class="iso-scene ${view.gardenZoom ? "garden-zoomed" : ""}" style="--garden-headroom:${TW * 1.35}px" data-play-scroll="garden-overview"><div class="iso-board" style="width:${view.gardenZoom ? `${boardW}px` : `min(100%, ${boardW}px)`};aspect-ratio:${boardW} / ${boardH}">`;
+  const objects = islandObjects(N, garden);
+  const paint = editing && view.gardenTool === "floors" && state.garden.ownedFloors.length > 1;
+  const selectedId = view.gardenSelectedId;
+  const cursor = view.gardenCursor || { x: 1, y: 1 };
+  const plan = editing && !paint ? gardenPlacementPlan(selectedId, cursor.x, cursor.y, garden.layout, N) : null;
+  const previewCells = editing ? gardenItemCells(paint ? "floor" : selectedId, cursor) : [];
+  const sizeLabel = (id) => gardenItemFootprint(id) === 2 ? "2×2マス" : "1マス";
+  let html = `<div class="iso-scene ${zoom ? "garden-zoomed" : ""} ${postcard ? "is-postcard" : ""} ${editing ? "garden-edit-scroll" : ""}" style="--garden-headroom:${Math.round(TW * 0.62)}px" data-play-scroll="${editing ? "garden-editor" : postcard ? "garden-postcard" : "garden-overview"}"${editing ? ' tabindex="0" aria-label="大きなおにわ。横と縦にスクロールできるよ"' : ""}><div class="iso-board" style="width:${zoom ? `${boardW}px` : `min(100%, ${boardW}px)`};aspect-ratio:${boardW} / ${boardH}">`;
   for (let sum = 2; sum <= 2 * (N - 2); sum += 1) {
     for (let x = 1; x < N - 1; x += 1) {
       const y = sum - x;
@@ -5175,28 +5247,55 @@ function renderIslandBoard() {
       const top = (x + y - 2) * (TH / 2);
       const z = x + y + 1;
       const object = objects[`${x},${y}`];
-      const floor = gardenFloorAt(x, y);
-      html += `<div class="iso-tile" style="left:${left / boardW * 100}%;top:${top / boardH * 100}%;width:${TW / boardW * 100}%;height:${imgH / boardH * 100}%;z-index:${z};" data-garden-x="${x}" data-garden-y="${y}"><span class="iso-floor" style="background-image:url('./assets/garden-floors/${floor}.svg?v=20261005-2')" aria-hidden="true"></span></div>`;
-      if (object) {
-        const side = gardenItemFootprint(object.id);
-        const relativeWidth = { home:.86, school:.86, tree:.78, boutique:.86, garden:.76, avatar:.72 }[object.id] || .72;
-        const objW = TW * side * relativeWidth;
-        // A building stands at the centre of its four tiles; small items stay
-        // within one tile. Artwork padding is separate from the name label.
-        const objBottom = boardH - top - TH * side / 2 - objW * .03;
-        const actionAttrs = object.place ? `data-action="visit-place" data-place="${object.place}" aria-label="${escapeHtml(object.label.replace(/<br>/g, ""))}をひらく"` : "";
-        const objectTag = object.place ? "button" : "div";
-        const typeAttr = object.place ? "type=\"button\"" : "";
-        html += `<${objectTag} ${typeAttr} class="iso-object ${object.className || ""} ${object.place ? "is-tappable" : ""} ${object.place === "school" && isFirstJourney() ? "is-next-place" : ""}" ${actionAttrs} data-footprint="${side}" style="left:${(left + TW / 2) / boardW * 100}%;bottom:${objBottom / boardH * 100}%;width:${objW / boardW * 100}%;z-index:${z + side - 1 + 400};--object-scale:1">
-          ${object.id === "avatar" ? `<span class="garden-map-companions">${renderAvatarLayered()}${renderPetCompanion(activePet(), { compact: true, showName: false })}</span>` : `<span class="iso-object-img" style="--src:url('${spriteUrl(object.sprite)}')"></span>`}
-          <span class="iso-label">${object.label}</span>
-        </${objectTag}>`;
+      const floor = garden.floorTiles?.[`${x},${y}`] || garden.baseFloor;
+      const tileStyle = `left:${left / boardW * 100}%;top:${top / boardH * 100}%;width:${TW / boardW * 100}%;height:${imgH / boardH * 100}%;z-index:${z};`;
+      const floorArt = `<span class="iso-floor" style="background-image:url('./assets/garden-floors/${floor}.svg?v=20261005-2')" aria-hidden="true"></span>`;
+      if (editing) {
+        const occupant = gardenItemAt(garden.layout, x, y);
+        const occupantItem = occupant ? gardenOwnedItems().find((item) => item.id === occupant) : null;
+        const current = x === cursor.x && y === cursor.y;
+        const preview = previewCells.some((cell) => cell.x === x && cell.y === y);
+        const fresh = view.gardenFresh === "all" || view.gardenFresh === `${x},${y}` ? "is-fresh" : "";
+        const previewClass = preview && !paint ? (plan?.valid ? "is-placement-preview" : "is-placement-blocked") : "";
+        const floorName = GARDEN_FLOORS.find((item) => item.id === floor)?.name || "しばふ";
+        const label = `${x}列 ${y}行、${occupantItem ? `${occupantItem.name}の場所、${sizeLabel(occupantItem.id)}` : "あいている場所"}、${floorName}。${paint ? "選んだ床をぬる" : "選んだものを置く"}`;
+        html += `<button class="iso-tile garden-edit-cell ${current ? "is-cursor" : ""} ${occupant === selectedId && !paint ? "is-selected-item" : ""} ${previewClass} ${fresh}" style="${tileStyle}" data-action="garden-cell" data-x="${x}" data-y="${y}" ${occupant ? `data-occupant="${occupant}"` : ""} tabindex="${current ? 0 : -1}" aria-label="${escapeHtml(label)}">${floorArt}</button>`;
+      } else if (postcard) {
+        html += `<div class="iso-tile" style="${tileStyle}" data-garden-x="${x}" data-garden-y="${y}">${floorArt}</div>`;
+      } else {
+        html += `<button class="iso-tile" style="${tileStyle}" data-garden-x="${x}" data-garden-y="${y}" data-x="${x}" data-y="${y}" data-action="garden-stroll" aria-label="ここを さわってみる">${floorArt}</button>`;
+      }
+      if (!object) continue;
+      const side = gardenItemFootprint(object.id);
+      const relativeWidth = { home: .86, school: .86, tree: .78, boutique: .86, garden: .76, avatar: .72 }[object.id] || .72;
+      const objW = TW * side * relativeWidth;
+      const objBottom = boardH - top - TH * side / 2 - objW * .03;
+      const objStyle = `left:${(left + TW / 2) / boardW * 100}%;bottom:${objBottom / boardH * 100}%;width:${objW / boardW * 100}%;z-index:${z + side - 1 + 400};--object-scale:1`;
+      const motion = object.id === view.gardenPlop ? "is-plop" : object.id === view.gardenBoop ? "is-boop" : object.id === "avatar" && view.gardenHop ? "is-hopping" : "";
+      const ready = !editing && !postcard && ((object.id === "tree" && state.garden.treeReady) || (object.id === "garden" && state.garden.harvestReady));
+      const chosen = editing && object.id === selectedId && !paint ? "is-chosen" : "";
+      const art = object.id === "avatar"
+        ? `<span class="garden-map-companions">${renderAvatarLayered()}${renderPetCompanion(activePet(), { compact: true, showName: false })}</span>`
+        : `<span class="iso-object-img" style="--src:url('${spriteUrl(object.sprite)}')"></span>`;
+      const name = `<span class="iso-label">${escapeHtml(object.label)}</span>`;
+      if (editing) {
+        html += `<button type="button" class="iso-object ${object.className || ""} is-tappable ${chosen} ${motion}" data-action="garden-item-select" data-item-id="${object.id}" data-garden-drag="${object.id}" data-x="${object.x}" data-y="${object.y}" data-footprint="${side}" style="${objStyle}" aria-label="${escapeHtml(object.label)}を もつ">${art}${name}</button>`;
+      } else if (postcard || !object.place) {
+        html += `<div class="iso-object ${object.className || ""} ${motion}" data-footprint="${side}" style="${objStyle}">${art}${name}</div>`;
+      } else {
+        const next = object.place === "school" && isFirstJourney() ? "is-next-place" : "";
+        html += `<button type="button" class="iso-object ${object.className || ""} is-tappable ${next} ${ready ? "is-ready" : ""} ${motion}" data-action="visit-place" data-place="${object.place}" data-footprint="${side}" style="${objStyle}" aria-label="${escapeHtml(String(object.label).replace(/<br>/g, ""))}をひらく">${art}${name}</button>`;
       }
     }
   }
-  html += "</div></div>" + renderGardenPlaceDock();
+  html += "</div></div>";
   return html;
 }
+
+function renderIslandBoard() {
+  return renderGardenScene();
+}
+
 
 // タイルの種類：外周＝水、中央十字＝砂の小道、その他＝草（一部にお花）
 function tileSprite(x, y, N) {
@@ -5204,9 +5303,9 @@ function tileSprite(x, y, N) {
   return { sprite: "tileGrass", flower: (x * 3 + y * 7) % 6 === 0 };
 }
 
-function islandObjects(size) {
+function islandObjects(size, garden = state.garden) {
   return Object.fromEntries(gardenOwnedItems().flatMap(item => {
-    const position = state.garden.layout[item.id];
+    const position = garden.layout[item.id];
     if (!position || !gardenItemFits(item.id, position.x, position.y, size)) return [];
     const facility = GARDEN_FACILITIES.some(f => f.id === item.id);
     return [[`${position.x},${position.y}`, { ...item, ...position, label: item.name, className: `obj-${item.id}`, place: facility ? item.id : null, scale: facility || item.id === "avatar" ? 1 : .8 }]];
@@ -5271,34 +5370,20 @@ function renderGardenItemArt(item) {
 }
 
 function renderGardenEditor() {
-  const garden = gardenWorkingState(), items = gardenOwnedItems(), size = gardenMapSize();
-  const selected = items.find(item => item.id === view.gardenSelectedId) || items[0];
-  const floors = GARDEN_FLOORS.filter(floor => garden.ownedFloors.includes(floor.id));
+  const garden = gardenWorkingState();
+  const items = gardenOwnedItems();
+  const selected = items.find((item) => item.id === view.gardenSelectedId) || items[0];
+  const floors = GARDEN_FLOORS.filter((floor) => garden.ownedFloors.includes(floor.id));
   const paint = view.gardenTool === "floors" && floors.length > 1;
-  const chosenFloor = floors.find(floor => floor.id === view.gardenSelectedFloor) || floors[0];
-  const cursor = view.gardenCursor || { x: 1, y: 1 }, position = garden.layout[selected.id];
-  const side = gardenItemFootprint(selected.id);
-  const plan = gardenPlacementPlan(selected.id, cursor.x, cursor.y, garden.layout, size);
-  const previewCells = gardenItemCells(paint ? "floor" : selected.id, cursor);
-  const sizeLabel = id => gardenItemFootprint(id) === 2 ? "2×2マス" : "1マス";
-  const rows = Array.from({ length: size - 2 }, (_, row) => `<div class="garden-edit-row" role="row">${Array.from({ length: size - 2 }, (_, column) => {
-    const x = column + 1, y = row + 1;
-    const item = items.find(item => item.id === gardenItemAt(garden.layout, x, y));
-    const anchor = item && garden.layout[item.id].x === x && garden.layout[item.id].y === y;
-    const current = x === cursor.x && y === cursor.y;
-    const preview = previewCells.some(cell => cell.x === x && cell.y === y);
-    const floor = gardenFloorAt(x, y), large = item && gardenItemFootprint(item.id) === 2;
-    const art = anchor ? renderGardenItemArt(item) : item ? '<span class="garden-reserved-cell" aria-hidden="true">2 × 2</span>' : '<span class="garden-empty-cell" aria-hidden="true">＋</span>';
-    return `<div role="gridcell"><button class="garden-edit-cell floor-${floor} ${current ? "is-cursor" : ""} ${item?.id === selected.id && !paint ? "is-selected-item" : ""} ${large ? "is-building-cell" : ""} ${preview && !paint ? plan.valid ? "is-placement-preview" : "is-placement-blocked" : ""}" data-action="garden-cell" data-x="${x}" data-y="${y}" ${item ? `data-occupant="${item.id}"` : ""} ${item && !paint ? `data-garden-drag="${item.id}"` : ""} tabindex="${current ? 0 : -1}" aria-label="${x}列 ${y}行、${item ? escapeHtml(item.name) + 'の場所、' + sizeLabel(item.id) : "あいている場所"}、${escapeHtml(GARDEN_FLOORS.find(f => f.id === floor)?.name || "しばふ")}。${paint ? "選んだ床をぬる" : side === 2 ? "ここを左上にして2×2マスに置く" : "選んだものを置く"}">${art}${item ? `<span class="garden-cell-name">${escapeHtml(item.name)}${anchor && large ? '<small>2×2マス</small>' : ""}</span>` : ""}</button></div>`;
-  }).join("")}</div>`).join("");
-  return `<section class="garden-editor" aria-label="おにわのもようがえ">
-    <div class="garden-editor-heading"><h3>おにわの もようがえ</h3><p>${paint ? "すきな床を、すきな場所にぬろう。" : "建物は2×2マス。木や小物は1マスにおこう。"}</p>${floors.length > 1 ? `<div class="garden-editor-tabs"><button class="soft-button" data-action="garden-tool" data-tool="objects" aria-pressed="${!paint}">ものを おく</button><button class="soft-button" data-action="garden-tool" data-tool="floors" aria-pressed="${paint}">ゆかを ぬる</button></div>` : ""}</div>
-    <div class="garden-shelf" data-play-scroll="${paint ? "garden-floor-shelf" : "garden-object-shelf"}" aria-label="${paint ? "手に入れた床" : "手に入れたもの"}">${paint ? floors.map(floor => `<button class="garden-shelf-card ${chosenFloor.id === floor.id ? "is-chosen" : ""}" data-action="garden-floor-select" data-floor-id="${floor.id}" aria-pressed="${chosenFloor.id === floor.id}"><span class="garden-floor-sample floor-${floor.id}" aria-hidden="true"></span><b>${escapeHtml(floor.name)}</b></button>`).join("") : items.map(item => `<button class="garden-shelf-card ${selected.id === item.id ? "is-chosen" : ""}" data-action="garden-item-select" data-item-id="${item.id}" data-garden-drag="${item.id}" aria-pressed="${selected.id === item.id}">${renderGardenItemArt(item)}<b>${escapeHtml(item.name)}</b><span class="garden-size-badge">${sizeLabel(item.id)}</span><small>${garden.layout[item.id] ? "おにわに あるよ" : "とどいたよ！ おいてみよう"}</small></button>`).join("")}</div>
-    <div class="garden-edit-workspace"><div class="garden-edit-preview">${paint ? `<span class="garden-floor-sample floor-${chosenFloor.id}" aria-hidden="true"></span>` : renderGardenItemArt(selected)}<strong>${escapeHtml(paint ? chosenFloor.name : selected.name)}</strong>${paint ? "" : `<span class="garden-size-badge">${sizeLabel(selected.id)}</span>`}<p>${paint ? "マスをタップすると、ここだけぬれるよ。" : side === 2 ? "左上のマスをえらぶと、4マスにおけるよ。" : "ひっぱってはこぶか、マスをタップしてね。"}</p>${paint ? '<button class="soft-button" data-action="garden-paint-all">おにわ ぜんぶに ぬる</button><span>なんかいでも ぬれるよ</span>' : `<span class="garden-placement-note ${plan.valid ? "is-valid" : "is-invalid"}">${plan.valid ? plan.swap ? "同じ大きさのものと いれかえられるよ" : "みどりのわくに おけるよ" : plan.reason === "edge" ? "おにわの内側を えらんでね" : "あいた場所を えらんでね"}</span><button class="soft-button" data-action="garden-stow" ${position && !["home", "avatar"].includes(selected.id) ? "" : "disabled"}>いったん しまう</button>`}
-    <div class="garden-cursor-pad" aria-label="置く場所を動かす"><button class="soft-button" data-action="garden-cursor" data-dx="0" data-dy="-1" aria-label="上の場所へ">↑</button><button class="soft-button" data-action="garden-cursor" data-dx="-1" data-dy="0" aria-label="左の場所へ">←</button><button class="soft-button" data-action="garden-cursor" data-dx="1" data-dy="0" aria-label="右の場所へ">→</button><button class="soft-button" data-action="garden-cursor" data-dx="0" data-dy="1" aria-label="下の場所へ">↓</button></div><button class="primary-button" data-action="garden-place-cursor" ${!paint && !plan.valid ? "disabled" : ""}>${paint ? "ここに ぬる" : "ここに おく"}</button></div>
-    <div class="garden-edit-scroll" data-play-scroll="garden-editor" tabindex="0" aria-label="大きなおにわ。横と縦にスクロールできるよ"><div class="garden-edit-grid" role="grid" aria-label="おにわの配置マップ" style="--garden-columns:${size - 2}">${rows}</div></div></div>
-    <p class="garden-edit-status" role="status">${escapeHtml(view.gardenMessage || "みどりのわくが、えらんでいる場所だよ。")}</p><div class="garden-editor-footer"><button class="soft-button" data-action="garden-undo" ${view.gardenHistory?.length ? "" : "disabled"}>ひとつ もどす</button><button class="primary-button" data-action="garden-edit">できあがり</button><button class="soft-button" data-action="garden-cancel">やめる</button></div></section>`;
+  const chosenFloor = floors.find((floor) => floor.id === view.gardenSelectedFloor) || floors[0];
+  const position = garden.layout[selected.id];
+  const sizeLabel = (id) => gardenItemFootprint(id) === 2 ? "2×2マス" : "1マス";
+  const shelf = paint
+    ? floors.map((floor) => `<button class="garden-shelf-card ${chosenFloor.id === floor.id ? "is-chosen" : ""}" data-action="garden-floor-select" data-floor-id="${floor.id}" aria-pressed="${chosenFloor.id === floor.id}"><span class="garden-floor-sample floor-${floor.id}" aria-hidden="true"></span><b>${escapeHtml(floor.name)}</b></button>`).join("")
+    : items.map((item) => `<button class="garden-shelf-card ${selected.id === item.id ? "is-chosen" : ""}" data-action="garden-item-select" data-item-id="${item.id}" data-garden-drag="${item.id}" aria-pressed="${selected.id === item.id}">${renderGardenItemArt(item)}<b>${escapeHtml(item.name)}</b><span class="garden-size-badge">${sizeLabel(item.id)}</span><small>${garden.layout[item.id] ? "おいてある" : "おいてみよう"}</small></button>`).join("");
+  return `<section class="garden-editor" aria-label="おにわのもようがえ"><div class="garden-live">${renderGardenScene({ editing: true })}</div><p class="garden-whisper" role="status">${escapeHtml(view.gardenMessage || "どこに おく？")}</p><div class="garden-toybox"><div class="garden-toybox-tools">${floors.length > 1 ? `<div class="garden-editor-tabs" role="group" aria-label="ならべかた"><button class="soft-button" data-action="garden-tool" data-tool="objects" aria-pressed="${!paint}">もの</button><button class="soft-button" data-action="garden-tool" data-tool="floors" aria-pressed="${paint}">ゆか</button></div>` : ""}${paint ? `<button class="soft-button" data-action="garden-paint-all">ぜんぶ ぬる</button>` : `<button class="soft-button" data-action="garden-stow" ${position && !["home", "avatar"].includes(selected.id) ? "" : "disabled"}>しまう</button>`}<button class="soft-button" data-action="garden-undo" ${view.gardenHistory?.length ? "" : "disabled"}>もどす</button><button class="soft-button" data-action="garden-cancel">やめる</button></div><div class="garden-shelf" data-play-scroll="${paint ? "garden-floor-shelf" : "garden-object-shelf"}" aria-label="${paint ? "手に入れた床" : "手に入れたもの"}">${shelf}</div></div></section>`;
 }
+
 
 function openGardenEditor() {
   if (view.gardenEditing && view.gardenDraft) {
@@ -5312,7 +5397,7 @@ function openGardenEditor() {
   view.gardenTool = "objects";
   view.gardenSelectedId = gardenOwnedItems().some(item => item.id === view.gardenSelectedId) ? view.gardenSelectedId : "home";
   view.gardenCursor = view.gardenDraft.layout[view.gardenSelectedId] || { x: 1, y: 1 };
-  view.gardenMessage = "とどいたものを、すきな場所におこう。";
+  view.gardenMessage = "どこに おく？";
   render();
   window.requestAnimationFrame(() => {
     const control = document.querySelector(`[data-action="garden-item-select"][data-item-id="${view.gardenSelectedId}"]`);
@@ -5334,7 +5419,7 @@ function closeGardenEditor(save) {
     const control = document.querySelector('[data-action="garden-edit"]');
     control?.focus?.({ preventScroll: true }); control?.scrollIntoView?.({ block: "nearest", behavior: "auto" });
   });
-  if (save) { playSfx("tap", "garden"); toast("すきなおにわに なったね！"); }
+  if (save) { playSfx("tap", "garden"); toast("すきな おにわ！"); }
   return true;
 }
 
@@ -5348,14 +5433,14 @@ function selectGardenItem(id) {
   if (!view.gardenEditing || !gardenOwnedItems().some(item => item.id === id)) return false;
   view.gardenTool = "objects"; view.gardenSelectedId = id;
   view.gardenCursor = view.gardenDraft.layout[id] || view.gardenCursor;
-  view.gardenMessage = gardenItemFootprint(id) === 2 ? "2×2の あいた場所をえらぼう。左上のマスをタップしてね。" : "1マスの あいた場所におけるよ。";
+  view.gardenMessage = gardenItemFootprint(id) === 2 ? "おおきい ばしょだよ" : "すきな場所に おこう";
   render(); focusGardenDestination(); return true;
 }
 
 function selectGardenFloor(id) {
   if (!view.gardenEditing || !state.garden.ownedFloors.includes(id) || !GARDEN_FLOORS.some(f => f.id === id)) return false;
   view.gardenSelectedFloor = id; view.gardenTool = "floors";
-  view.gardenMessage = "1マスずつでも、ぜんぶでも ぬれるよ。";
+  view.gardenMessage = "すきなマスを ぬろう";
   render(); focusGardenDestination(); return true;
 }
 
@@ -5389,20 +5474,20 @@ function placeGardenItem(id, x, y) {
   if (gardenCellIsLand(x, y)) { view.gardenSelectedId = id; view.gardenCursor = { x, y }; }
   const plan = gardenPlacementPlan(id, x, y, layout);
   if (!plan.valid) {
-    const area = gardenItemFootprint(id) === 2 ? "2×2の" : "1マスの";
-    view.gardenMessage = plan.reason === "edge" ? `${area} 場所が、おにわから はみ出すよ。もう少し内側をえらんでね。` : `${area} あいた場所がいるよ。ここにあるものを、先にうごかしてね。`;
+    view.gardenMessage = plan.reason === "edge" ? "はみだしちゃう" : "ここは いっぱい";
     render(); focusGardenDestination(); return false;
   }
   if (original?.x === x && original?.y === y) {
-    view.gardenMessage = "ここに おいてあるよ。";
+    view.gardenMessage = "ここに あるよ";
     render(); focusGardenDestination(); return false;
   }
   rememberGardenEdit();
   if (plan.swap) layout[plan.swap] = { ...original };
   layout[id] = { x, y };
   view.gardenSelectedId = id; view.gardenCursor = { x, y };
-  view.gardenMessage = plan.swap ? "同じ大きさのものを いれかえたよ！" : "ここに おいたよ！";
-  render(); focusGardenDestination(); playSfx("tap", "garden"); return true;
+  view.gardenPlop = id;
+  view.gardenMessage = plan.swap ? "いれかえた！" : "おいたよ！";
+  render(); view.gardenPlop = null; focusGardenDestination(); playSfx("tap", "garden"); return true;
 }
 
 function paintGardenFloor(id, x, y, all = false) {
@@ -5412,8 +5497,9 @@ function paintGardenFloor(id, x, y, all = false) {
   rememberGardenEdit();
   if (all) { view.gardenDraft.baseFloor = id; view.gardenDraft.floorTiles = {}; }
   else { view.gardenCursor = { x, y }; view.gardenDraft.floorTiles[`${x},${y}`] = id; }
-  view.gardenMessage = all ? "おにわの ゆかを ぬったよ！" : "ここを ぬったよ！";
-  render(); playSfx("tap", "garden"); return true;
+  view.gardenFresh = all ? "all" : `${x},${y}`;
+  view.gardenMessage = all ? "ぜんぶ ぬった！" : "ぬったよ！";
+  render(); view.gardenFresh = null; playSfx("tap", "garden"); return true;
 }
 
 function gardenEditCell(x, y) {
@@ -5443,13 +5529,13 @@ function stowGardenItem() {
   const id = view.gardenSelectedId;
   if (!view.gardenEditing || ["home", "avatar"].includes(id) || !gardenOwnedItems().some(item => item.id === id) || !view.gardenDraft.layout[id]) return false;
   rememberGardenEdit(); view.gardenDraft.layout[id] = null;
-  view.gardenMessage = "しまったよ。いつでも またおけるよ。";
+  view.gardenMessage = "しまったよ";
   render(); return true;
 }
 
 function undoGardenEdit() {
   if (!view.gardenEditing || !view.gardenHistory?.length) return false;
-  view.gardenDraft = view.gardenHistory.pop(); view.gardenMessage = "ひとつ もどしたよ。";
+  view.gardenDraft = view.gardenHistory.pop(); view.gardenMessage = "もどしたよ";
   render(); return true;
 }
 
@@ -10867,7 +10953,8 @@ function collectTree() {
   state.stats.coins += coins;
   state.garden.treeReady = false;
   saveState();
-  toast(`ちえのきからコインを${coins}こもらいました。`);
+  toast("きらきら、コイン！");
+  triggerMoment("reward", "garden");
   render();
 }
 
@@ -10877,7 +10964,8 @@ function harvestGarden() {
   state.stats.shards += shards;
   state.garden.harvestReady = false;
   saveState();
-  toast(`はたけからかけらを${shards}こもらいました。`);
+  toast("おはなが さいた！");
+  triggerMoment("reward", "garden");
   render();
 }
 
@@ -10897,12 +10985,12 @@ function visitIslandPlace(place) {
   }
   if (place === "tree") {
     if (state.garden.treeReady) collectTree();
-    else toast("ちえのきは、ステージをひとつできたら またきらきらするよ。");
+    else toast("まだ ねむってる");
     return;
   }
   if (place === "garden") {
     if (state.garden.harvestReady) harvestGarden();
-    else toast("はたけは、ステージをひとつできたら またそだつよ。");
+    else toast("まだ つぼみだよ");
   }
 }
 
